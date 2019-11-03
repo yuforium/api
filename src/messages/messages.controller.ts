@@ -1,8 +1,8 @@
 import { Controller, Get, Param, Post } from '@nestjs/common';
 
 @Controller('forum/:forumId/message')
-export class MessagesController {
-
+export class MessagesController 
+{
 	@Get()
 	public getForumIndex (@Param("forumId") forumId: string): string[]
 	{
