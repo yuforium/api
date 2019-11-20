@@ -18,7 +18,6 @@ export class ForumsController
 {
 	constructor (protected forumsService: ForumsService)
 	{
-
 	}
 
 	@ApiOperation({title: "Get Forum", operationId: "getForum"})
@@ -26,7 +25,18 @@ export class ForumsController
 	@Get(":path")
 	public async getForum (@Param('path') path: string): Promise<Forum | object>
 	{
-		return await this.forumsService.get(path) || {name: null, description: null, path, founded: false}
+		const id = path.toLowerCase()
+
+		return {
+			type:       "Forum",
+			"@context": "https://www.yuforium.com/ns/activitystreams",
+			id:         `https://yuforium.com/${id}`,
+			inbox:      `https://www.yuforia.com/${id}/inbox`,
+			outbox:     `https://www.yuforia.com/${id}/outbox`,
+			preferredName: `${path} Forum`
+		}
+
+		// return await this.forumsService.get(path) || {name: null, description: null, path, founded: false}
 	}
 
 	@ApiOperation({title: "Create Forum", operationId: "createForum"})
@@ -37,10 +47,9 @@ export class ForumsController
 		return this.forumsService.create(Object.assign(createForumDto, {path}))
 	}
 
-	
+
 	@Patch(":forumId")
 	public updateForum (@Param("forumId") forumId: string)
 	{
-		
 	}
 }
