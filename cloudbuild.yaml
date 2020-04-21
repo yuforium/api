@@ -1,0 +1,4 @@
+steps:
+  - name: "docker:latest"
+    args: ["build", "-t", "gcr.io/yuforium/api", "."]
+images: ["gcr.io/yuforium/api"]

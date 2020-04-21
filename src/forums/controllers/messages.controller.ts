@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiUseTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 
-@ApiUseTags("forums")
+@ApiTags("forums")
 @Controller('forums/:forumId')
 export class MessagesController 
 {

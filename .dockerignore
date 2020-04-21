@@ -1,0 +1,9 @@
+dist/
+node_modules/
+test/
+.env*
+.gitignore
+.prettierrc
+cloudbuild.yaml
+nest-cli.json
+tslink.json
