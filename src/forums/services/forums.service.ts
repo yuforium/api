@@ -6,20 +6,22 @@ import { ModelType } from '@typegoose/typegoose/lib/types';
 @Injectable()
 export class ForumsService 
 {
-	constructor (@InjectModel(Forum) protected readonly forumModel: ModelType<Forum>)
-	{
+  constructor(@InjectModel(Forum) protected readonly forumModel: ModelType<Forum>) { }
 
-	}
+  async create(forum: Forum): Promise<Forum> {
+    const createdForum = new this.forumModel(forum);
+    return createdForum.save();
+  }
 
-	async create (createForumDto: {path: string, name?: string, description?: string}): Promise<Forum>
-	{
-		const createdForum = new this.forumModel(createForumDto)
+  async get(id: string): Promise<Forum> {
+    return this.forumModel.findOne({id}).then(data => JSON.parse(JSON.stringify(data)));
+  }
 
-		return createdForum.save()
-	}
+  async find(): Promise<Forum[]> {
+    return this.forumModel.find({}).then(data => JSON.parse(JSON.stringify(data)));
+  }
 
-	async get (path: string)
-	{
-		return this.forumModel.findOne({path})
-	}
+  async delete(id: string) {
+    return this.forumModel.deleteOne(id);
+  }
 }

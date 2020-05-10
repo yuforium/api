@@ -6,4 +6,4 @@ test/
 .prettierrc
 cloudbuild.yaml
 nest-cli.json
-tslink.json
+tslint.json

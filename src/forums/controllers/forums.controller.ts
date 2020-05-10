@@ -1,54 +1,75 @@
-import { Controller, Get, Param, Post, Patch, Body } from '@nestjs/common';
+import { Controller, Get, Param, Post, Patch, Body, Req, RequestTimeoutException, SerializeOptions, UseInterceptors, ClassSerializerInterceptor, NotFoundException } from '@nestjs/common';
 import { ApiResponse, ApiProperty, ApiTags, ApiParam, ApiHeader } from '@nestjs/swagger';
 import { ForumsService } from '../services/forums.service';
 import { Forum } from '../models/forum.model';
+import { CreateForumDto } from '../dto/create-forum.dto';
+import { request } from 'http';
+import { ForumParams } from '../dto/forum-params.dto';
+import { ClassTransformOptions } from '@nestjs/common/interfaces/external/class-transform-options.interface';
+import { classToPlain } from 'class-transformer';
 
-class CreateForumDto
-{
-	@ApiProperty()
-	name?: string
+const serializeOptions: ClassTransformOptions = {
+  excludePrefixes: ['_']
+};
 
-	@ApiProperty()
-	description?: string
-}
+@UseInterceptors(ClassSerializerInterceptor)
+@ApiTags('forums')
+@Controller('forum')
+export class ForumsController {
 
-@ApiTags("forums")
-@Controller('forums')
-export class ForumsController 
-{
-	constructor (protected forumsService: ForumsService)
-	{
-	}
+  constructor (protected forumsService: ForumsService) { }
 
-	@ApiResponse({status: 200, description: "Successful response"})
-	@ApiResponse({status: 400, description: "Forum does not exist"})
-	@Get(":path")
-	public async getForum (@Param('path') path: string): Promise<Forum | object>
-	{
-		const id = path.toLowerCase()
+  protected toForumResponse(forum: any) {
+    return Object.assign({
+      inbox:     `http:${forum.id}/inbox`,
+      outbox:    `http:${forum.id}/outbox`,
+      followers: `http:${forum.id}/followers`,
+      following: `http:${forum.id}/following`,
+      liked:     `http:${forum.id}/liked`
+    }, classToPlain(forum, serializeOptions));
+  }
 
-		return {
-			type:          "Forum",
-			"@context":    "https://www.yuforium.com/ns/activitystreams",
-			id:            `https://yuforium.com/${id}`,
-			inbox:         `https://www.yuforia.com/${id}/inbox`,
-			outbox:        `https://www.yuforia.com/${id}/outbox`,
-			preferredName: `${path} Forum`
-		}
+  @Get()
+  public async getAll(@Req() request) {
+    return (await this.forumsService.find()).map(this.toForumResponse);
+  }
 
-		// return await this.forumsService.get(path) || {name: null, description: null, path, founded: false}
-	}
+  @ApiResponse({status: 200, description: "Successful response"})
+  @ApiResponse({status: 404, description: "Forum does not exist"})
+  @Get(':path')
+  public async getForum (@Req() request, @Param() params: ForumParams) {
+    const
+      path    = params.path.toLowerCase(),
+      forumId = `//${request.hostname}/forum/${path}`,
+      forum   = await this.forumsService.get(forumId);
 
-	@ApiResponse({status: 201, description: "Created"})
-	@Post(":path")
-	public createForum (@Param("path") path: string, @Body() createForumDto: CreateForumDto)
-	{
-		return this.forumsService.create(Object.assign(createForumDto, {path}))
-	}
+    if (!forum) {
+      throw new NotFoundException();
+    }
 
+    return this.toForumResponse(forum);
+  }
 
-	@Patch(":forumId")
-	public updateForum (@Param("forumId") forumId: string)
-	{
-	}
+  @ApiResponse({status: 201, description: "New forum created"})
+  @Post(':path')
+  public createForum (@Req() request, @Param() params: ForumParams, @Body() createForumDto: CreateForumDto) {
+    const 
+      path  = params.path.toLowerCase(),
+      forum = Object.assign({id: `//${request.hostname}/forum/${path}`, path}, createForumDto);
+
+    return this.forumsService.create(forum);
+  }
+
+  @Patch(':path')
+  public updateForum(@Req() request, @Param() params: ForumParams) {
+    const 
+      id = `//${request.hostname}/forum/${params.path}`,
+      forum = this.forumsService.get(id);
+    
+    if (!forum) {
+      throw new NotFoundException();
+    }
+
+    // @todo update logic here
+  }
 }

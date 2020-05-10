@@ -1,0 +1,10 @@
+FROM node:13-alpine as development
+
+WORKDIR /usr/src/app
+
+COPY . .
+
+RUN npm install && npm install -g @nestjs/cli
+
+ENTRYPOINT npm
+CMD ["run", "start:dev"]

@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface'
+import { ValidationPipe } from '@nestjs/common'
 
 async function bootstrap () 
 {
@@ -21,7 +22,9 @@ async function bootstrap ()
 
 	SwaggerModule.setup("api", app, document)
 
-	app.enableCors({origin: "*"})
+	app.enableCors({origin: "*"});
+
+	app.useGlobalPipes(new ValidationPipe());
 
 	await app.listen(3000);
 }

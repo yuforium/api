@@ -1,0 +1,63 @@
+version: "3.3"
+services:
+  yuforia:
+    build:
+      context: .
+      dockerfile: Dockerfile.developer
+    image: yuforium/api:developer
+    entrypoint:
+      - npm
+    command:
+      - run
+      - start:dev
+    volumes:
+      - ./src:/usr/src/app/src
+    environment:
+      MONGODB_URI: mongodb://mongodev/yuforia
+      SERVICE_ID: http://yuforia.com
+      SERVICE_NAME: Yuforia
+    ports:
+      - 3000:3000
+    networks:
+      default:
+        aliases:
+          - yuforia.com
+    depends_on: 
+      - mongodev
+  yuforium:
+    build:
+      context: .
+      dockerfile: Dockerfile.developer
+    image: yuforium/api:developer
+    entrypoint:
+      - npm
+    command:
+      - run
+      - start:dev
+    volumes:
+      - ./src:/usr/src/app/src
+    environment:
+      MONGODB_URI: mongodb://mongodev/yuforium
+      SERVICE_ID: http://yuforium.com
+      SERVICE_NAME: Yuforium
+    ports:
+      - 3001:3000
+    networks:
+      default:
+        aliases:
+          - yuforium.com
+    depends_on: 
+      - mongodev
+  nginx:
+    image: nginx
+    ports:
+      - 80:80
+    volumes: 
+      - ./nginx.conf:/etc/nginx/conf.d/yuforium.conf
+    depends_on:
+      - yuforia
+      - yuforium
+  mongodev:
+    image: mongo
+    volumes:
+      - .local/mongodev:/data/db
