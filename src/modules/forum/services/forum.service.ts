@@ -4,8 +4,7 @@ import { Forum } from '../models/forum.model';
 import { ModelType } from '@typegoose/typegoose/lib/types';
 
 @Injectable()
-export class ForumsService 
-{
+export class ForumService {
   constructor(@InjectModel(Forum) protected readonly forumModel: ModelType<Forum>) { }
 
   async create(forum: Forum): Promise<Forum> {

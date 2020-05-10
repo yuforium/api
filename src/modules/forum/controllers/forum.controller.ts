@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Post, Patch, Body, Req, RequestTimeoutException, SerializeOptions, UseInterceptors, ClassSerializerInterceptor, NotFoundException } from '@nestjs/common';
 import { ApiResponse, ApiProperty, ApiTags, ApiParam, ApiHeader } from '@nestjs/swagger';
-import { ForumsService } from '../services/forums.service';
+import { ForumService } from '../services/forum.service';
 import { Forum } from '../models/forum.model';
 import { CreateForumDto } from '../dto/create-forum.dto';
 import { request } from 'http';
@@ -15,9 +15,9 @@ const serializeOptions: ClassTransformOptions = {
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('forums')
 @Controller('forum')
-export class ForumsController {
+export class ForumController {
 
-  constructor (protected forumsService: ForumsService) { }
+  constructor (protected forumsService: ForumService) { }
 
   protected toForumResponse(forum: any) {
     return Object.assign({
