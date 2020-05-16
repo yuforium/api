@@ -27,6 +27,10 @@ You can POST to your forum's outbox to send messages to the world (client-to-ser
 
 *A Note On This:* Anything generally posted to a forum should be posted to the public group, although it may be possible to specify targets in the future.
 
+A forum represents all activity (user messages) that center around a topic - so when posting to a forum actor, its ID represents the topic to which it belongs.  Topics exist on yuforium.com, but may also exist in other services as well.
+
+Topics should be the form https://yuforium.com/topic/**topicId**
+
 ### Outbox GET
 
 ### The User Way

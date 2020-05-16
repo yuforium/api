@@ -63,7 +63,8 @@ export class ForumController {
   @Patch(':path')
   public updateForum(@Req() request, @Param() params: ForumParams) {
     const 
-      id = `//${request.hostname}/forum/${params.path}`,
+      path  = params.path.toLowerCase(),
+      id    = `//${request.hostname}/forum/${path}`,
       forum = this.forumsService.get(id);
     
     if (!forum) {
