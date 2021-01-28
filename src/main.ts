@@ -6,17 +6,14 @@ import { ValidationPipe } from '@nestjs/common'
 
 async function bootstrap () 
 {
-	const 
-		app = await NestFactory.create(AppModule),
-
-		options = new DocumentBuilder()
-			.setTitle("Yuforium API Specification")
-			.setDescription("Yuforium API specification")
-			.setVersion("1.0")
-			.build(),
-
-		document = SwaggerModule.createDocument(app, options),
-		fs       = require("fs")
+	const app = await NestFactory.create(AppModule);
+	const options = new DocumentBuilder()
+		.setTitle("Yuforium API Specification")
+		.setDescription("Yuforium API specification")
+		.setVersion("1.0")
+		.build();
+	const document = SwaggerModule.createDocument(app, options);
+	const fs = require("fs")
 
 	// fs.writeFileSync("./swagger-spec.json", JSON.stringify(document))
 

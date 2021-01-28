@@ -8,11 +8,6 @@ import { ForumParams } from '../dto/forum-params.dto';
 import { ClassTransformOptions } from '@nestjs/common/interfaces/external/class-transform-options.interface';
 import { classToPlain } from 'class-transformer';
 
-const serializeOptions: ClassTransformOptions = {
-  excludePrefixes: ['_']
-};
-
-@UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('forums')
 @Controller('forum')
 export class ForumController {
@@ -26,7 +21,7 @@ export class ForumController {
       followers: `http:${forum.id}/followers`,
       following: `http:${forum.id}/following`,
       liked:     `http:${forum.id}/liked`
-    }, classToPlain(forum, serializeOptions));
+    }, classToPlain(forum));
   }
 
   @Get()
@@ -51,13 +46,14 @@ export class ForumController {
   }
 
   @ApiResponse({status: 201, description: "New forum created"})
+  @UseInterceptors(ClassSerializerInterceptor)
   @Post(':path')
-  public createForum (@Req() request, @Param() params: ForumParams, @Body() createForumDto: CreateForumDto) {
+  public async createForum (@Req() request, @Param() params: ForumParams, @Body() createForumDto: CreateForumDto) {
     const 
       path  = params.path.toLowerCase(),
       forum = Object.assign({id: `//${request.hostname}/forum/${path}`, path}, createForumDto);
 
-    return this.forumsService.create(forum);
+    return await this.forumsService.create(forum);
   }
 
   @Patch(':path')
