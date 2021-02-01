@@ -1,33 +1,28 @@
-import { Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
 import { ApiTags, ApiHeader, ApiProduces } from '@nestjs/swagger';
 import { Request } from 'express';
 import * as psl from 'psl';
+import { AuthGuard } from '@nestjs/passport';
+import { ServiceId } from './common/decorators/service-id.decorator';
 
 @ApiTags('app', 'service')
 @Controller()
 export class AppController 
 {
-  constructor (private readonly appService: AppService, config: ConfigService) {
+  constructor (private readonly appService: AppService, config: ConfigService) {}
 
-  }
+  // @UseGuards(AuthGuard('local'))
+  // @Post('auth/login')
+  // async login(@Req() req, @Body() body: {username: string, password: string}) {
+  //   return req.user;
+  // }
 
   @ApiProduces("application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", "application/activity+json")
   @Get()
-  public getService(@Req() request: Request) {
-    return this.appService.get(this.appService.getDomain(request.hostname));
-  }
-
-  @Get('inbox') 
-  public readInbox(@Req() request: Request) {
-    const domain = this.appService.getDomain(request.hostname);
-
-  }
-
-  @Post('inbox') 
-  public writeInbox(@Req() request: Request) {
-
+  public async getService(@Req() request: Request, @ServiceId() serviceId: string) {
+    return this.appService.get(serviceId);
   }
 
   @Get('outbox')
@@ -37,16 +32,6 @@ export class AppController
 
   @Post('outbox')
   public writeOutbox(@Req() request: Request) {
-    
-  }
-
-  @Post('sharedInbox')
-  public writeSharedInbox(@Req() request: Request) {
-
-  }
-
-  @Get('sharedInbox')
-  public readSharedInbox(@Req() request: Request) {
 
   }
 }
