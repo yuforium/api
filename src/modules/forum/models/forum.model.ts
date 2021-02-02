@@ -1,16 +1,15 @@
-import { Typegoose, prop } from '@typegoose/typegoose';
 import { IsString, Matches } from 'class-validator';
 
-export class Forum extends Typegoose {
+export class Forum {
   @IsString()
-  @prop({required: true, unique: true})
+  // @prop({required: true, unique: true})
   id: string;
 
   @IsString()
-  @prop()
+  // @prop()
   name: string;
 
   @IsString()
-  @prop()
+  // @prop()
   summary: string;
 }

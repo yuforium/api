@@ -3,7 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { ForumModule } from './modules/forum/forum.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import database from './config/database';
 import service from "./config/service";
 import auth from './config/auth';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -15,8 +16,12 @@ import { DomainModule } from './modules/domain/domain.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({load: [service, auth]}),
-    MongooseModule.forRoot(process.env.MONGODB_URI),
+    ConfigModule.forRoot({load: [database, service, auth]}),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => config.get('database')
+    }),
     // TypegooseModule.forRoot(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true}),
     DomainModule,
     InboxModule,
@@ -28,9 +33,4 @@ import { DomainModule } from './modules/domain/domain.module';
   controllers: [AppController],
   providers:   [AppService],
 })
-export class AppModule {
-
-  // onApplicationBootstrap ()
-  // {
-  // }
-}
+export class AppModule { }

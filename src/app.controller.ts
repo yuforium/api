@@ -13,12 +13,6 @@ export class AppController
 {
   constructor (private readonly appService: AppService, config: ConfigService) {}
 
-  // @UseGuards(AuthGuard('local'))
-  // @Post('auth/login')
-  // async login(@Req() req, @Body() body: {username: string, password: string}) {
-  //   return req.user;
-  // }
-
   @ApiProduces("application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", "application/activity+json")
   @Get()
   public async getService(@Req() request: Request, @ServiceId() serviceId: string) {
