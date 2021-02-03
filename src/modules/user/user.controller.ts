@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, Param, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ServiceId } from '../../common/decorators/service-id.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
@@ -10,6 +10,7 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(protected userService: UserService) { }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Post()
   public create(@ServiceId() serviceId: string, @Body() userDto: UserCreateDto) {
     return this.userService.create(serviceId, userDto);

@@ -1,7 +1,9 @@
 # Yuforium API
-_let's open up social_
+_distributed social platform_
 
-The Yuforium API is an ActivityPub server that provides socials profiles and activity feeds, but also focuses on providing forum capabilities.  Our goal is to federate forum topics and make them accessible and distributed in the same way that packets are sent over the Internet.
+The Yuforium API is an ActivityPub server that provides social profiles and activity feeds, but also focuses on providing forum and group capabilities.
+
+Our mission is to federate forum topics and make them accessible and distributed in the same way that ISPs connect to Internet exchange points to send packets.
 
 Yuforium is built on top of the excellent and very Angular friendly NestJS framework.
 

@@ -3,13 +3,19 @@ import { Document } from 'mongoose';
 
 export type UserDocument = User & Document;
 
-@Schema()
+@Schema({collection: 'objects'})
 export class User {
   @Prop()
-  _id: string;
-  
+  id: string;
+
   @Prop()
   username: string;
+
+  @Prop()
+  name: string;
+
+  @Prop()
+  summary: string;
 
   @Prop() 
   password: string;
