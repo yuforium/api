@@ -1,9 +1,9 @@
 import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from 'mongoose';
+import * as mongoose from 'mongoose';
 
-export type ActivityDocument = Activity & Document;
+export type ActivityDocument = Activity & mongoose.Document;
 
-@Schema({collection: 'activities'})
+@Schema({collection: 'stream-activity'})
 export class Activity {
   @Prop({required: true})
   id: string;
@@ -11,73 +11,76 @@ export class Activity {
   @Prop({required: true})
   type: string;
 
-  @Prop()
+  @Prop({required: true, type: mongoose.Schema.Types.Mixed})
+  object: any;
+
+  @Prop({type: mongoose.Schema.Types.Mixed})
   actor?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   target?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   result?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   origin?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   instrument?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   attachment?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   attributedTo?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   audience?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   content?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   context?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   contentMap?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   endTime?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   generator?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   icon?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   image?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   inReplyTo?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   location?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   preview?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   published?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   replies?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   startTime?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   summary?: any;
 
-  @Prop()
+  @Prop({type: mongoose.Schema.Types})
   summaryMap?: any;
 }
 
