@@ -11,7 +11,7 @@ export class BaseObject {
 	id: string;
 
 	@Prop({required: true})
-	type: string;
+	type: string = 'Object';
 
 	@Prop({type: Mixed})
 	attachment?: any;

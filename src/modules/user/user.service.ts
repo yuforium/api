@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Res } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ActivityStreamService } from '../activity-stream/activity-stream.service';
 import { UserCreateDto } from './dto/user-create.dto';
 import { User, UserDocument } from './schemas/user.schema';
-import { UserDto } from './dto/user.dto';
+import { DuplicateRecordException } from '../../common/exceptions/duplicate-record.exception';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -13,49 +14,45 @@ export class UserService {
     protected activityStreamService: ActivityStreamService
   ) { }
 
-  public async create(serviceId: string, userDto: UserCreateDto): Promise<UserDto> {
+  public async create(serviceId: string, userDto: UserCreateDto): Promise<any> {
     const saltRounds = 10;
     const {username, password} = userDto;
-    const user = await this.userModel.create({username, password});
-    const userId = `${serviceId}/user/${username}`;
-    const actor = {
-      "@context": "https://www.w3.org/ns/activitystreams",
-      'type': "Person",
-      "id": `${serviceId}/user/${userDto.username}`,
-      "name": userDto.name,
-      "preferredUsername": userDto.username,
-      "summary": userDto.summary,
-    };
+    const session = await this.userModel.db.startSession();
 
-    this.activityStreamService.createActivity(actor)
-    
-    return;
-    // const record = {
-    //   "@context": "https://www.w3.org/ns/activitystreams",
-    //   'type': "Person",
-    //   "id": `${serviceId}/user/${userDto.username}`,
-    //   "name": userDto.name,
-    //   "preferredUsername": userDto.username,
-    //   "summary": userDto.summary,
-    //   "inbox": `${userId}/inbox`,
-    //   "outbox": `${userId}/outbox`,
-    //   'followers': `${userId}/followers`,
-    //   'following': `${userId}/following`,
-    //   "liked": `${userId}/liked`,
-    //   "password": await bcrypt.hash(password, saltRounds)
-    // };
-    // const user = await this.userModel.create(record);
-    // const response = Object.assign(new UserDto(), user.toObject());
+    session.startTransaction();
 
-    // const activity = await this.activityService.create({
-    //   "@context": "https://www.w3.org/ns/activitystreams",
-    //   "type": "Create",
-    //   "id": user.id,
-    //   "actor": serviceId,
-    //   "object": user._id
-    // });
+    try {
+      const user = await this.userModel.create({username, password: await bcrypt.hash(password, saltRounds)});
+      const userId = `${serviceId}/user/${username}`;
+      const actorData = {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        'type': "Person",
+        "id": `${serviceId}/user/${userDto.username}`,
+        "name": userDto.name,
+        "preferredUsername": user.username,
+        "summary": userDto.summary,
+      };
+      const actor = await this.activityStreamService.createActivity(actorData);
 
-    // return response;
+      user.identities = [actor._id];
+      user.defaultIdentity = actor._id;
+      
+      await user.save();
+
+      session.commitTransaction();
+      session.endSession();
+      
+      return actor.toObject();
+    } 
+    catch (error) {
+      session.abortTransaction();
+      session.endSession();
+
+      if (error.code === 11000) {
+        throw new DuplicateRecordException("record exists");
+      }
+      throw error;
+    }
   }
 
   public async findOne(username: string): Promise<User | undefined> {

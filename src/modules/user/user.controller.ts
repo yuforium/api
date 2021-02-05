@@ -1,4 +1,6 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, Param, Post, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, Param, Post, Res, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Response } from 'express';
+import { DuplicateRecordFilter } from '../../common/decorators/duplicate-record-filter.decorator';
 import { ServiceId } from '../../common/decorators/service-id.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
@@ -10,9 +12,10 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(protected userService: UserService) { }
 
+  @UseFilters(DuplicateRecordFilter)
   @UseInterceptors(ClassSerializerInterceptor)
   @Post()
-  public create(@ServiceId() serviceId: string, @Body() userDto: UserCreateDto) {
+  public async create(@ServiceId() serviceId: string, @Body() userDto: UserCreateDto) {
     return this.userService.create(serviceId, userDto);
   }
 

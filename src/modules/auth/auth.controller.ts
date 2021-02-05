@@ -1,5 +1,7 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LocalAuthGuard } from './local-auth.guard';
 
@@ -9,8 +11,9 @@ export class AuthController {
 
 	@UseGuards(LocalAuthGuard)
   @Post('login')
+  @ApiBody({type: LoginDto})
   async login(@Req() req, @Body() body: {username: string, password: string}) {
-    return this.authService.login(req.user);
+    return {...await this.authService.login(req.user)};
   }
 
   @UseGuards(JwtAuthGuard)
