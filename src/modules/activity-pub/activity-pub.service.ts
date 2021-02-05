@@ -6,7 +6,7 @@ import { BaseObject, BaseObjectDocument } from './schema/base-object.schema';
 import { Person, PersonDocument } from './schema/person.schema';
 
 @Injectable()
-export class ActivityStreamService {
+export class ActivityPubService {
   constructor(
     @InjectModel(BaseObject.name) protected objectModel: Model<BaseObjectDocument>,
     @InjectModel(Activity.name) protected activityModel: Model<ActivityDocument>,

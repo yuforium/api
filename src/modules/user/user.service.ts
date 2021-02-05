@@ -1,7 +1,7 @@
 import { Injectable, Res } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ActivityStreamService } from '../activity-stream/activity-stream.service';
+import { ActivityPubService } from '../activity-pub/activity-pub.service';
 import { UserCreateDto } from './dto/user-create.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { DuplicateRecordException } from '../../common/exceptions/duplicate-record.exception';
@@ -11,7 +11,7 @@ import * as bcrypt from 'bcrypt';
 export class UserService {
   constructor(
     @InjectModel(User.name) protected userModel: Model<UserDocument>, 
-    protected activityStreamService: ActivityStreamService
+    protected activityStreamService: ActivityPubService
   ) { }
 
   public async create(serviceId: string, userDto: UserCreateDto): Promise<any> {

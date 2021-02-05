@@ -3,14 +3,14 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserDocument } from '../user/schemas/user.schema';
-import { ActivityStreamService } from '../activity-stream/activity-stream.service';
+import { ActivityPubService } from '../activity-pub/activity-pub.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     protected userService: UserService, 
     protected jwtService: JwtService,
-    protected activityPubService: ActivityStreamService
+    protected activityPubService: ActivityPubService
   ) { }
 
   public async validateUser(username: string, password: string): Promise<any> {

@@ -2,13 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { ActivityStreamService } from "../activity-stream/activity-stream.service";
+import { ActivityPubService } from "../activity-pub/activity-pub.service";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     protected configService: ConfigService,
-    protected activityStreamService: ActivityStreamService
+    protected activityStreamService: ActivityPubService
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

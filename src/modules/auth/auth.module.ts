@@ -7,14 +7,14 @@ import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ActivityStreamModule } from '../activity-stream/activity-stream.module';
+import { ActivityPubModule } from '../activity-pub/activity-pub.module';
 
 @Module({
   providers: [AuthService, LocalStrategy, JwtStrategy],
   imports: [
     ConfigModule,
     UserModule,
-    ActivityStreamModule,
+    ActivityPubModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

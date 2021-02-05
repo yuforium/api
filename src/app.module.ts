@@ -12,7 +12,6 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { InboxModule } from './modules/inbox/inbox.module';
 import { SharedInboxModule } from './modules/shared-inbox/shared-inbox.module';
-import { DomainModule } from './modules/domain/domain.module';
 
 @Module({
   imports: [
@@ -22,8 +21,7 @@ import { DomainModule } from './modules/domain/domain.module';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => config.get('database')
     }),
-    // TypegooseModule.forRoot(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true}),
-    DomainModule,
+    // TypegooseModule.forRoot(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true},
     InboxModule,
     SharedInboxModule,
     AuthModule,
