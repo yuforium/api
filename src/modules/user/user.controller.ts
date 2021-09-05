@@ -1,7 +1,8 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, Param, Post, Res, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
-import { Response } from 'express';
+import { Body, ClassSerializerInterceptor, Controller, Get, Param, Post, Req, Res, UnauthorizedException, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { DuplicateRecordFilter } from '../../common/decorators/duplicate-record-filter.decorator';
 import { ServiceId } from '../../common/decorators/service-id.decorator';
+import { ActivityPubService } from '../activity-pub/activity-pub.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -10,7 +11,10 @@ import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
-  constructor(protected userService: UserService) { }
+  constructor(
+    protected userService: UserService,
+    protected activityPubService: ActivityPubService
+  ) { }
 
   @UseFilters(DuplicateRecordFilter)
   @UseInterceptors(ClassSerializerInterceptor)
@@ -39,7 +43,19 @@ export class UserController {
   @Roles(Role.User)
   @UseGuards(JwtAuthGuard)
   @Post(':username/outbox') 
-  public postOutbox(@Param('username') username: string, @Body() body: any) {
-    return body;
+  public async postOutbox(@ServiceId() serviceId: string, @Req() request: Request, @Param('username') username: string, @Body() body: any) {
+    if ((request.user as any).id !== `${serviceId}/user/${username}`) {
+      throw new UnauthorizedException();
+    }
+
+    const message = await this.activityPubService.createObject(body);
+    // const activity = await this.activityPubService.createActivity({
+    //   type: 'Create',
+    //   object: message._id
+    // });
+
+    return message.toObject();
+
+    return request.user;
   }
 }

@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { Activity, ActivityDocument } from './schema/activity.schema';
 import { BaseObject, BaseObjectDocument } from './schema/base-object.schema';
 import { Person, PersonDocument } from './schema/person.schema';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class ActivityPubService {
@@ -19,6 +20,7 @@ export class ActivityPubService {
   }
   
   public async createObject(data): Promise<BaseObjectDocument> {
+    const _id = "abcd";
     return this.objectModel.create(data);
   }
 

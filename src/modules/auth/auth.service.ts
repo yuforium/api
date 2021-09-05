@@ -4,6 +4,7 @@ import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserDocument } from '../user/schemas/user.schema';
 import { ActivityPubService } from '../activity-pub/activity-pub.service';
+import { PersonDocument } from '../activity-pub/schema/person.schema';
 
 @Injectable()
 export class AuthService {
@@ -27,11 +28,12 @@ export class AuthService {
   }
 
   public async login(user: UserDocument) {
-    const person = await this.activityPubService.findOne({_id: user.defaultIdentity});
+    const person = await this.activityPubService.findOne({_id: user.defaultIdentity}) as PersonDocument;
 
     const payload = {
       sub: person.id,
-      name: person.name
+      name: person.name,
+      username: person.preferredUsername
     };
 
     return {
