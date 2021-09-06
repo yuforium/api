@@ -11,6 +11,6 @@ export const ServiceId = createParamDecorator(
       throw new Error('not a valid name');
     }
 
-    return `https://${domain}`;
+    return domain;
   }
 );
