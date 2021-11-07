@@ -9,7 +9,7 @@ import { PersonDocument } from '../activity-pub/schema/person.schema';
 @Injectable()
 export class AuthService {
   constructor(
-    protected userService: UserService, 
+    protected userService: UserService,
     protected jwtService: JwtService,
     protected activityPubService: ActivityPubService
   ) { }
@@ -28,12 +28,12 @@ export class AuthService {
   }
 
   public async login(user: UserDocument) {
-    const person = await this.activityPubService.findOne({_id: user.defaultIdentity}) as PersonDocument;
+    // const person = await this.activityPubService.findOne({_id: user.defaultIdentity}) as PersonDocument;
 
     const payload = {
-      sub: person.id,
-      name: person.name,
-      username: person.preferredUsername
+      // sub: person.id,
+      // name: person.name,
+      username: user.username
     };
 
     return {

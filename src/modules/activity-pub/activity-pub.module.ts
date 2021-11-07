@@ -7,13 +7,13 @@ import { Person, PersonSchema } from './schema/person.schema';
 
 @Module({
   providers: [ActivityPubService],
-  exports: [ActivityPubService],
   imports: [
     MongooseModule.forFeature([
-      {name: BaseObject.name, schema: BaseObjectSchema},
-      {name: Activity.name, schema: ActivitySchema},
+      // {name: BaseObject.name, schema: BaseObjectSchema},
+      // {name: Activity.name, schema: ActivitySchema},
       {name: Person.name, schema: PersonSchema}
     ])
-  ]
+  ],
+  exports: [ActivityPubService, MongooseModule]
 })
 export class ActivityPubModule { }

@@ -1,15 +1,38 @@
-import { BaseObject } from "./base-object.schema";
-import * as mongoose from 'mongoose';
-import { Prop, SchemaFactory } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Person as BasePerson, ActivityStreams } from '@yuforium/activity-streams-validator';
+import { Exclude, Transform } from 'class-transformer';
+import { Document, Mongoose, Schema as MongooseSchema } from 'mongoose';
 
-export type PersonDocument = Person & mongoose.Document;
+export type PersonDocument = Person & Document;
 
-export class Person extends BaseObject {
-  @Prop({type: String})
-  public readonly type: string = 'Person';
+@Schema({collection: 'objects'})
+export class Person extends BasePerson {
+  @Transform((_id: any) => _id.toHexString(), {toPlainOnly: true})
+  _id?: MongooseSchema.Types.ObjectId;
 
-  @Prop({required: true, type: String, lowercase: true})
-  public preferredUsername: string;
+  @Prop()
+  type: string;
+
+  @Prop()
+  preferredUsername?: string;
+
+  @Prop()
+  id?: string;
+
+  @Prop()
+  name?: string;
+
+  @Prop()
+  nameMap?: ActivityStreams.ContentMap;
+
+  @Prop()
+  summary?: string;
+
+  @Prop()
+  summaryMap?: ActivityStreams.ContentMap;
+
+  @Exclude()
+  __v: number;
 }
 
 export const PersonSchema = SchemaFactory.createForClass(Person);

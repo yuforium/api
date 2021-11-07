@@ -7,9 +7,8 @@ export class AppService {
     const id = `https://${domain}`;
 
     return {
-      type: 'Service',
+      type: 'Application',
       id,
-      name: id,
       inbox:     `${id}/inbox`,
       outbox:    `${id}/outbox`,
       following: `${id}/following`,
@@ -24,6 +23,10 @@ export class AppService {
         `${id}/trending/users`
       ]
     };
+  }
+
+  public async createDomain(domain) {
+    
   }
 
   public async getDomain(hostname) {

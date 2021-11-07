@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { InboxModule } from './modules/inbox/inbox.module';
 import { SharedInboxModule } from './modules/shared-inbox/shared-inbox.module';
+import { UserService } from './modules/user/user.service';
 
 @Module({
   imports: [
@@ -22,13 +23,18 @@ import { SharedInboxModule } from './modules/shared-inbox/shared-inbox.module';
       useFactory: async (config: ConfigService) => config.get('database')
     }),
     // TypegooseModule.forRoot(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true},
+    AuthModule,
     InboxModule,
     SharedInboxModule,
-    AuthModule,
     UserModule,
     ForumModule
   ],
   controllers: [AppController],
   providers:   [AppService],
 })
-export class AppModule { }
+export class AppModule {
+  constructor() { }
+
+  async onApplicationBootstrap() {
+  }
+}

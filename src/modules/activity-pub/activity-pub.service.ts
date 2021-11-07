@@ -9,8 +9,8 @@ import * as mongoose from 'mongoose';
 @Injectable()
 export class ActivityPubService {
   constructor(
-    @InjectModel(BaseObject.name) protected objectModel: Model<BaseObjectDocument>,
-    @InjectModel(Activity.name) protected activityModel: Model<ActivityDocument>,
+    // @InjectModel(BaseObject.name) protected objectModel: Model<BaseObjectDocument>,
+    // @InjectModel(Activity.name) protected activityModel: Model<ActivityDocument>,
     @InjectModel(Person.name) protected personModel: Model<PersonDocument>
   ) { }
 
@@ -18,21 +18,21 @@ export class ActivityPubService {
   public async createPerson(data): Promise<PersonDocument> {
     return this.personModel.create(data);
   }
-  
-  public async createObject(data): Promise<BaseObjectDocument> {
-    const _id = "abcd";
-    return this.objectModel.create(data);
-  }
 
-  public async createActivity(data): Promise<ActivityDocument> {
-    return this.activityModel.create(data);
-  }
+  // public async createObject(data): Promise<BaseObjectDocument> {
+    // const _id = "abcd";
+    // return this.objectModel.create(data);
+  // }
 
-  public async find(params) {
-    return this.activityModel.find(params);
-  }
+  // public async createActivity(data): Promise<ActivityDocument> {
+  //   return this.activityModel.create(data);
+  // }
 
-  public async findOne(params) {
-    return this.activityModel.findOne(params);
-  }
+  // public async find(params) {
+  //   return this.activityModel.find(params);
+  // }
+
+  // public async findOne(params) {
+  //   return this.activityModel.findOne(params);
+  // }
 }
