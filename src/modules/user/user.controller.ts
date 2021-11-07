@@ -24,7 +24,7 @@ export class UserController {
   public async findUsers(): Promise<any[]> {
     const users =  await this.userService.find();
 
-    return users.map(user => {username: user.username})
+    return users.map(user => ({username: user.username}))
   }
 
   // @UseFilters(DuplicateRecordFilter)
