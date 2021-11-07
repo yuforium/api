@@ -37,7 +37,7 @@ export class UserController {
   @Get(':username')
   public async findOne(@Param('username') username: string) {
     const person = await this.userService.findPerson(username);
-
+    console.log('person', person);
     return person;
   }
 
