@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypegooseModule } from 'nestjs-typegoose';
 import { ForumModule } from './modules/forum/forum.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import database from './config/database';
@@ -22,7 +21,6 @@ import { UserService } from './modules/user/user.service';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => config.get('database')
     }),
-    // TypegooseModule.forRoot(process.env.MONGODB_URI, {useNewUrlParser: true, useUnifiedTopology: true},
     AuthModule,
     InboxModule,
     SharedInboxModule,

@@ -22,6 +22,6 @@ export class ForumService {
   }
 
   async delete(id: string) {
-    return this.forumModel.deleteOne(id);
+    // return this.forumModel.deleteOne(id);
   }
 }

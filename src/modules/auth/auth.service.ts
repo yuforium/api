@@ -26,6 +26,8 @@ export class AuthService {
       if (await await bcrypt.compare(password, user.password)) {
         this.logger.debug(`User "${username}" password matches, validation succeeded`);
 
+
+
         // @todo find the actual user document and send back from here
         return user;
         return {
