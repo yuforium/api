@@ -4,25 +4,28 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface'
 import { ValidationPipe } from '@nestjs/common'
 
-async function bootstrap () 
-{
-	const app = await NestFactory.create(AppModule);
-	const options = new DocumentBuilder()
-		.setTitle("Yuforium API Specification")
-		.setDescription("Yuforium API specification")
-		.setVersion("1.0")
-		.build();
-	const document = SwaggerModule.createDocument(app, options);
-	const fs = require("fs")
+async function bootstrap () {
+  const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'error', 'warn', 'debug', 'verbose']
+  });
 
-	// fs.writeFileSync("./swagger-spec.json", JSON.stringify(document))
+  const options = new DocumentBuilder()
+    .setTitle("Yuforium API Specification")
+    .setDescription("Yuforium API specification")
+    .setVersion("1.0")
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, options);
+  const fs = require("fs")
 
-	SwaggerModule.setup("api", app, document)
+  // fs.writeFileSync("./swagger-spec.json", JSON.stringify(document))
 
-	app.enableCors({origin: "*"});
+  SwaggerModule.setup("api", app, document)
 
-	app.useGlobalPipes(new ValidationPipe());
+  app.enableCors({origin: "*"});
 
-	await app.listen(3000);
+  app.useGlobalPipes(new ValidationPipe());
+
+  await app.listen(3000);
 }
 bootstrap();
