@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, Param, Post, Req, Res, UnauthorizedException, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, NotFoundException, Param, Post, Req, Res, UnauthorizedException, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
 import { classToPlain, plainToClass } from 'class-transformer';
 import { Request, Response } from 'express';
 import { DuplicateRecordFilter } from '../../common/decorators/duplicate-record-filter.decorator';
@@ -8,11 +8,12 @@ import { Person } from '../activity-pub/schema/person.schema';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PersonDto } from './dto/person.dto';
 import { UserCreateDto } from './dto/user-create.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
-// @UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
   constructor(
     protected userService: UserService,
@@ -23,7 +24,6 @@ export class UserController {
   @Get()
   public async findUsers(): Promise<any[]> {
     const users =  await this.userService.find();
-
     return users.map(user => ({username: user.username}))
   }
 
@@ -34,11 +34,16 @@ export class UserController {
     return this.userService.create(serviceId, userDto);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':username')
   public async findOne(@Param('username') username: string) {
     const person = await this.userService.findPerson(username);
-    console.log('person', person);
-    return person;
+
+    if (person) {
+      return plainToClass(PersonDto, person);
+    }
+
+    throw new NotFoundException('User does not exist');
   }
 
   @Roles(Role.User)

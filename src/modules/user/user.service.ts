@@ -65,10 +65,11 @@ export class UserService {
 
   public async findPerson(username: string): Promise<Person | undefined> {
     const user = await this.findOne(username);
+
     if (user) {
-      console.log(user);
       return this.personModel.findOne({_id: user.defaultIdentity});
     }
+
     return Promise.resolve(undefined);
   }
 
