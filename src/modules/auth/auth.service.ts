@@ -4,7 +4,6 @@ import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserDocument } from '../user/schemas/user.schema';
 import { ActivityPubService } from '../activity-pub/activity-pub.service';
-import { PersonDocument } from '../activity-pub/schema/person.schema';
 
 @Injectable()
 export class AuthService {

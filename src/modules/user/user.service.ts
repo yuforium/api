@@ -1,4 +1,4 @@
-import { Injectable, Res } from '@nestjs/common';
+import { Injectable, Logger, Res } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ActivityPubService } from '../activity-pub/activity-pub.service';
@@ -10,6 +10,8 @@ import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 
 @Injectable()
 export class UserService {
+  protected logger = new Logger(UserService.name);
+
   constructor(
     @InjectModel(User.name) protected userModel: Model<UserDocument>,
     @InjectModel(Person.name) protected personModel: Model<PersonDocument>,
@@ -64,6 +66,8 @@ export class UserService {
   }
 
   public async findPerson(username: string): Promise<Person | undefined> {
+    this.logger.debug(`findPerson "${username}`);
+
     const user = await this.findOne(username);
 
     if (user) {
