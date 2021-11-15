@@ -66,7 +66,7 @@ export class UserService {
   }
 
   public async findPerson(username: string): Promise<Person | undefined> {
-    this.logger.debug(`findPerson "${username}`);
+    this.logger.debug(`findPerson "${username}"`);
 
     const user = await this.findOne(username);
 
