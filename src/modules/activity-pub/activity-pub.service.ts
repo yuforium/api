@@ -19,6 +19,10 @@ export class ActivityPubService {
     return this.personModel.create(data);
   }
 
+  public async findPerson(): Promise<PersonDocument[]> {
+    return this.personModel.find();
+  }
+
   // public async createObject(data): Promise<BaseObjectDocument> {
     // const _id = "abcd";
     // return this.objectModel.create(data);

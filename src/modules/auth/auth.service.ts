@@ -4,6 +4,11 @@ import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserDocument } from '../user/schemas/user.schema';
 import { ActivityPubService } from '../activity-pub/activity-pub.service';
+import { Model } from 'mongoose';
+import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { plainToClass } from 'class-transformer';
+import { PersonDto } from '../user/dto/person.dto';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +16,8 @@ export class AuthService {
   constructor(
     protected userService: UserService,
     protected jwtService: JwtService,
-    protected activityPubService: ActivityPubService
+    protected activityPubService: ActivityPubService,
+    @InjectModel(Person.name) protected readonly personModel: Model<PersonDocument>
   ) { }
 
   public async validateUser(username: string, password: string): Promise<any> {
@@ -24,15 +30,7 @@ export class AuthService {
 
       if (await await bcrypt.compare(password, user.password)) {
         this.logger.debug(`User "${username}" password matches, validation succeeded`);
-
-
-
-        // @todo find the actual user document and send back from here
         return user;
-        return {
-          username: user.username,
-          defaultIdentity: user.defaultIdentity
-        }
       }
 
       this.logger.debug(`User "${username}" password does not match, validation failed`);
@@ -45,20 +43,12 @@ export class AuthService {
   }
 
   public async login(user: UserDocument) {
-    console.log("User Doc", user);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-    // const person = await this.activityPubService.findOne({_id: user.defaultIdentity}) as PersonDocument;
-
     const payload = {
-      // sub: person.id,
-      // name: person.name,
       username: user.username,
-      iam: "chris"
+      _id: user._id.toString(),
+      actor: plainToClass(PersonDto, await this.personModel.findById(user.defaultIdentity))
     };
 
-    console.log("the payload is", payload);
     return {
       access_token: this.jwtService.sign(payload)
     };

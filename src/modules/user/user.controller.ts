@@ -23,8 +23,8 @@ export class UserController {
 
   @Get()
   public async findUsers(): Promise<any[]> {
-    const users =  await this.userService.find();
-    return users.map(user => ({username: user.username}))
+    const users = await this.activityPubService.findPerson();
+    return users.map(user => plainToClass(PersonDto, user));
   }
 
   // @UseFilters(DuplicateRecordFilter)

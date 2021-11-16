@@ -61,7 +61,7 @@ export class UserService {
     }
   }
 
-  public async findOne(username: string): Promise<User | undefined> {
+  public async findOne(username: string): Promise<UserDocument | undefined> {
     return this.userModel.findOne({username});
   }
 
