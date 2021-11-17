@@ -36,7 +36,7 @@ export class UserController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get(':username')
-  public async findOne(@Param('username') username: string) {
+  public async findOne(@ServiceId() serviceId: string, @Param('username') username: string) {
     const person = await this.userService.findPerson(username);
 
     if (person) {

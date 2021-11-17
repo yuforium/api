@@ -12,6 +12,7 @@ import { UserModule } from './modules/user/user.module';
 import { InboxModule } from './modules/inbox/inbox.module';
 import { SharedInboxModule } from './modules/shared-inbox/shared-inbox.module';
 import { UserService } from './modules/user/user.service';
+import { WellKnownModule } from './modules/well-known/well-known.module';
 
 @Module({
   imports: [
@@ -22,10 +23,11 @@ import { UserService } from './modules/user/user.service';
       useFactory: async (config: ConfigService) => config.get('database')
     }),
     AuthModule,
+    UserModule,
+    WellKnownModule,
     InboxModule,
     SharedInboxModule,
-    UserModule,
-    ForumModule
+    ForumModule,
   ],
   controllers: [AppController],
   providers:   [AppService],
