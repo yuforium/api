@@ -1,4 +1,5 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, NotFoundException, Param, Post, Req, Res, UnauthorizedException, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, Header, NotFoundException, Param, Post, Query, Req, Res, UnauthorizedException, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { OrderedCollectionPage } from '@yuforium/activity-streams-validator';
 import { classToPlain, plainToClass } from 'class-transformer';
 import { Request, Response } from 'express';
 import { DuplicateRecordFilter } from '../../common/decorators/duplicate-record-filter.decorator';
@@ -22,20 +23,20 @@ export class UserController {
   }
 
   @Get()
+  @Header('Content-Type', 'application/activity+json')
   public async findUsers(): Promise<any[]> {
     const users = await this.activityPubService.findPerson();
     return users.map(user => plainToClass(PersonDto, user));
   }
 
-  // @UseFilters(DuplicateRecordFilter)
-  @UseInterceptors(ClassSerializerInterceptor)
   @Post()
+  @Header('Content-Type', 'application/activity+json')
   public async create(@ServiceId() serviceId: string, @Body() userDto: UserCreateDto) {
     return this.userService.create(serviceId, userDto);
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':username')
+  @Header('Content-Type', 'application/activity+json')
   public async findOne(@ServiceId() serviceId: string, @Param('username') username: string) {
     const person = await this.userService.findPerson(username);
 
@@ -46,20 +47,40 @@ export class UserController {
     throw new NotFoundException('User does not exist');
   }
 
-  @Roles(Role.User)
-  @UseGuards(JwtAuthGuard)
-  @Get(':username/inbox')
-  public getInbox(@Param('username') username: string) {
-    return 'getInbox';
+
+  @Get(':username/content')
+  @Header('Content-Type', 'application/activity+json')
+  public async getUserContent(
+    @ServiceId() serviceId: string,
+    @Param('username') username: string,
+    @Query('page') page: number = 0,
+    @Query('pageSize') pageSize: number = 20,
+    @Query('sort') sort: string = 'createdAt', // also by lastReply
+  ) {
+
+    const collection = OrderedCollectionPage.factory({
+      id: `https://${serviceId}/users/${username}/content`,
+      first: `https://${serviceId}/users/${username}/content?page=0`,
+      last: `https://${serviceId}/users/${username}/content?last=true`
+    });
+
+    return collection;
   }
 
-  @Roles(Role.User)
-  @UseGuards(JwtAuthGuard)
-  @Post(':username/outbox')
-  public async postOutbox(@ServiceId() serviceId: string, @Req() request: Request, @Param('username') username: string, @Body() body: any) {
-    if ((request.user as any).id !== `${serviceId}/user/${username}`) {
-      throw new UnauthorizedException();
-    }
+  // @Roles(Role.User)
+  // @UseGuards(JwtAuthGuard)
+  // @Get(':username/inbox')
+  // public getInbox(@Param('username') username: string) {
+  //   return 'getInbox';
+  // }
+
+  // @Roles(Role.User)
+  // @UseGuards(JwtAuthGuard)
+  // @Post(':username/outbox')
+  // public async postOutbox(@ServiceId() serviceId: string, @Req() request: Request, @Param('username') username: string, @Body() body: any) {
+  //   if ((request.user as any).id !== `${serviceId}/user/${username}`) {
+  //     throw new UnauthorizedException();
+  //   }
 
     // const message = await this.activityPubService.createObject(body);
     // const activity = await this.activityPubService.createActivity({
@@ -68,7 +89,7 @@ export class UserController {
     // });
 
     // return message.toObject();
-
-    return request.user;
-  }
+  //   console.log(request.user);
+  //   return request.user;
+  // }
 }

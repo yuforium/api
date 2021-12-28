@@ -13,6 +13,7 @@ import { InboxModule } from './modules/inbox/inbox.module';
 import { SharedInboxModule } from './modules/shared-inbox/shared-inbox.module';
 import { UserService } from './modules/user/user.service';
 import { WellKnownModule } from './modules/well-known/well-known.module';
+import { ActivityModule } from './modules/activity/activity.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { WellKnownModule } from './modules/well-known/well-known.module';
     AuthModule,
     UserModule,
     WellKnownModule,
+    ActivityModule,
     InboxModule,
     SharedInboxModule,
     ForumModule,
