@@ -12,7 +12,6 @@ Before we begin, let's clarify that:
 
 _Post to a forum from your Activity Stream by addressing the forum_
 ```json
-// post a note to a forum from your own activity stream
 {
   "@context": "https://www.w3.org/ns/activitystreams",
   "id": "https://mastodon.social/cpmoser/note/some-id",
