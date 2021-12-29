@@ -10,7 +10,7 @@ Before we begin, let's clarify that:
 - Yuforium is code and standards, Yuforia.com is a service
 - `@context` is not the same as `context`
 
-_Post to a forum from your Activity Stream_
+_Post to a forum from your Activity Stream by addressing the forum_
 ```json
 // post a note to a forum from your own activity stream
 {
@@ -20,11 +20,13 @@ _Post to a forum from your Activity Stream_
   "name": "First Post by Chris",
   "content": "Hi world!",
   "to": [
-    "https://www.w3.org/ns/activitystreams#Public", // required, until we figure out private communities
+    "https://www.w3.org/ns/activitystreams#Public",
     "https://yuforia.com/forum/anything"
   ]
 }
-// ...a new Note is created in the forum, referencing the original via "delegatedFor" and adding the default context of the forum
+```
+_A new Note is created in the forum, referencing the original via "delegatedFor" and adding the default context of the forum_
+```json
 {
   "@context": [
     "https://www.w3.org/ns/activitystreams",
@@ -33,15 +35,14 @@ _Post to a forum from your Activity Stream_
   "id": "https://yuforia.com/forum/anything/note/another-id",
   "type": "Note",
   "delegatedFor": "https://mastodon.social/cpmoser/note/some-id",
-  "context": "https://yuforium.com/topic/anything" // inherits default context
+  "context": "https://yuforium.com/topic/anything"
 }
 ```
 
-It's not necessary to pass `delegatedFor` through the community at large but it should remain with the forum's Note.
+It's not necessary to pass through the `delegatedFor` property through the community at large but it should remain with the forum's Note.
 
-_You can also POST directly to the forum outbox and it will be excluded from your Activity Stream (should require authentication)_
+_You can also POST directly to the forum outbox like your own and it will be excluded from your Activity Stream (should require authentication)_
 ```json
-// POST https://yuforia.com/forum/anything/outbox
 {
   "type": "Note",
   "name": "A note",
@@ -49,8 +50,10 @@ _You can also POST directly to the forum outbox and it will be excluded from you
     "https://www.w3.org/ns/activitystreams#Public"
   ]
 }
+```
 
-// ...and a forum
+_Forums encapsulate the context_
+```json
 {
   "type": "Service",
   "name": "The anything community",
