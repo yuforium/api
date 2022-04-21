@@ -1,31 +1,16 @@
 import { ApiProperty, ApiPropertyOptional, PartialType, PickType } from "@nestjs/swagger";
-import { ActivityStreams, Note } from "@yuforium/activity-streams-validator";
+import { Note, IsRequired } from "@yuforium/activity-streams-validator";
 import { IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, MinLength } from "class-validator";
 
 export class NoteCreateDto extends PartialType(
-  PickType(Note, ['name', 'content', 'attributedTo', 'published'])
+  PickType(Note, ['name', 'content', 'attributedTo', 'to', 'published'])
 ) {
-  @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  @ApiProperty()
-  @ApiPropertyOptional()
-  public name: string;
-
-  @IsString()
-  @IsNotEmpty()
   @MaxLength(500) // make it compatible with Mastodon for now
   @ApiProperty()
+  @IsRequired()
   public content: string;
 
-  @IsString()
-  @IsOptional()
-  public attributedTo: string;
-
-  @IsOptional()
-  public published: string;
-
-  @IsString({each: true})
+  @IsRequired()
   // @IsUrl({each: true})
   public to: string|string[];
 }

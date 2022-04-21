@@ -4,7 +4,6 @@ import { Model } from 'mongoose';
 import { ActivityPubService } from '../activity-pub/activity-pub.service';
 import { UserCreateDto } from './dto/user-create.dto';
 import { User, UserDocument } from './schemas/user.schema';
-import { DuplicateRecordException } from '../../common/exceptions/duplicate-record.exception';
 import * as bcrypt from 'bcrypt';
 import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 
@@ -26,7 +25,7 @@ export class UserService {
     session.startTransaction();
 
     try {
-      const user = await this.userModel.create({username, password: await bcrypt.hash(password, saltRounds)});
+      const user = await this.userModel.create({serviceId, username, password: await bcrypt.hash(password, saltRounds)});
       const userId = `${serviceId}/user/${username}`;
       const personData = {
         "@context": "https://www.w3.org/ns/activitystreams",
@@ -62,14 +61,14 @@ export class UserService {
     }
   }
 
-  public async findOne(username: string): Promise<UserDocument | undefined> {
-    return this.userModel.findOne({username});
+  public async findOne(serviceId: string, username: string): Promise<UserDocument | undefined> {
+    return this.userModel.findOne({serviceId, username});
   }
 
-  public async findPerson(username: string): Promise<Person | undefined> {
+  public async findPerson(serviceId: string, username: string): Promise<Person | undefined> {
     this.logger.debug(`findPerson "${username}"`);
 
-    const user = await this.findOne(username);
+    const user = await this.findOne(serviceId, username);
 
     if (user) {
       return this.personModel.findOne({_id: user.defaultIdentity});

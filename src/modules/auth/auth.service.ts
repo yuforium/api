@@ -20,8 +20,8 @@ export class AuthService {
     @InjectModel(Person.name) protected readonly personModel: Model<PersonDocument>
   ) { }
 
-  public async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.userService.findOne(username);
+  public async validateUser(serviceId, username: string, password: string): Promise<any> {
+    const user = await this.userService.findOne(serviceId, username);
 
     this.logger.debug(`Validating user "${username}"`);
 

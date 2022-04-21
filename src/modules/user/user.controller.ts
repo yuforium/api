@@ -1,7 +1,7 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, Header, NotFoundException, Param, Post, Query, Req, Res, UnauthorizedException, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, Header, NotFoundException, Param, Post, Query, Req, Request, Res, UnauthorizedException, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { OrderedCollectionPage } from '@yuforium/activity-streams-validator';
 import { classToPlain, plainToClass } from 'class-transformer';
-import { Request, Response } from 'express';
 import { DuplicateRecordFilter } from '../../common/decorators/duplicate-record-filter.decorator';
 import { ServiceId } from '../../common/decorators/service-id.decorator';
 import { ActivityPubService } from '../activity-pub/activity-pub.service';
@@ -29,6 +29,13 @@ export class UserController {
     return users.map(user => plainToClass(PersonDto, user));
   }
 
+  @Get('whoami')
+  @UseGuards(AuthGuard('jwt'))
+  @Header('Content-Type', 'application/activity+json')
+  public async whoAmI(@Req() req: any): Promise<any> {
+    return req.user.actor;
+  }
+
   @Post()
   @Header('Content-Type', 'application/activity+json')
   public async create(@ServiceId() serviceId: string, @Body() userDto: UserCreateDto) {
@@ -38,7 +45,7 @@ export class UserController {
   @Get(':username')
   @Header('Content-Type', 'application/activity+json')
   public async findOne(@ServiceId() serviceId: string, @Param('username') username: string) {
-    const person = await this.userService.findPerson(username);
+    const person = await this.userService.findPerson(serviceId, username);
 
     if (person) {
       return plainToClass(PersonDto, person);
@@ -46,7 +53,6 @@ export class UserController {
 
     throw new NotFoundException('User does not exist');
   }
-
 
   @Get(':username/content')
   @Header('Content-Type', 'application/activity+json')

@@ -3,12 +3,15 @@ import * as mongoose from 'mongoose';
 
 export type UserDocument = User & mongoose.Document;
 
-@Schema({collection: 'user'})
+@Schema({collection: 'user', autoIndex: true})
 export class User {
-  @Prop({unique: true, lowercase: true})
+  @Prop({required: true})
+  serviceId: string;
+
+  @Prop({required: true, lowercase: true})
   username: string;
 
-  @Prop()
+  @Prop({required: true})
   password: string;
 
   @Prop()
@@ -22,3 +25,5 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.index({serviceId: 1, username: 1}, {unique: true});
