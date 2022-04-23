@@ -1,11 +1,12 @@
 import { ConflictException, Injectable, Logger, Res } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ActivityPubService } from '../activity-pub/activity-pub.service';
+// import { ActivityPubService } from '../activity-pub/activity-pub.service';
 import { UserCreateDto } from './dto/user-create.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
-import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
+import { ObjectService } from '../object/object.service';
+// import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 
 @Injectable()
 export class UserService {
@@ -13,8 +14,9 @@ export class UserService {
 
   constructor(
     @InjectModel(User.name) protected userModel: Model<UserDocument>,
-    @InjectModel(Person.name) protected personModel: Model<PersonDocument>,
-    protected activityStreamService: ActivityPubService
+    protected readonly objectService: ObjectService
+    // @InjectModel(Person.name) protected personModel: Model<PersonDocument>,
+    // protected activityStreamService: ActivityPubService
   ) { }
 
   public async create(serviceId: string, userDto: UserCreateDto): Promise<any> {
@@ -26,7 +28,6 @@ export class UserService {
 
     try {
       const user = await this.userModel.create({serviceId, username, password: await bcrypt.hash(password, saltRounds)});
-      const userId = `${serviceId}/user/${username}`;
       const personData = {
         "@context": "https://www.w3.org/ns/activitystreams",
         'type': "Person",
@@ -35,19 +36,18 @@ export class UserService {
         "preferredUsername": user.username,
         "summary": userDto.summary,
       };
-      // const actor = await this.activityStreamService.createActivity(actorData);
 
-      const person = await this.personModel.create(personData);
+      const {activity, object} = await this.objectService.create(serviceId, serviceId, 'user', personData, userDto.username);
 
-      user.identities = [person._id];
-      user.defaultIdentity = person._id;
+      user.identities = [object._id];
+      user.defaultIdentity = object._id;
 
       await user.save();
 
       session.commitTransaction();
       session.endSession();
 
-      return person.toObject();
+      return activity.object;
     }
     catch (error) {
       session.abortTransaction();
@@ -65,13 +65,13 @@ export class UserService {
     return this.userModel.findOne({serviceId, username});
   }
 
-  public async findPerson(serviceId: string, username: string): Promise<Person | undefined> {
+  public async findPerson(serviceId: string, username: string): Promise<any | undefined> {
     this.logger.debug(`findPerson "${username}"`);
 
     const user = await this.findOne(serviceId, username);
 
     if (user) {
-      return this.personModel.findOne({_id: user.defaultIdentity});
+      return this.objectService.findOne({_id: user.defaultIdentity});
     }
 
     return Promise.resolve(undefined);

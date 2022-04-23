@@ -51,7 +51,7 @@ export class AppController {
     }
     forumDto.attributedTo = req.user.actor.id;
     forumDto.published = (new Date()).toISOString();
-    const activity = this.objectService.create(`https://${serviceId}`, 'forum', forumDto, forumDto.id);
+    const activity = this.objectService.create(serviceId, `https://${serviceId}`, 'forum', forumDto, forumDto.id);
     return plainToClass(ActivityStreams.Activity, activity, { excludeExtraneousValues: true});
   }
 }

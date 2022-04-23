@@ -1,15 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
-import { User, UserDocument } from '../user/schemas/user.schema';
+import { ObjectService } from '../object/object.service';
 
 @Injectable()
 export class WebfingerService {
-  constructor(@InjectModel(Person.name) protected personModel: Model<PersonDocument>) {}
+  constructor(protected objectService: ObjectService) {}
 
   public async getAccount(serviceId: string, username: string): Promise<any> {
-    const user = await this.personModel.findOne({id: `https://${serviceId}/user/${username}`});
+    const user = await this.objectService.findOne({id: `https://${serviceId}/user/${username}`});
 
     if (!user) {
       throw new NotFoundException();

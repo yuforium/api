@@ -3,12 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserDocument } from '../user/schemas/user.schema';
-import { ActivityPubService } from '../activity-pub/activity-pub.service';
-import { Model } from 'mongoose';
-import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
-import { InjectModel } from '@nestjs/mongoose';
 import { plainToClass } from 'class-transformer';
 import { PersonDto } from '../user/dto/person.dto';
+import { ObjectService } from '../object/object.service';
 
 @Injectable()
 export class AuthService {
@@ -16,8 +13,7 @@ export class AuthService {
   constructor(
     protected userService: UserService,
     protected jwtService: JwtService,
-    protected activityPubService: ActivityPubService,
-    @InjectModel(Person.name) protected readonly personModel: Model<PersonDocument>
+    protected objectService: ObjectService
   ) { }
 
   public async validateUser(serviceId, username: string, password: string): Promise<any> {
@@ -46,7 +42,7 @@ export class AuthService {
     const payload = {
       username: user.username,
       _id: user._id.toString(),
-      actor: plainToClass(PersonDto, await this.personModel.findById(user.defaultIdentity))
+      actor: plainToClass(PersonDto, await this.objectService.findById(user.defaultIdentity))
     };
 
     return {

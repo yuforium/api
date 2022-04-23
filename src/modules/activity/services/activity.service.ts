@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ActivityStreams, Create } from '@yuforium/activity-streams-validator';
+import { Create } from '@yuforium/activity-streams-validator';
 import { instanceToPlain, plainToClass } from 'class-transformer';
 import { Model, Types } from 'mongoose';
 // import { ObjectService } from '../object/object.service';
-import { ActivityDocument } from './schema/activity.schema';
+import { ActivityDocument } from '../schema/activity.schema';
+import { SyncStreamService } from './sync-stream.service';
 
 @Injectable()
 export class ActivityService {
   constructor(
-    @InjectModel('Activity') protected readonly activityModel: Model<ActivityDocument>
+    @InjectModel('Activity') protected readonly activityModel: Model<ActivityDocument>,
+    public readonly processor: SyncStreamService
   ) { }
 
   public async get(id: string): Promise<ActivityDocument> {
@@ -24,8 +26,13 @@ export class ActivityService {
     activity.object = objectDto;
     activity.id = `${idPrefix}/activity/${_id}`;
 
-    console.log('instance to plain', objectDto);
+    await this.processor.dispatch(activity);
+
     return (await this.activityModel.create({_id, ...instanceToPlain(activity)})).toObject();
+  }
+
+  public async process(activity: any) {
+    this.processor.consume(activity);
   }
 
   public async find(query: any): Promise<ActivityDocument[]> {

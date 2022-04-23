@@ -1,32 +1,28 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, Header, NotFoundException, Param, Post, Query, Req, Request, Res, UnauthorizedException, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, Header, NotFoundException, Param, Post, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { OrderedCollectionPage } from '@yuforium/activity-streams-validator';
-import { classToPlain, plainToClass } from 'class-transformer';
-import { DuplicateRecordFilter } from '../../common/decorators/duplicate-record-filter.decorator';
-import { ServiceId } from '../../common/decorators/service-id.decorator';
-import { ActivityPubService } from '../activity-pub/activity-pub.service';
-import { Person } from '../activity-pub/schema/person.schema';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { Role } from '../auth/enums/role.enum';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PersonDto } from './dto/person.dto';
-import { UserCreateDto } from './dto/user-create.dto';
-import { UserService } from './user.service';
+import { plainToInstance } from 'class-transformer';
+import { ServiceId } from '../../../common/decorators/service-id.decorator';
+import { ObjectService } from '../../object/object.service';
+import { PersonDto } from '../dto/person.dto';
+import { UserCreateDto } from '../dto/user-create.dto';
+import { UserService } from '../user.service';
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
   constructor(
     protected userService: UserService,
-    protected activityPubService: ActivityPubService
+    protected objectService: ObjectService
   ) {
   }
 
   @Get()
   @Header('Content-Type', 'application/activity+json')
-  public async findUsers(): Promise<any[]> {
-    const users = await this.activityPubService.findPerson();
-    return users.map(user => plainToClass(PersonDto, user));
+  public async findUsers(@ServiceId() _serviceId): Promise<any[]> {
+    console.log(_serviceId);
+    const users = await this.objectService.find({_serviceId, type: 'Person'});
+    return users.map(user => plainToInstance(PersonDto, user));
   }
 
   @Get('whoami')
@@ -36,10 +32,11 @@ export class UserController {
     return req.user.actor;
   }
 
+  // @todo - this is returning a weird response - need to fix
   @Post()
   @Header('Content-Type', 'application/activity+json')
   public async create(@ServiceId() serviceId: string, @Body() userDto: UserCreateDto) {
-    return this.userService.create(serviceId, userDto);
+    return plainToInstance(PersonDto, await this.userService.create(serviceId, userDto));
   }
 
   @Get(':username')
@@ -48,7 +45,7 @@ export class UserController {
     const person = await this.userService.findPerson(serviceId, username);
 
     if (person) {
-      return plainToClass(PersonDto, person);
+      return plainToInstance(PersonDto, person);
     }
 
     throw new NotFoundException('User does not exist');

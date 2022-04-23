@@ -18,6 +18,9 @@ export class StreamObject {
   id: string;
 
   @Prop({required: true})
+  _serviceId: string;
+
+  @Prop({required: true})
   type: string = 'Object';
 
   @Prop({type: Mixed})

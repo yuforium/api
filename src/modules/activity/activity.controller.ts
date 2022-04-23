@@ -2,7 +2,7 @@ import { ClassSerializerInterceptor, Controller, Get, NotFoundException, Param, 
 import { ActivityStreams } from '@yuforium/activity-streams-validator';
 import { plainToClass } from 'class-transformer';
 import { ServiceId } from 'src/common/decorators/service-id.decorator';
-import { ActivityService } from '../activity/activity.service';
+import { ActivityService } from './services/activity.service';
 
 @Controller('activity')
 @UseInterceptors(ClassSerializerInterceptor)

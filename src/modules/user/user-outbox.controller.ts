@@ -2,11 +2,10 @@ import { Body, ClassSerializerInterceptor, Controller, Get, NotImplementedExcept
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ActivityStreams } from '@yuforium/activity-streams-validator';
-import { plainToClass, Expose, Transform } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 import { ServiceId } from 'src/common/decorators/service-id.decorator';
-import service from 'src/config/service';
-import { NoteCreateDto } from '../activity-pub/dto/note-create.dto';
-import { ActivityService } from '../activity/activity.service';
+import { NoteCreateDto } from '../../common/dto/note-create.dto';
+import { ActivityService } from '../activity/services/activity.service';
 import { ObjectService } from '../object/object.service';
 
 @Controller('user/:username/outbox')
@@ -28,7 +27,7 @@ export class UserOutboxController {
     }
     noteDto.attributedTo = req.user.actor.id;
     noteDto.published = (new Date()).toISOString();
-    const activity = await this.objectService.create(`https://${serviceId}/user/${username}`, 'note', noteDto);
+    const {activity, object} = await this.objectService.create(serviceId, `https://${serviceId}/user/${username}`, 'note', noteDto);
     return plainToClass(ActivityStreams.Activity, activity, { excludeExtraneousValues: true});
   }
 
