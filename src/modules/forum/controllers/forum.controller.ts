@@ -1,10 +1,11 @@
 import { Controller, Get, Param, Post, Patch, Body, Req, UseInterceptors, ClassSerializerInterceptor, NotFoundException, SerializeOptions } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { plainToClass } from 'class-transformer';
+import { ObjectService } from '../../object/object.service';
+import { ServiceId } from '../../../common/decorators/service-id.decorator';
+import { ForumDto } from '../dto/forum.dto';
+import { ForumCollectionDto } from '../dto/forum-collection.dto';
 import { ForumParams } from '../dto/forum-params.dto';
-import { classToPlain, plainToClass } from 'class-transformer';
-import { ObjectService } from 'src/modules/object/object.service';
-import { ServiceId } from 'src/common/decorators/service-id.decorator';
-import { ForumResponseDto } from '../dto/forum-response.dto';
 
 @ApiTags('forums')
 @Controller('forum')
@@ -16,29 +17,25 @@ export class ForumController {
     protected readonly objectService: ObjectService
   ) { }
 
-  protected toForumResponse(forum: any) {
-    return Object.assign({
-      inbox:     `http:${forum.id}/inbox`,
-      outbox:    `http:${forum.id}/outbox`,
-      followers: `http:${forum.id}/followers`,
-      following: `http:${forum.id}/following`,
-      liked:     `http:${forum.id}/liked`
-    }, classToPlain(forum));
-  }
-
   @Get()
   public async find() {
     const forums = await this.objectService.find({type: 'Forum'});
-    return forums.map(forum => plainToClass(ForumResponseDto, forum));
-    // return (await this.forumService.find()).map(this.toForumResponse);
+    const collection = new ForumCollectionDto();
+    collection.items = forums.map(item => plainToClass(ForumDto, item));
+
+    return collection;
   }
 
   @ApiResponse({status: 200, description: "Successful response"})
   @ApiResponse({status: 404, description: "Forum does not exist"})
   @Get(':pathId')
-  public async get(@ServiceId() serviceId: string, @Param('pathId') pathId: string) {
-    const forum = await this.objectService.get(`https://${serviceId}/forum/${pathId}`);
+  public async get(@ServiceId() serviceId: string, @Param() params: ForumParams) {
+    const forum = await this.objectService.get(`https://${serviceId}/forum/${params.pathId}`);
 
-    return plainToClass(ForumResponseDto, forum);
+    if (!forum) {
+      throw new NotFoundException();
+    }
+
+    return plainToClass(ForumDto, forum);
   }
 }

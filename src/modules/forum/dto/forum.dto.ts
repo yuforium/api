@@ -1,6 +1,6 @@
 import { Expose } from "class-transformer";
 
-export class ForumResponseDto {
+export class ForumDto {
   @Expose()
   id: string;
 
@@ -10,8 +10,8 @@ export class ForumResponseDto {
   @Expose()
   summary: string;
 
-  @Expose()
-  get inbox(): string {
+  @Expose({name: 'inbox'})
+  getInbox(): string {
     return `${this.id}/inbox`;
   }
 
