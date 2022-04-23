@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Patch, Body, Req, UseInterceptors, ClassSerializerInterceptor, NotFoundException, SerializeOptions } from '@nestjs/common';
+import { Controller, Get, Param, UseInterceptors, ClassSerializerInterceptor, NotFoundException, SerializeOptions } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToClass } from 'class-transformer';
 import { ObjectService } from '../../object/object.service';
