@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotImplementedException, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
 import { ApiTags, ApiHeader, ApiProduces } from '@nestjs/swagger';
@@ -7,13 +7,21 @@ import * as psl from 'psl';
 import { AuthGuard } from '@nestjs/passport';
 import { ServiceId } from './common/decorators/service-id.decorator';
 import { DomainDto } from './common/dto/domain.dto';
+import { ForumCreateDto } from './common/dto/forum-create.dto';
+import { ActivityStreams } from '@yuforium/activity-streams-validator';
+import { ObjectService } from './modules/object/object.service';
+import { plainToClass } from 'class-transformer';
 
 @ApiProduces("application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", "application/activity+json")
 @ApiTags('app')
 @Controller()
 export class AppController {
 
-  constructor (private readonly appService: AppService, config: ConfigService) {}
+  constructor(
+    protected readonly appService: AppService,
+    protected readonly objectService: ObjectService,
+    config: ConfigService
+  ) { }
 
   @Get()
   public async getService(@Req() request: Request, @ServiceId() serviceId: string) {
@@ -27,7 +35,7 @@ export class AppController {
 
   @Patch()
   public async patchDomain(@Body() domainDto) {
-    
+
   }
 
   @Get('outbox')
@@ -35,8 +43,15 @@ export class AppController {
 
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('outbox')
-  public writeOutbox(@Req() request: Request) {
-
+  public async postOutbox(@Req() req, @ServiceId() serviceId: string, @Body() forumDto: ForumCreateDto) {
+    if (forumDto instanceof ActivityStreams.Activity) {
+      throw new NotImplementedException('Activity objects are not supported at this time.');
+    }
+    forumDto.attributedTo = req.user.actor.id;
+    forumDto.published = (new Date()).toISOString();
+    const activity = this.objectService.create(`https://${serviceId}`, 'forum', forumDto, forumDto.id);
+    return plainToClass(ActivityStreams.Activity, activity, { excludeExtraneousValues: true});
   }
 }

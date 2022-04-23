@@ -26,7 +26,7 @@ export class AppService {
   }
 
   public async createDomain(domain) {
-    
+
   }
 
   public async getDomain(hostname) {

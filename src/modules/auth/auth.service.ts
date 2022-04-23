@@ -23,20 +23,20 @@ export class AuthService {
   public async validateUser(serviceId, username: string, password: string): Promise<any> {
     const user = await this.userService.findOne(serviceId, username);
 
-    this.logger.debug(`Validating user "${username}"`);
+    this.logger.debug(`Validating user "${username}@${serviceId}"`);
 
     if (user) {
-      this.logger.verbose(`User "${username}" found`);
+      this.logger.verbose(`User "${username}@${serviceId}" found`);
 
       if (await await bcrypt.compare(password, user.password)) {
-        this.logger.debug(`User "${username}" password matches, validation succeeded`);
+        this.logger.debug(`User "${username}@${serviceId}" password matches, validation succeeded`);
         return user;
       }
 
-      this.logger.debug(`User "${username}" password does not match, validation failed`);
+      this.logger.debug(`User "${username}@${serviceId}" password does not match, validation failed`);
     }
     else {
-      this.logger.debug(`User "${username}" not found, validation failed`);
+      this.logger.debug(`User "${username}@${serviceId}" not found, validation failed`);
     }
 
     return undefined;

@@ -11,9 +11,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { InboxModule } from './modules/inbox/inbox.module';
 import { SharedInboxModule } from './modules/shared-inbox/shared-inbox.module';
-import { UserService } from './modules/user/user.service';
 import { WellKnownModule } from './modules/well-known/well-known.module';
 import { ActivityModule } from './modules/activity/activity.module';
+import { ObjectModule } from './modules/object/object.module';
 
 @Module({
   imports: [
@@ -30,6 +30,7 @@ import { ActivityModule } from './modules/activity/activity.module';
     InboxModule,
     SharedInboxModule,
     ForumModule,
+    ObjectModule
   ],
   controllers: [AppController],
   providers:   [AppService],

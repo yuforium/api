@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, Param, Post, Request, SerializeOptions, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, NotImplementedException, Param, Post, Request, SerializeOptions, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ActivityStreams } from '@yuforium/activity-streams-validator';
@@ -22,13 +22,13 @@ export class UserOutboxController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  public async postOutbox(@ServiceId() serviceId: string, @Request() req, @Body() noteDto: NoteCreateDto) {
+  public async postOutbox(@Param('username') username: string, @ServiceId() serviceId: string, @Request() req, @Body() noteDto: NoteCreateDto) {
     if (noteDto instanceof ActivityStreams.Activity) {
-
+      throw new NotImplementedException('Activity objects are not supported at this time.');
     }
     noteDto.attributedTo = req.user.actor.id;
     noteDto.published = (new Date()).toISOString();
-    const activity = await this.objectService.create(serviceId, noteDto);
+    const activity = await this.objectService.create(`https://${serviceId}/user/${username}`, 'note', noteDto);
     return plainToClass(ActivityStreams.Activity, activity, { excludeExtraneousValues: true});
   }
 

@@ -16,13 +16,13 @@ export class ActivityService {
     return this.activityModel.findOne({id});
   }
 
-  public async create(serviceId, objectDto: any): Promise<any> {
+  public async create(idPrefix: string, objectDto: any): Promise<any> {
     const activity = new Create();
     const _id = new Types.ObjectId(); // this is the internal id
 
     activity.actor = objectDto.attributedTo;
     activity.object = objectDto;
-    activity.id = `https://${serviceId}/activity/${_id}`;
+    activity.id = `${idPrefix}/activity/${_id}`;
 
     console.log('instance to plain', objectDto);
     return (await this.activityModel.create({_id, ...instanceToPlain(activity)})).toObject();

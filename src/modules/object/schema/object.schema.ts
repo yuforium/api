@@ -9,12 +9,12 @@ const {Mixed} = mongoose.Schema.Types;
 /**
  * Called "StreamObject" in the spec although in ActivityPub it is called "Object".  Try to use Object where possible.
  */
-@Schema({collection: 'objects'})
+@Schema({collection: 'objects', autoIndex: true})
 export class StreamObject {
   @Prop({})
   '@context'?: string
 
-  @Prop({required: true})
+  @Prop({required: true, unique: true})
   id: string;
 
   @Prop({required: true})
