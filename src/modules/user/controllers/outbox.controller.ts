@@ -4,15 +4,15 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ActivityStreams } from '@yuforium/activity-streams-validator';
 import { plainToClass } from 'class-transformer';
 import { ServiceId } from 'src/common/decorators/service-id.decorator';
-import { NoteCreateDto } from '../../common/dto/note-create.dto';
-import { ActivityService } from '../activity/services/activity.service';
-import { ObjectService } from '../object/object.service';
+import { NoteCreateDto } from '../../../common/dto/note-create.dto';
+import { ActivityService } from '../../activity/services/activity.service';
+import { ObjectService } from '../../object/object.service';
 
 @Controller('user/:username/outbox')
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions({excludeExtraneousValues: true})
 @ApiTags('user-outbox')
-export class UserOutboxController {
+export class OutboxController {
   constructor(
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService
