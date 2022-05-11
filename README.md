@@ -6,7 +6,7 @@ Yuforium focuses on federated communities so they are no longer constrained to a
 ## About
 This API is a WIP to implement a [proposed community standard for Activity Pub](https://github.com/yuforium/activitypub-docs/blob/main/federation.md).  This project also uses the [Activity Streams validator](https://github.com/yuforium/activity-streams-validator) package and has a [separate UI project](https://github.com/yuforium/ui) written in Angular.
 
-The Yuforium API is built on the excellentt NestJS framework.
+The Yuforium API is built on the excellent NestJS framework.
 
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>

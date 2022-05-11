@@ -28,20 +28,20 @@ export class AppController {
     return this.appService.get(serviceId);
   }
 
-  @Post()
-  public async createDomain(@Body() domainDto: DomainDto) {
-    return domainDto;
-  }
+  // @Post()
+  // public async createDomain(@Body() domainDto: DomainDto) {
+  //   return domainDto;
+  // }
 
-  @Patch()
-  public async patchDomain(@Body() domainDto) {
+  // @Patch()
+  // public async patchDomain(@Body() domainDto) {
 
-  }
+  // }
 
-  @Get('outbox')
-  public readOutbox(@Req() request: Request) {
+  // @Get('outbox')
+  // public readOutbox(@Req() request: Request) {
 
-  }
+  // }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('outbox')

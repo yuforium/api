@@ -1,6 +1,6 @@
 import { Body, ClassSerializerInterceptor, Controller, Get, NotImplementedException, Param, Post, Request, SerializeOptions, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ActivityStreams } from '@yuforium/activity-streams-validator';
 import { plainToClass } from 'class-transformer';
 import { ServiceId } from 'src/common/decorators/service-id.decorator';
@@ -11,7 +11,7 @@ import { ObjectService } from '../../object/object.service';
 @Controller('user/:username/outbox')
 @UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions({excludeExtraneousValues: true})
-@ApiTags('user-outbox')
+@ApiTags('user')
 export class OutboxController {
   constructor(
     protected readonly activityService: ActivityService,
@@ -19,6 +19,7 @@ export class OutboxController {
   ) { }
 
   @ApiBearerAuth()
+  @ApiOperation({operationId: 'postOutbox'})
   @UseGuards(AuthGuard('jwt'))
   @Post()
   public async postOutbox(@Param('username') username: string, @ServiceId() serviceId: string, @Request() req, @Body() noteDto: NoteCreateDto) {
@@ -31,6 +32,7 @@ export class OutboxController {
     return plainToClass(ActivityStreams.Activity, activity, { excludeExtraneousValues: true});
   }
 
+  @ApiOperation({operationId: 'getOutbox'})
   @UseGuards(AuthGuard(['anonymous', 'jwt']))
   @Get()
   public async getOutbox(@ServiceId() serviceId: string, @Param('username') username: string, @Request() req) {

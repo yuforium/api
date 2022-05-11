@@ -37,7 +37,7 @@ export class UserService {
         "summary": userDto.summary,
       };
 
-      const {activity, object} = await this.objectService.create(serviceId, serviceId, 'user', personData, userDto.username);
+      const {activity, object} = await this.objectService.create(serviceId, `https://${serviceId}`, 'user', personData, userDto.username);
 
       user.identities = [object._id];
       user.defaultIdentity = object._id;

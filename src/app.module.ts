@@ -29,7 +29,7 @@ import { ObjectModule } from './modules/object/object.module';
     ActivityModule,
     InboxModule,
     SharedInboxModule,
-    ForumModule,
+    // ForumModule,
     ObjectModule
   ],
   controllers: [AppController],

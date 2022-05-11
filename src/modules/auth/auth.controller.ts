@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -11,14 +11,16 @@ import { LocalAuthGuard } from './local-auth.guard';
 export class AuthController {
   constructor(protected authService: AuthService) { }
 
+  @ApiBody({type: LoginDto})
+  @ApiOperation({operationId: 'login'})
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  @ApiBody({type: LoginDto})
   async login(@Req() req, @Body() body: LoginDto) {
     return {...await this.authService.login(req.user)};
   }
 
   @ApiBearerAuth()
+  @ApiOperation({operationId: 'profile'})
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   async me(@Req() req) {

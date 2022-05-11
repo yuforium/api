@@ -68,6 +68,9 @@ export class StreamObject {
   @Prop({type: Mixed})
   location?: any;
 
+  @Prop({type: String})
+  preferredUsername?: string;
+
   @Prop({type: Mixed})
   preview?: any;
 

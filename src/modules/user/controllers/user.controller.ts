@@ -1,5 +1,6 @@
 import { Body, ClassSerializerInterceptor, Controller, Get, Header, NotFoundException, Param, Post, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OrderedCollectionPage } from '@yuforium/activity-streams-validator';
 import { plainToInstance } from 'class-transformer';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
@@ -8,6 +9,7 @@ import { PersonDto } from '../dto/person.dto';
 import { UserCreateDto } from '../dto/user-create.dto';
 import { UserService } from '../user.service';
 
+@ApiTags('user')
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
@@ -17,6 +19,7 @@ export class UserController {
   ) {
   }
 
+  @ApiOperation({operationId: 'find'})
   @Get()
   @Header('Content-Type', 'application/activity+json')
   public async findUsers(@ServiceId() _serviceId): Promise<any[]> {
@@ -39,9 +42,11 @@ export class UserController {
     return plainToInstance(PersonDto, await this.userService.create(serviceId, userDto));
   }
 
+  @ApiOperation({operationId: 'get'})
+  @ApiResponse({status: 404, type: PersonDto})
   @Get(':username')
   @Header('Content-Type', 'application/activity+json')
-  public async findOne(@ServiceId() serviceId: string, @Param('username') username: string) {
+  public async findOne(@ServiceId() serviceId: string, @Param('username') username: string): Promise<PersonDto> {
     const person = await this.userService.findPerson(serviceId, username);
 
     if (person) {
