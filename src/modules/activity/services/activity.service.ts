@@ -38,4 +38,8 @@ export class ActivityService {
   public async find(query: any): Promise<ActivityDocument[]> {
     return this.activityModel.find(query).exec();
   }
+
+  public async count(query: any): Promise<number> {
+    return this.activityModel.count(query).exec();
+  }
 }

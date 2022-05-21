@@ -5,8 +5,8 @@ import { ServiceId } from 'src/common/decorators/service-id.decorator';
 import { ActivityService } from './services/activity.service';
 
 @Controller('activity')
-@UseInterceptors(ClassSerializerInterceptor)
-@SerializeOptions({excludeExtraneousValues: true})
+// @UseInterceptors(ClassSerializerInterceptor)
+// @SerializeOptions({excludeExtraneousValues: true})
 export class ActivityController {
   constructor(protected readonly activityService: ActivityService) { }
 

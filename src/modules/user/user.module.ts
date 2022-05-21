@@ -7,6 +7,7 @@ import { InboxController } from './controllers/inbox.controller';
 import { OutboxController } from './controllers/outbox.controller';
 import { ActivityModule } from '../activity/activity.module';
 import { ObjectModule } from '../object/object.module';
+import { ContentController } from './controllers/content.controller';
 
 @Module({
   providers: [UserService],
@@ -19,6 +20,7 @@ import { ObjectModule } from '../object/object.module';
   controllers: [
     OutboxController,
     InboxController,
+    ContentController,
     UserController
   ]
 })

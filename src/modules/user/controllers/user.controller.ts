@@ -11,7 +11,7 @@ import { UserService } from '../user.service';
 
 @ApiTags('user')
 @Controller('user')
-@UseInterceptors(ClassSerializerInterceptor)
+// @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
   constructor(
     protected userService: UserService,
@@ -56,24 +56,24 @@ export class UserController {
     throw new NotFoundException('User does not exist');
   }
 
-  @Get(':username/content')
-  @Header('Content-Type', 'application/activity+json')
-  public async getUserContent(
-    @ServiceId() serviceId: string,
-    @Param('username') username: string,
-    @Query('page') page: number = 0,
-    @Query('pageSize') pageSize: number = 20,
-    @Query('sort') sort: string = 'createdAt', // also by lastReply
-  ) {
+  // @Get(':username/content')
+  // @Header('Content-Type', 'application/activity+json')
+  // public async getUserContent(
+  //   @ServiceId() serviceId: string,
+  //   @Param('username') username: string,
+  //   @Query('page') page: number = 0,
+  //   @Query('pageSize') pageSize: number = 20,
+  //   @Query('sort') sort: string = 'createdAt', // also by lastReply
+  // ) {
 
-    const collection = OrderedCollectionPage.factory({
-      id: `https://${serviceId}/users/${username}/content`,
-      first: `https://${serviceId}/users/${username}/content?page=0`,
-      last: `https://${serviceId}/users/${username}/content?last=true`
-    });
+  //   const collection = OrderedCollectionPage.factory({
+  //     id: `https://${serviceId}/users/${username}/content`,
+  //     first: `https://${serviceId}/users/${username}/content?page=0`,
+  //     last: `https://${serviceId}/users/${username}/content?last=true`
+  //   });
 
-    return collection;
-  }
+  //   return collection;
+  // }
 
   // @Roles(Role.User)
   // @UseGuards(JwtAuthGuard)

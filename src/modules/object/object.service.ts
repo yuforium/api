@@ -56,7 +56,6 @@ export class ObjectService {
   }
 
   public async find(params: any): Promise<any> {
-    console.log('params for find', params)
     return this.objectModel.find(params);
   }
 

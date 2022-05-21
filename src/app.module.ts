@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ForumModule } from './modules/forum/forum.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import database from './config/database';
 import service from "./config/service";

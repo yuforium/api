@@ -9,8 +9,8 @@ import { ForumParams } from '../dto/forum-params.dto';
 
 @ApiTags('forums')
 @Controller('forum')
-@UseInterceptors(ClassSerializerInterceptor)
-@SerializeOptions({excludeExtraneousValues: true})
+// @UseInterceptors(ClassSerializerInterceptor)
+// @SerializeOptions({excludeExtraneousValues: true})
 export class ForumController {
 
   constructor(

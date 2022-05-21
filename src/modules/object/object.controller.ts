@@ -3,8 +3,8 @@ import { ServiceId } from 'src/common/decorators/service-id.decorator';
 import { ObjectService } from './object.service';
 
 @Controller('object')
-@UseInterceptors(ClassSerializerInterceptor)
-@SerializeOptions({excludeExtraneousValues: true})
+// @UseInterceptors(ClassSerializerInterceptor)
+// @SerializeOptions({excludeExtraneousValues: true})
 export class ObjectController {
   constructor(protected readonly objectService: ObjectService) { }
 
