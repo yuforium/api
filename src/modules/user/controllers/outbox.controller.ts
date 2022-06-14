@@ -1,6 +1,6 @@
 import { Body, ClassSerializerInterceptor, Controller, Get, NotImplementedException, Param, Post, Request, SerializeOptions, UnauthorizedException, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ActivityStreams, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams-validator';
 import { plainToClass } from 'class-transformer';
 import { ServiceId } from 'src/common/decorators/service-id.decorator';
@@ -19,6 +19,7 @@ export class OutboxController {
 
   @ApiBearerAuth()
   @ApiBody({type: NoteCreateDto})
+  @ApiParam({name: 'username', type: 'string'})
   @ApiOperation({operationId: 'postUserOutbox'})
   @UseGuards(AuthGuard('jwt'))
   @Post()
@@ -50,6 +51,7 @@ export class OutboxController {
    * @returns
    */
   @ApiOperation({operationId: 'getUserOutbox'})
+  @ApiParam({name: 'username', type: 'string', required: true})
   @UseGuards(AuthGuard(['anonymous', 'jwt']))
   @Get()
   public async getOutbox(@ServiceId() serviceId: string, @Param() params: UserParamsDto, @Request() req): Promise<OrderedCollection> {
@@ -73,6 +75,8 @@ export class OutboxController {
    * @returns
    */
   @ApiOperation({operationId: 'getUserOutboxPage'})
+  @ApiParam({name: 'username', type: 'string'})
+  @ApiParam({name: 'page'})
   @UseGuards(AuthGuard(['anonymous', 'jwt']))
   @Get('page/:page')
   public async getOutboxPage(

@@ -55,8 +55,8 @@ export class ObjectService {
     return this.objectModel.findById(id);
   }
 
-  public async find(params: any): Promise<any> {
-    return this.objectModel.find(params);
+  public async find(params: any = {}, options: any = {}): Promise<any> {
+    return this.objectModel.find(params, {}, options);
   }
 
   public async findOne(params: any): Promise<any> {
