@@ -46,12 +46,14 @@ export class AppController {
   @UseGuards(AuthGuard('jwt'))
   @Post('outbox')
   public async postOutbox(@Req() req, @ServiceId() serviceId: string, @Body() forumDto: ForumCreateDto) {
-    if (forumDto instanceof ActivityStreams.Activity) {
-      throw new NotImplementedException('Activity objects are not supported at this time.');
-    }
-    forumDto.attributedTo = req.user.actor.id;
-    forumDto.published = (new Date()).toISOString();
-    const activity = this.objectService.create(serviceId, `https://${serviceId}`, 'forum', forumDto, forumDto.id);
-    return plainToClass(ActivityStreams.Activity, activity, { excludeExtraneousValues: true});
+    // @todo - determine if resource creation should be handled by the app outbox, user outbox, or individual resources (e.g. POST /forums)
+    throw new NotImplementedException();
+    // if (forumDto instanceof ActivityStreams.Activity) {
+    //   throw new NotImplementedException('Activity objects are not supported at this time.');
+    // }
+    // forumDto.attributedTo = req.user.actor.id;
+    // forumDto.published = (new Date()).toISOString();
+    // const activity = this.objectService.create(serviceId, `https://${serviceId}`, 'forum', forumDto, forumDto.id);
+    // return plainToClass(ActivityStreams.Activity, activity, { excludeExtraneousValues: true});
   }
 }

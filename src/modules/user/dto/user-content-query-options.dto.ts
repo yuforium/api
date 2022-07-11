@@ -41,8 +41,10 @@ export class UserContentQueryOptionsDto {
     name: 'sort',
     type: 'string',
     default: '-published',
+    format: 'form',
     description: 'The sort order of the returned items.',
     example: 'published'
   })
-  public sort: any = '-published';
+  @IsOptional()
+  public sort: string = '-published';
 }

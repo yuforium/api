@@ -7,6 +7,7 @@ import { ServiceId } from 'src/common/decorators/service-id.decorator';
 import { ObjectService } from 'src/modules/object/object.service';
 import { ActivityService } from '../../activity/services/activity.service';
 
+// @todo this should be rename to UserInboxController
 @ApiTags('user')
 @Controller('user/:username/inbox')
 export class InboxController {
@@ -25,15 +26,13 @@ export class InboxController {
   public async getInbox(@Req() req, @ServiceId() serviceId: string, @Param() params: any) {
     const queryParams = {to: `https://${serviceId}/user/${params.username}`};
     const content = await this.objectService.find(queryParams);
-
     const response = content.map(item => plainToClass(Note, item, {excludeExtraneousValues: true}));
-
 
     return response;
   }
 
   // this should send a 202 accepted since the result will be queued
-  @ApiBearerAuth()
+  @ApiBearerAuth() // @todo is this necessary? a token can be passed to authenticate the user but it's completely optional (could be used to bypass rate limiting)
   @ApiOperation({operationId: 'postInbox'})
   @ApiParam({name: 'username', required: true, type: String, 'description': 'The username of the user to get the inbox for.'})
   @Post()
@@ -41,14 +40,11 @@ export class InboxController {
   @HttpCode(HttpStatus.ACCEPTED)
   public async postInbox(@Req() req, @Body() activity: any, @Param('username') username: string) {
     this.logger.debug(`Received "${activity.type}" activity from ${req.connection.remoteAddress}`);
-    if (activity.type === 'Create') {
-      this.activityService.process(activity);
-      return {
-        status: 'accepted',
-        message: 'The activity was queued for processing.',
-        receipt: Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 16) // @todo use a real, traceable id
-      }
+    const receipt = await this.activityService.process(activity);
+    return {
+      status: 'accepted',
+      message: 'The activity was queued for processing.',
+      receipt
     }
-    throw new NotImplementedException(`${activity.type} is not supported at this time.`);
   }
 }

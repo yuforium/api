@@ -9,6 +9,8 @@ import { ActivityService } from '../../activity/services/activity.service';
 import { ObjectService } from '../../object/object.service';
 import { UserParamsDto } from '../dto/user-params.dto';
 
+
+// @todo this should be renamed to UserOutboxController
 @Controller('user/:username/outbox')
 @ApiTags('activity-pub')
 export class OutboxController {

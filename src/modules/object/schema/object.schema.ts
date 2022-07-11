@@ -23,6 +23,7 @@ export class StreamObject {
   @Prop({required: true})
   type: string = 'Object';
 
+
   @Prop({type: Mixed})
   attachment?: any;
 

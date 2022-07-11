@@ -11,7 +11,9 @@ import { StreamProcessor } from '../interfaces/stream-processor.interface';
 export class SyncStreamService implements StreamProcessor {
   protected readonly logger = new Logger(SyncStreamService.name);
 
-  constructor(protected readonly httpService: HttpService) { }
+  constructor(
+    protected readonly httpService: HttpService
+  ) { }
 
   public async consume(stream: any) {
     this.logger.debug(`Consuming ${stream.type} activity with id ${stream.id}`);
@@ -27,7 +29,7 @@ export class SyncStreamService implements StreamProcessor {
       .toPromise()
       .then(response => response.data)
       .catch(error => {
-        this.logger.error(`Received error "${error.message}" while sending ${activity.type} activity with id ${activity.id} to ${url}`);
+        this.logger.error(`send(): "${error.message}" while sending ${activity.type} activity with id ${activity.id} to ${url}`);
         throw error;
       });
   }
@@ -38,9 +40,17 @@ export class SyncStreamService implements StreamProcessor {
       .replace('https://yuforia.com', 'http://dev.yuforia.com:3000')
       .replace('https://yuforium.com', 'http://dev.yuforium.com:3000');
 
+    this.logger.debug(`Getting inbox url for ${address}`);
     return this.httpService.get(address)
       .toPromise()
-      .then(response => response.data.inbox);
+      .then(response => {
+        this.logger.debug('Found inbox url: ' + response.data.inbox);
+        return response.data.inbox;
+      })
+      .catch(error => {
+        this.logger.error(`getInboxUrl(): Received error "${error.message}" while getting inbox url for ${address}`);
+        throw error;
+      });
   }
 
   public async dispatch(activity: Activity) {
@@ -57,7 +67,7 @@ export class SyncStreamService implements StreamProcessor {
             console.log(response);
           }
           catch (error) {
-            this.logger.error(`Received error "${error.message}" while sending ${activity.type} activity with id ${activity.id} to ${to}`);
+            this.logger.error(`dispatch(): Received error "${error.message}" while sending ${activity.type} activity with id ${activity.id} to ${to}`);
           }
         }
       })

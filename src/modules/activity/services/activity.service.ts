@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotImplementedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Create } from '@yuforium/activity-streams-validator';
 import { instanceToPlain, plainToClass } from 'class-transformer';
@@ -32,7 +32,13 @@ export class ActivityService {
   }
 
   public async process(activity: any) {
-    this.processor.consume(activity);
+    if (activity.type === 'Create') {
+      return Math.random().toString(36).replace(/[^a-z]+/g, '').substring(0, 16); // @todo use a real, traceable id
+    }
+
+    console.log('shouldnt exception be thrown')
+
+    throw new NotImplementedException(`${activity.type} is not supported at this time.`);
   }
 
   public async find(query: any): Promise<ActivityDocument[]> {

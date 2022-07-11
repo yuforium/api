@@ -1,8 +1,7 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { ObjectDocument } from './schema/object.schema';
-import * as mongoose from 'mongoose';
+import { Model, Types, Schema } from 'mongoose';
 import { ActivityService } from '../activity/services/activity.service';
 import { ActivityDocument } from '../activity/schema/activity.schema';
 
@@ -19,9 +18,10 @@ export class ObjectService {
     return this.objectModel.findOne({id});
   }
 
-  public async create(serviceId: string, idPrefix: string, idType: string, data: any, id?: string): Promise<{activity: ActivityDocument, object: ObjectDocument}> {
-    const _id = new mongoose.Types.ObjectId();
+  public async create(serviceId: string, idPrefix: string, idType: string, data: any, id?: string): Promise<{activity?: ActivityDocument, object?: ObjectDocument}> {
+    const _id = new Types.ObjectId();
     data.id = `${idPrefix}/${idType}/${id || _id}`;
+
     this.logger.debug(`Creating object with id ${data.id}`);
 
     data._serviceId = serviceId;
@@ -51,7 +51,7 @@ export class ObjectService {
     }
   }
 
-  public async findById(id: string|mongoose.Schema.Types.ObjectId): Promise<any> {
+  public async findById(id: string|Schema.Types.ObjectId): Promise<any> {
     return this.objectModel.findById(id);
   }
 

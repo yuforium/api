@@ -8,6 +8,9 @@ export class PersonDto extends Person {
   @Expose()
   id;
 
+  @ApiProperty({type: 'string', description: 'The name of the user'})
+  name;
+
   @ApiProperty({type: 'string'})
   @Expose()
   summary?;

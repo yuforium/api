@@ -24,7 +24,7 @@ async function bootstrap () {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   app.enableCors({origin: "*"});
-  app.useGlobalPipes(new ValidationPipe({transform: true}));
+  app.useGlobalPipes(new ValidationPipe({transform: true, whitelist: true}));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), {excludeExtraneousValues: true}));
 
   await app.listen(3000);

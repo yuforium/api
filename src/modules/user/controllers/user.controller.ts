@@ -1,7 +1,6 @@
 import { Body, ClassSerializerInterceptor, Controller, Get, Header, NotFoundException, Param, Post, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { OrderedCollectionPage } from '@yuforium/activity-streams-validator';
 import { plainToInstance } from 'class-transformer';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
 import { ObjectService } from '../../object/object.service';
@@ -11,23 +10,21 @@ import { UserService } from '../user.service';
 
 @ApiTags('user')
 @Controller('user')
-// @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
   constructor(
     protected userService: UserService,
     protected objectService: ObjectService
-  ) {
-  }
+  ) { }
 
   @ApiOperation({operationId: 'find'})
   @Get()
   @Header('Content-Type', 'application/activity+json')
   public async findUsers(@ServiceId() _serviceId): Promise<any[]> {
-    console.log(_serviceId);
     const users = await this.objectService.find({_serviceId, type: 'Person'});
     return users.map(user => plainToInstance(PersonDto, user));
   }
 
+  @ApiOperation({operationId: 'whoami'})
   @Get('whoami')
   @UseGuards(AuthGuard('jwt'))
   @Header('Content-Type', 'application/activity+json')
@@ -35,7 +32,7 @@ export class UserController {
     return req.user.actor;
   }
 
-  // @todo - this is returning a weird response - need to fix
+  @ApiOperation({operationId: 'create'})
   @Post()
   @Header('Content-Type', 'application/activity+json')
   public async create(@ServiceId() serviceId: string, @Body() userDto: UserCreateDto) {
