@@ -7,8 +7,6 @@ jobs:
   build:
     runs-on: self-hosted
     steps:
-      - name: Setup Git
-        uses:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
         with:
