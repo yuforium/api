@@ -7,10 +7,10 @@ jobs:
   build:
     runs-on: self-hosted
     steps:
-      # - name: Init Buildx
-      #   run: |
-      #     docker context create default
-      #     docker buildx create default
+      - name: Init Buildx
+        run: |
+          docker context create default
+          docker buildx create default
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
         with:
