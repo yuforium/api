@@ -5,23 +5,23 @@ export type UserDocument = User & mongoose.Document;
 
 @Schema({collection: 'user', autoIndex: true})
 export class User {
-  @Prop({required: true})
-  serviceId: string;
+  @Prop({type: String, required: true})
+  serviceId: string | undefined;
 
-  @Prop({required: true, lowercase: true})
-  username: string;
+  @Prop({type: String, required: true, lowercase: true})
+  username: string | undefined;
 
-  @Prop({required: true})
-  password: string;
+  @Prop({type: String, required: true})
+  password: string | undefined;
 
-  @Prop()
-  type: string;
+  @Prop({type: String})
+  type: string | undefined;
 
   @Prop({type: Array})
   identities: any[] = [];
 
-  @Prop()
-  defaultIdentity: mongoose.Schema.Types.ObjectId
+  @Prop({type: mongoose.Schema.Types.ObjectId})
+  defaultIdentity: mongoose.Schema.Types.ObjectId | undefined;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

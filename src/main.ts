@@ -2,7 +2,7 @@ import { NestFactory, Reflector } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface'
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common'
+import { ClassSerializerInterceptor, ConsoleLogger, ValidationPipe } from '@nestjs/common'
 import { useContainer } from 'class-validator'
 
 async function bootstrap () {

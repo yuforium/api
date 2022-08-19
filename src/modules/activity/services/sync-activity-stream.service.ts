@@ -3,20 +3,52 @@ import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { Activity, Create } from '@yuforium/activity-streams-validator';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { StreamProcessor } from '../interfaces/stream-processor.interface';
+import { Connection, Types } from 'mongoose';
+import { InjectConnection } from '@nestjs/mongoose';
+import { AxiosResponse } from 'axios';
 
 /**
- * Synchronous
+ * Synchronous activity stream service
  */
 @Injectable()
-export class SyncStreamService implements StreamProcessor {
-  protected readonly logger = new Logger(SyncStreamService.name);
+export class SyncActivityStreamService implements StreamProcessor {
+  protected readonly logger = new Logger(SyncActivityStreamService.name);
 
   constructor(
-    protected readonly httpService: HttpService
+    protected readonly httpService: HttpService,
+    @InjectConnection() protected readonly connection: Connection
   ) { }
 
-  public async consume(stream: any) {
-    this.logger.debug(`Consuming ${stream.type} activity with id ${stream.id}`);
+
+  public async id() {
+    return new Types.ObjectId();
+  }
+
+  public async create(activity: Activity) {
+    const session = await this.connection.startSession();
+
+    session.startTransaction();
+
+    // try {
+    //   const activity = this.activityService.create(activity);
+    // }
+    // return true;
+  }
+
+  public async update(activity: Activity) {
+
+  }
+
+  public async delete(activity: Activity) {
+
+  }
+
+  /**
+   * Consumes an activity
+   * @param activity
+   */
+  public async consume(activity: Activity) {
+    this.logger.debug(`Consuming ${activity.type} activity with id ${activity.id}`);
   }
 
   protected send(url: string, activity: any): Promise<any> {
@@ -25,9 +57,13 @@ export class SyncStreamService implements StreamProcessor {
       .replace('https://yuforia.com', 'http://dev.yuforia.com:3000')
       .replace('https://yuforium.com', 'http://dev.yuforium.com:3000');
 
-      return this.httpService.post(url, instanceToPlain(activity))
+      return this.httpService.post<string>(url, instanceToPlain(activity))
       .toPromise()
-      .then(response => response.data)
+      .then((response: AxiosResponse | undefined) => {
+        if (response !== undefined) {
+          return response.data;
+        }
+      })
       .catch(error => {
         this.logger.error(`send(): "${error.message}" while sending ${activity.type} activity with id ${activity.id} to ${url}`);
         throw error;
@@ -43,7 +79,11 @@ export class SyncStreamService implements StreamProcessor {
     this.logger.debug(`Getting inbox url for ${address}`);
     return this.httpService.get(address)
       .toPromise()
-      .then(response => {
+      .then((response: AxiosResponse | undefined) => {
+        if (response === undefined) {
+          throw new Error('No response');
+        }
+
         this.logger.debug('Found inbox url: ' + response.data.inbox);
         return response.data.inbox;
       })
@@ -64,10 +104,9 @@ export class SyncStreamService implements StreamProcessor {
             // @todo - is this one of ours? if so we can skip it, no need to replicate it to our own database
             const inbox = await this.getInboxUrl(to);
             const response = await this.send(inbox, instanceToPlain(activity));
-            console.log(response);
           }
-          catch (error) {
-            this.logger.error(`dispatch(): Received error "${error.message}" while sending ${activity.type} activity with id ${activity.id} to ${to}`);
+          catch (error: unknown) {
+            this.logger.error(`dispatch(): "${String(error)}" while sending ${activity.type} activity with id ${activity.id} to ${to}`);
           }
         }
       })

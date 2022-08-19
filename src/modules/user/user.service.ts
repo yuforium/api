@@ -6,6 +6,8 @@ import { UserCreateDto } from './dto/user-create.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { ObjectService } from '../object/object.service';
+import { MongoServerError } from 'mongodb';
+
 // import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 
 @Injectable()
@@ -23,6 +25,10 @@ export class UserService {
     const saltRounds = 10;
     const {username, password} = userDto;
     const session = await this.userModel.db.startSession();
+
+    if (password === undefined) {
+      throw new Error('Password is required');
+    }
 
     session.startTransaction();
 
@@ -49,11 +55,11 @@ export class UserService {
 
       return activity.object;
     }
-    catch (error) {
+    catch (error: unknown) {
       session.abortTransaction();
       session.endSession();
 
-      if (error.code === 11000) {
+      if (error instanceof MongoServerError && error.code === 11000) {
         throw new ConflictException('Username already exists');
       }
 
@@ -61,7 +67,7 @@ export class UserService {
     }
   }
 
-  public async findOne(serviceId: string, username: string): Promise<UserDocument | undefined> {
+  public async findOne(serviceId: string, username: string): Promise<UserDocument | null> {
     return this.userModel.findOne({serviceId, username});
   }
 

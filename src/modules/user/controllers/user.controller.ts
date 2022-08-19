@@ -2,6 +2,7 @@ import { Body, ClassSerializerInterceptor, Controller, Get, Header, NotFoundExce
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
+import { ObjectDocument } from 'src/modules/object/schema/object.schema';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
 import { ObjectService } from '../../object/object.service';
 import { PersonDto } from '../dto/person.dto';
@@ -19,9 +20,9 @@ export class UserController {
   @ApiOperation({operationId: 'find'})
   @Get()
   @Header('Content-Type', 'application/activity+json')
-  public async findUsers(@ServiceId() _serviceId): Promise<any[]> {
+  public async findUsers(@ServiceId() _serviceId: string): Promise<any[]> {
     const users = await this.objectService.find({_serviceId, type: 'Person'});
-    return users.map(user => plainToInstance(PersonDto, user));
+    return users.map((user: ObjectDocument) => plainToInstance(PersonDto, user));
   }
 
   @ApiOperation({operationId: 'whoami'})

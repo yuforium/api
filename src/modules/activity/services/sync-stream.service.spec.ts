@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SyncStreamService } from './sync-stream.service';
+import { SyncActivityStreamService } from './sync-activity-stream.service';
 
 describe('SyncStreamService', () => {
-  let service: SyncStreamService;
+  let service: SyncActivityStreamService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SyncStreamService],
+      providers: [SyncActivityStreamService],
     }).compile();
 
-    service = module.get<SyncStreamService>(SyncStreamService);
+    service = module.get<SyncActivityStreamService>(SyncActivityStreamService);
   });
 
   it('should be defined', () => {

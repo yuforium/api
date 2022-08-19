@@ -1,9 +1,9 @@
 import { PartialType, PickType } from "@nestjs/swagger";
-import { Follow, IsRequired } from "@yuforium/activity-streams-validator";
+import { ActivityStreams, Follow, IsRequired } from "@yuforium/activity-streams-validator";
 
 export class FollowCreateDto extends PartialType(
   PickType(Follow, ['id', 'name', 'type', 'actor', 'object']),
 ) {
   @IsRequired()
-  object;
+  object: ActivityStreams.StreamObject | undefined;
 }

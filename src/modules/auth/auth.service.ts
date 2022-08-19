@@ -16,13 +16,17 @@ export class AuthService {
     protected objectService: ObjectService
   ) { }
 
-  public async validateUser(serviceId, username: string, password: string): Promise<any> {
+  public async validateUser(serviceId: string, username: string, password: string): Promise<any> {
     const user = await this.userService.findOne(serviceId, username);
 
     this.logger.debug(`Validating user "${username}@${serviceId}"`);
 
     if (user) {
       this.logger.verbose(`User "${username}@${serviceId}" found`);
+
+      if (user.password === undefined) {
+        throw new UnauthorizedException();
+      }
 
       if (await await bcrypt.compare(password, user.password)) {
         this.logger.debug(`User "${username}@${serviceId}" password matches, validation succeeded`);
@@ -39,6 +43,10 @@ export class AuthService {
   }
 
   public async login(user: UserDocument) {
+    if (user.defaultIdentity === undefined) {
+      throw new Error('User has no default identity');
+    }
+
     const payload = {
       username: user.username,
       _id: user._id.toString(),

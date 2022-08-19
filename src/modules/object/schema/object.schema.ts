@@ -14,15 +14,14 @@ export class StreamObject {
   @Prop({})
   '@context'?: string
 
-  @Prop({required: true, unique: true})
-  id: string;
+  @Prop({type: String, required: true, unique: true})
+  id: string | undefined;
 
-  @Prop({required: true})
-  _serviceId: string;
+  @Prop({type: String, required: true})
+  _serviceId: string | undefined;
 
-  @Prop({required: true})
+  @Prop({type: String, required: true})
   type: string = 'Object';
-
 
   @Prop({type: Mixed})
   attachment?: any;

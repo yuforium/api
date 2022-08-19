@@ -6,22 +6,22 @@ import { Exclude, Expose } from "class-transformer";
 export class PersonDto extends Person {
   @ApiProperty({type: 'string', format: 'uri', description: 'The ID of the user'})
   @Expose()
-  id;
+  id: string | undefined;
 
   @ApiProperty({type: 'string', description: 'The name of the user'})
-  name;
+  name: string | undefined;
 
   @ApiProperty({type: 'string'})
   @Expose()
-  summary?;
+  summary?: string;
 
   @ApiProperty({type: 'string'})
   @Expose()
-  type;
+  type: string = 'Person';
 
   @ApiProperty({type: 'string'})
   @Expose()
-  preferredUsername;
+  preferredUsername: string | undefined;
 
   @ApiProperty({type: 'string', format: 'uri'})
   @Expose()

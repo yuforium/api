@@ -8,6 +8,7 @@ import { ForumCollectionDto } from '../dto/forum-collection.dto';
 import { ForumParams } from '../dto/forum-params.dto';
 import { ForumService } from '../forum.service';
 import { ForumCreateDto } from 'src/common/dto/forum-create.dto';
+import { ObjectDocument } from 'src/modules/object/schema/object.schema';
 
 @ApiTags('forum')
 @Controller('forum')
@@ -23,7 +24,7 @@ export class ForumController {
   public async findForums() {
     const forums = await this.objectService.find({type: 'Forum'});
     const collection = new ForumCollectionDto();
-    collection.items = forums.map(item => plainToInstance(ForumDto, item));
+    collection.items = forums.map((item: ObjectDocument) => plainToInstance(ForumDto, item));
 
     return collection;
   }
@@ -45,7 +46,7 @@ export class ForumController {
     if (!forum) {
       const tempForum = new ForumDto();
       tempForum.id = `https://${serviceId}/forum/${params.pathId}`;
-      tempForum.name = 'Test Forum';
+      tempForum.name = 'Unallocated Forum';
       return tempForum;
       // throw new NotFoundException();
     }

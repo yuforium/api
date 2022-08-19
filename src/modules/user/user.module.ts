@@ -3,11 +3,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { UserService } from './user.service';
 import { UserController } from './controllers/user.controller';
-import { InboxController } from './controllers/inbox.controller';
-import { OutboxController } from './controllers/outbox.controller';
+import { UserInboxController } from './controllers/user-inbox.controller';
+import { UserOutboxController } from './controllers/user-outbox.controller';
 import { ActivityModule } from '../activity/activity.module';
 import { ObjectModule } from '../object/object.module';
-import { ContentController } from './controllers/content.controller';
+import { UserContentController } from './controllers/user-content.controller';
 
 @Module({
   providers: [UserService],
@@ -18,9 +18,9 @@ import { ContentController } from './controllers/content.controller';
     ActivityModule
   ],
   controllers: [
-    OutboxController,
-    InboxController,
-    ContentController,
+    UserOutboxController,
+    UserInboxController,
+    UserContentController,
     UserController
   ]
 })

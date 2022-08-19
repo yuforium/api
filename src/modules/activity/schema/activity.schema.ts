@@ -12,16 +12,16 @@ export class Activity extends PartialType(
   PickType(ActivityStreams.Activity, ['id', 'actor', 'object', 'type'])
 ) {
   @Prop({type: String})
-  id: string;
+  id: string | undefined;
 
   @Prop({type: String})
-  actor: string;
+  actor: string | undefined;
 
   @Prop({type: Mixed})
   object: any;
 
   @Prop({type: String})
-  type: string;
+  type: string | undefined;
 
   // @Prop({type: Mixed})
   // actor?: any;

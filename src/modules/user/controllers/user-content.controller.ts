@@ -4,12 +4,13 @@ import { ActivityStreams, OrderedCollectionPage } from '@yuforium/activity-strea
 import { plainToInstance } from 'class-transformer';
 import { ServiceId } from 'src/common/decorators/service-id.decorator';
 import { ObjectService } from 'src/modules/object/object.service';
+import { ObjectDocument } from 'src/modules/object/schema/object.schema';
 import { UserContentQueryOptionsDto } from '../dto/user-content-query-options.dto';
 import { UserParamsDto } from '../dto/user-params.dto';
 
 @ApiTags('user')
 @Controller('user/:username/content')
-export class ContentController {
+export class UserContentController {
 
   constructor(
     protected readonly objectService: ObjectService
@@ -44,7 +45,7 @@ export class ContentController {
 
     collectionPage.id = `${userId}/content`;
     collectionPage.orderedItems = (await this.objectService.find({_serviceId, attributedTo: userId}, contentQuery))
-      .map(item => plainToInstance(ActivityStreams.StreamObject, item));
+      .map((item: ObjectDocument) => plainToInstance(ActivityStreams.StreamObject, item));
 
     return collectionPage;
   }

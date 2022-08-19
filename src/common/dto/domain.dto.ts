@@ -2,8 +2,8 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class DomainDto {
   @ApiProperty()
-  domainName: string;
+  domainName: string | undefined;
 
   @ApiProperty()
-  name: string;
+  name: string | undefined;
 }

@@ -3,13 +3,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ActivityService } from './services/activity.service';
 import { ActivitySchema } from './schema/activity.schema';
 import { ActivityController } from './activity.controller';
-import { SyncStreamService } from './services/sync-stream.service';
+import { SyncActivityStreamService } from './services/sync-activity-stream.service';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
   providers: [
     ActivityService,
-    SyncStreamService
+    SyncActivityStreamService
   ],
   imports: [
     MongooseModule.forFeature([
@@ -18,7 +18,8 @@ import { HttpModule } from '@nestjs/axios';
     HttpModule
   ],
   exports: [
-    ActivityService
+    ActivityService,
+    SyncActivityStreamService
   ],
   controllers: [ActivityController]
 })

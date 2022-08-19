@@ -1,9 +1,10 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ObjectDocument } from './schema/object.schema';
-import { Model, Types, Schema } from 'mongoose';
+import { Model, Types, Schema, Connection } from 'mongoose';
 import { ActivityService } from '../activity/services/activity.service';
 import { ActivityDocument } from '../activity/schema/activity.schema';
+import { MongoServerError } from 'mongodb';
 
 @Injectable()
 export class ObjectService {
@@ -11,14 +12,16 @@ export class ObjectService {
 
   constructor(
     @InjectModel('Object') protected objectModel: Model<ObjectDocument>,
+    @InjectConnection() protected connection: Connection,
     protected activityService: ActivityService
   ) { }
 
-  public async get(id: string): Promise<ObjectDocument> {
+  public async get(id: string): Promise<ObjectDocument | null> {
     return this.objectModel.findOne({id});
   }
 
-  public async create(serviceId: string, idPrefix: string, idType: string, data: any, id?: string): Promise<{activity?: ActivityDocument, object?: ObjectDocument}> {
+  // public async create(id: string, serviceId: string, dto: any): Promise<ObjectDocument>
+  public async create(serviceId: string, idPrefix: string, idType: string, data: any, id?: string): Promise<{activity: ActivityDocument, object: ObjectDocument}> {
     const _id = new Types.ObjectId();
     data.id = `${idPrefix}/${idType}/${id || _id}`;
 
@@ -39,11 +42,11 @@ export class ObjectService {
 
       return {activity, object}
     }
-    catch (error) {
+    catch (error: unknown) {
       session.abortTransaction();
       session.endSession();
 
-      if (error.code === 11000) {
+      if (error instanceof MongoServerError && error.code === 11000) {
         throw new ConflictException('Object already exists');
       }
 

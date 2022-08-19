@@ -8,16 +8,14 @@ export class ForumCreateDto extends PartialType(
   @ApiProperty()
   @IsString()
   @IsRequired()
-  public pathId: string;
+  public pathId: string | undefined;
 
   @MaxLength(256)
   @ApiProperty()
   @IsRequired()
-  public name: string;
+  public name: string | undefined;
 
   @MaxLength(4096)
   @ApiProperty()
-  public summary: string;
-
-
+  public summary: string | undefined;
 }

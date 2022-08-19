@@ -12,7 +12,7 @@ export class UserContentQueryOptionsDto {
     example: 'Note,Article'
   })
   @IsOptional()
-  public type: string;
+  public type: string | undefined;
 
   @ApiPropertyOptional({
     name: 'skip',

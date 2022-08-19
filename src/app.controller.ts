@@ -45,7 +45,7 @@ export class AppController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('outbox')
-  public async postOutbox(@Req() req, @ServiceId() serviceId: string, @Body() forumDto: ForumCreateDto) {
+  public async postOutbox(@Req() req: Request, @ServiceId() serviceId: string, @Body() forumDto: ForumCreateDto) {
     // @todo - determine if resource creation should be handled by the app outbox, user outbox, or individual resources (e.g. POST /forums)
     throw new NotImplementedException();
     // if (forumDto instanceof ActivityStreams.Activity) {

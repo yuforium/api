@@ -3,7 +3,7 @@ import * as psl from 'psl';
 
 @Injectable()
 export class AppService {
-  public async get(domain) {
+  public async get(domain: string) {
     const id = `https://${domain}`;
 
     return {
@@ -25,12 +25,12 @@ export class AppService {
     };
   }
 
-  public async createDomain(domain) {
+  public async createDomain(domainName: string) {
 
   }
 
-  public async getDomain(hostname) {
-    const domain = psl.get(hostname) || psl.get(process.env.DEFAULT_DOMAIN);
+  public async getDomain(hostname: string) {
+    const domain = psl.get(hostname) || psl.get(process.env.DEFAULT_DOMAIN as string);
 
     if (typeof domain !== 'string') {
       throw new Error('not a valid name');
@@ -43,7 +43,7 @@ export class AppService {
    * Send a follow request to another domain
    * @param domain Domain to follow
    */
-  public async follow(domain) {
+  public async follow(domain: string) {
 
   }
 }

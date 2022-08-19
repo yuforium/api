@@ -10,24 +10,24 @@ export class NoteDto extends PartialType(
   @ApiProperty()
   @Expose()
   @MaxLength(255)
-  public name: string;
+  public name: string | undefined;
 
   @ApiProperty()
   @Expose()
   @IsRequired()
   @IsUrl({each: true})
-  public attributedTo: string|string[];
+  public attributedTo: string | string[] | undefined;
 
   @MaxLength(500) // make it compatible with Mastodon for now
   @ApiProperty()
   @IsRequired()
-  public content: string;
+  public content: string | undefined;
 
   @ApiProperty()
   @IsRequired()
   @IsUrl({each: true})
-  public to: string|string[];
+  public to: string | string[] | undefined;
 
   @ApiProperty()
-  public published: string;
+  public published: string | undefined;
 }

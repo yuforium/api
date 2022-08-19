@@ -9,7 +9,7 @@ export class ForumService {
   ) { }
 
   public async create(serviceId: string, forumCreateDto: ForumCreateDto) {
-    const {activity, object} = await this.objectService.create(
+    const {activity} = await this.objectService.create(
       serviceId,
       `https://${serviceId}`,
       'forum',

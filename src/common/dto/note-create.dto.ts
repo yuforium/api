@@ -8,12 +8,12 @@ export class NoteCreateDto extends PartialType(
   @MaxLength(500) // make it compatible with Mastodon for now
   @ApiProperty()
   @IsRequired()
-  public content: string;
+  public content: string | undefined;
 
   @ApiProperty({required: true, oneOf: [{type: 'string'}, {type: 'array', items: {type: 'string'}}], format: 'uri'})
   @IsRequired()
   // @IsUrl({each: true})
-  public to: string|string[];
+  public to: string | string[] | undefined;
 
   @ApiProperty({type: 'string', enum: ['Note']})
   public type: string = 'Note';

@@ -4,4 +4,6 @@ export interface StreamProcessor {
 
   // function to process an outgoing stream
   dispatch(stream: any): Promise<any>;
+
+
 }

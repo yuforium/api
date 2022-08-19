@@ -5,5 +5,5 @@ import { ForumDto } from "./forum.dto";
 export class ForumCollectionDto extends Collection {
   @Expose({name: 'items'})
   @Type(() => ForumDto)
-  items: ForumDto[];
+  items: ForumDto[] = [];
 }

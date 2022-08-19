@@ -13,7 +13,12 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   public async validate(req: any, username: string, password: string) {
-    const serviceId = psl.get(req.hostname) || psl.get(process.env.DEFAULT_DOMAIN);
+    const serviceId = psl.get(req.hostname) || psl.get(process.env.DEFAULT_DOMAIN as string);
+
+    if (typeof serviceId !== 'string') {
+      throw new Error('not a valid domain name');
+    }
+
     this.logger.verbose(`Validating user "${username}@${serviceId}"`);
     const user = await this.authService.validateUser(serviceId, username, password);
 

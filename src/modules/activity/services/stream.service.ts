@@ -1,10 +1,11 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { Activity } from '@yuforium/activity-streams-validator';
 import { StreamProcessor } from '../interfaces/stream-processor.interface';
-import { SyncStreamService } from './sync-stream.service';
+import { SyncActivityStreamService } from './sync-activity-stream.service';
 
 @Injectable()
-export class StreamService extends SyncStreamService implements StreamProcessor {
-  public async consume(activity) { }
-  public async dispatch(activity) { }
+export class StreamService extends SyncActivityStreamService implements StreamProcessor {
+  public async consume(activity: Activity) { }
+  public async dispatch(activity: Activity) { }
 }

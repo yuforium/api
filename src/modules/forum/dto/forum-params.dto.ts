@@ -5,5 +5,5 @@ export class ForumParams {
 	@ApiProperty({type: 'string', required: true})
 	@Matches(/^[a-z](?:-?[a-z0-9]+)*$/i)
 	@IsString()
-	pathId: string
+	pathId: string | undefined;
 }

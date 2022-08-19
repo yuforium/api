@@ -2,13 +2,13 @@ import { Expose } from "class-transformer";
 
 export class ForumDto {
   @Expose()
-  id: string;
+  id: string | undefined;
 
   @Expose()
-  name: string;
+  name: string | undefined;
 
   @Expose()
-  summary: string;
+  summary: string | undefined;
 
   @Expose({name: 'inbox'})
   getInbox(): string {
@@ -30,5 +30,5 @@ export class ForumDto {
     return `${this.id}/following`;
   }
 
-  liked: string;
+  liked: string | undefined;
 }
