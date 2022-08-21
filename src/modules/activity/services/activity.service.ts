@@ -1,11 +1,12 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Activity, Create } from '@yuforium/activity-streams-validator';
+import { ActivityDocument, ActivityRecord } from '../schema/activity.schema';
+import { Create } from '@yuforium/activity-streams-validator';
 import { instanceToPlain, plainToClass } from 'class-transformer';
 import { Model, Types } from 'mongoose';
 // import { ObjectService } from '../object/object.service';
-import { ActivityDocument } from '../schema/activity.schema';
-import { SyncActivityStreamService } from './sync-activity-stream.service';
+// import { ActivityDocument } from '../schema/activity.schema';
+// import { SyncActivityStreamService } from './sync-activity-stream.service';
 
 @Injectable()
 export class ActivityService {
@@ -14,8 +15,8 @@ export class ActivityService {
 
   constructor(
     @InjectModel('Activity') protected readonly activityModel: Model<ActivityDocument>,
-    protected readonly syncStreamService: SyncActivityStreamService,
-    public readonly processor: SyncActivityStreamService
+    // protected readonly syncStreamService: SyncActivityStreamService,
+    // public readonly processor: SyncActivityStreamService
   ) { }
 
   /**
@@ -46,7 +47,7 @@ export class ActivityService {
    * @param objectDto
    * @returns
    */
-  public async create(serviceId: string, activity: Create): Promise<any> {
+  public async create(activity: ActivityRecord): Promise<any> {
     const session = await this.activityModel.db.startSession();
     const _activityId = new Types.ObjectId(); // this is the internal id
 
@@ -54,7 +55,7 @@ export class ActivityService {
     // activity.object = objectDto;
     // activity.id = `${idPrefix}/activity/${_activityId}`;
 
-    await this.processor.dispatch(activity);
+    // await this.processor.dispatch(activity);
 
     return (await this.activityModel.create({_activityId, ...instanceToPlain(activity)})).toObject();
   }

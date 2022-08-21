@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SyncActivityStreamService } from './sync-activity-stream.service';
 
-describe('SyncStreamService', () => {
+describe('SyncActivityStreamService', () => {
   let service: SyncActivityStreamService;
 
   beforeEach(async () => {

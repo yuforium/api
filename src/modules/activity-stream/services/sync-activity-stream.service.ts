@@ -6,6 +6,11 @@ import { StreamProcessor } from '../interfaces/stream-processor.interface';
 import { Connection, Types } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 import { AxiosResponse } from 'axios';
+import { ServiceId } from 'src/common/types/service-id.type';
+import { ActivityService } from 'src/modules/activity/services/activity.service';
+import { ActivityDto } from 'src/common/dto/activity.dto';
+
+type allowed = 'create' | 'update' | 'delete';
 
 /**
  * Synchronous activity stream service
@@ -15,31 +20,50 @@ export class SyncActivityStreamService implements StreamProcessor {
   protected readonly logger = new Logger(SyncActivityStreamService.name);
 
   constructor(
+    protected readonly activityService: ActivityService,
     protected readonly httpService: HttpService,
-    @InjectConnection() protected readonly connection: Connection
+    @InjectConnection() protected readonly connection: Connection,
+    typeHandlers = {}
   ) { }
-
 
   public async id() {
     return new Types.ObjectId();
   }
 
-  public async create(activity: Activity) {
+  public async ingest(activity: ActivityDto, serviceId?: ServiceId) {
+    this.logger.debug(`Ingesting ${activity.type} activity with id ${activity.id}`);
+    this[activity.type as allowed](activity);
+  }
+
+  public async create(activityDto: ActivityDto, serviceId?: ServiceId) {
+    const activityId = await this.id();
+    const activityParams = {
+      ...activityDto,
+      _serviceId: serviceId,
+      _id: activityId,
+      id: `${activityDto.actor}/activity/${activityId}`
+    };
+
     const session = await this.connection.startSession();
 
     session.startTransaction();
 
-    // try {
-    //   const activity = this.activityService.create(activity);
-    // }
-    // return true;
+    try {
+      this.activityService.create(activityParams);
+      await session.commitTransaction();
+    }
+    catch (error: unknown) {
+      await session.abortTransaction();
+    }
+
+    return true;
   }
 
-  public async update(activity: Activity) {
+  public async update(activity: ActivityDto) {
 
   }
 
-  public async delete(activity: Activity) {
+  public async delete(activity: ActivityDto) {
 
   }
 

@@ -1,27 +1,31 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { PartialType, PickType } from "@nestjs/swagger";
 import { ActivityStreams } from "@yuforium/activity-streams-validator";
+// import { Schema } from "inspector";
 import * as mongoose from "mongoose";
 
-export type ActivityDocument = Activity & mongoose.Document;
+export type ActivityDocument = ActivityRecord & mongoose.Document;
 
 const { Mixed } = mongoose.Schema.Types;
 
 @Schema({ collection: 'activities' })
-export class Activity extends PartialType(
+export class ActivityRecord extends PartialType(
   PickType(ActivityStreams.Activity, ['id', 'actor', 'object', 'type'])
 ) {
   @Prop({type: String})
-  id: string | undefined;
+  id!: string;
 
   @Prop({type: String})
-  actor: string | undefined;
+  actor!: string;
 
   @Prop({type: Mixed})
-  object: any;
+  object!: ActivityStreams.StreamObject;
 
   @Prop({type: String})
-  type: string | undefined;
+  type!: string;
+
+  @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'objects'})
+  _object?: mongoose.Schema.Types.ObjectId;
 
   // @Prop({type: Mixed})
   // actor?: any;
@@ -39,4 +43,4 @@ export class Activity extends PartialType(
   // instrument?: any;
 }
 
-export const ActivitySchema = SchemaFactory.createForClass(Activity);
+export const ActivitySchema = SchemaFactory.createForClass(ActivityRecord);
