@@ -1,15 +1,18 @@
-import { Body, Req, Controller, Get, NotImplementedException, Param, Post, SerializeOptions, UnauthorizedException, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { ActivityStreams, Create, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams-validator';
+import { ActivityStreams, Actor, Create, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams-validator';
 import { plainToClass } from 'class-transformer';
-import { ServiceId } from 'src/common/decorators/service-id.decorator';
-import { SyncActivityStreamService } from 'src/modules/activity/services/sync-activity-stream.service';
+import { ServiceId } from '../../../common/decorators/service-id.decorator';
+import { SyncActivityStreamService } from 'src/modules/activity-stream/services/sync-activity-stream.service';
 import { NoteCreateDto } from '../../../common/dto/note-create.dto';
 import { ActivityService } from '../../activity/services/activity.service';
 import { ObjectService } from '../../object/object.service';
 import { UserParamsDto } from '../dto/user-params.dto';
 import { Request } from 'express';
+import { User } from 'src/common/decorators/user.decorator';
+import { OutboxService } from 'src/modules/activity-pub/services/outbox.service';
+import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
 
 @Controller('user/:username/outbox')
 @ApiTags('activity-pub')
@@ -17,7 +20,8 @@ export class UserOutboxController {
   constructor(
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService,
-    protected readonly activityStreamService: SyncActivityStreamService
+    protected readonly activityStreamService: SyncActivityStreamService,
+    protected readonly outboxService: OutboxService
   ) { }
 
   @ApiBearerAuth()
@@ -29,6 +33,7 @@ export class UserOutboxController {
   public async postOutbox(
     @Param() params: UserParamsDto,
     @ServiceId() serviceId: string,
+    @User('actor') actor: Actor,
     @Req() req: Request,
     @Body() noteDto: NoteCreateDto
   ) {
@@ -39,23 +44,17 @@ export class UserOutboxController {
     const userId = `https://${serviceId}/user/${params.username}`;
 
     // @todo - auth should be done via decorator on the class method
-    if (userId !== (req.user as any).actor.id) {
+    if (userId !== actor.id) {
       throw new UnauthorizedException('You are not authorized to post to this user\'s outbox.');
     }
 
     noteDto.attributedTo = (req.user as any).actor.id;
     noteDto.published = (new Date()).toISOString();
-
     noteDto.to = Array.isArray(noteDto.to) ? noteDto.to : [noteDto.to as string];
 
-    const activity = new Create();
-    activity.id = `https://${serviceId}/user/${params.username}/outbox/${(await this.activityStreamService.id()).toString()}`;
-    activity.actor = userId;
-    activity.object = noteDto;
+    const activity = this.outboxService.create(serviceId, actor, noteDto);
 
-    return await this.activityStreamService.create(activity);
-    // const {activity} = await this.objectService.create(serviceId, `https://${serviceId}/user/${params.username}`, 'note', noteDto);
-    return plainToClass(ActivityStreams.Activity, activity);
+    return plainToClass(ActivityDto, activity);
   }
 
   /**

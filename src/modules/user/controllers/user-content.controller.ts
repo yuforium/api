@@ -2,7 +2,7 @@ import { Controller, Get, Param, Query, ValidationPipe } from '@nestjs/common';
 import { ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { ActivityStreams, OrderedCollectionPage } from '@yuforium/activity-streams-validator';
 import { plainToInstance } from 'class-transformer';
-import { ServiceId } from 'src/common/decorators/service-id.decorator';
+import { ServiceId } from '../../../common/decorators/service-id.decorator';
 import { ObjectService } from 'src/modules/object/object.service';
 import { ObjectDocument } from 'src/modules/object/schema/object.schema';
 import { UserContentQueryOptionsDto } from '../dto/user-content-query-options.dto';

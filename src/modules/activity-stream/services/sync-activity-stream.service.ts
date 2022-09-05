@@ -7,8 +7,12 @@ import { Connection, Types } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 import { AxiosResponse } from 'axios';
 import { ServiceId } from 'src/common/types/service-id.type';
-import { ActivityService } from 'src/modules/activity/services/activity.service';
-import { ActivityDto } from 'src/common/dto/activity.dto';
+import { ActivityService } from '../../activity/services/activity.service';
+import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
+
+interface ActivityStreamService {
+  accept(activity: ActivityDto, serviceId?: string): Promise<boolean>;
+}
 
 type allowed = 'create' | 'update' | 'delete';
 
@@ -16,26 +20,49 @@ type allowed = 'create' | 'update' | 'delete';
  * Synchronous activity stream service
  */
 @Injectable()
-export class SyncActivityStreamService implements StreamProcessor {
+export class SyncActivityStreamService implements StreamProcessor, ActivityStreamService {
   protected readonly logger = new Logger(SyncActivityStreamService.name);
 
   constructor(
     protected readonly activityService: ActivityService,
     protected readonly httpService: HttpService,
-    @InjectConnection() protected readonly connection: Connection,
-    typeHandlers = {}
+    @InjectConnection() protected readonly connection: Connection
   ) { }
 
   public async id() {
     return new Types.ObjectId();
   }
 
-  public async ingest(activity: ActivityDto, serviceId?: ServiceId) {
+  /**
+   * Accept an activity from an external source
+   *
+   * @param activity
+   */
+  public async accept(activity: ActivityDto) {
     this.logger.debug(`Ingesting ${activity.type} activity with id ${activity.id}`);
     this[activity.type as allowed](activity);
+    return true;
   }
 
-  public async create(activityDto: ActivityDto, serviceId?: ServiceId) {
+  /**
+   * Produce an activity from a known service
+   * @param activity
+   * @param serviceId
+   */
+  public async produce(activity: ActivityDto, serviceId: ServiceId) {
+    throw new NotImplementedException('This stream processor does not support this activity type');
+  }
+
+  /**
+   *
+   * @param activityDto
+   * @param serviceId
+   * @returns The newly created activity
+   */
+  protected async create(activityDto: ActivityDto, serviceId?: ServiceId): Promise<boolean> {
+    if (serviceId === undefined) {
+      throw new Error('serviceId is undefined');
+    }
     const activityId = await this.id();
     const activityParams = {
       ...activityDto,
@@ -49,7 +76,7 @@ export class SyncActivityStreamService implements StreamProcessor {
     session.startTransaction();
 
     try {
-      this.activityService.create(activityParams);
+      // this.activityService.create('someprefix', activityParams);
       await session.commitTransaction();
     }
     catch (error: unknown) {

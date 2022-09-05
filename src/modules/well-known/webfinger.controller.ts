@@ -1,5 +1,5 @@
 import { BadRequestException, Controller, Get, NotFoundException, Query } from '@nestjs/common';
-import { ServiceId } from 'src/common/decorators/service-id.decorator';
+import { ServiceId } from '../../common/decorators/service-id.decorator';
 import { WebfingerService } from './webfinger.service';
 
 @Controller('.well-known/webfinger')

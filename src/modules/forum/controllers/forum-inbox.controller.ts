@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Logger, NotImplementedException, Param, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ServiceId } from 'src/common/decorators/service-id.decorator';
+import { ServiceId } from '../../../common/decorators/service-id.decorator';
 import { ActivityService } from 'src/modules/activity/services/activity.service';
 import { ForumParams } from '../dto/forum-params.dto';
 import { Request } from 'express';

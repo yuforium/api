@@ -95,7 +95,6 @@ export class UserController {
     // });
 
     // return message.toObject();
-  //   console.log(request.user);
   //   return request.user;
   // }
 }

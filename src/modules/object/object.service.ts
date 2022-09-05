@@ -1,10 +1,15 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { ObjectDocument } from './schema/object.schema';
+import { ObjectDocument, ObjectRecordDto } from './schema/object.schema';
 import { Model, Types, Schema, Connection } from 'mongoose';
 import { ActivityService } from '../activity/services/activity.service';
 import { ActivityDocument } from '../activity/schema/activity.schema';
 import { MongoServerError } from 'mongodb';
+import { instanceToPlain } from 'class-transformer';
+import { ActivityDto } from '../activity/dto/activity.dto';
+import { ServiceId } from 'src/common/types/service-id.type';
+import { ObjectDto } from './dto/object.dto';
+import { Actor } from '@yuforium/activity-streams-validator';
 
 @Injectable()
 export class ObjectService {
@@ -20,38 +25,10 @@ export class ObjectService {
     return this.objectModel.findOne({id});
   }
 
-  // public async create(id: string, serviceId: string, dto: any): Promise<ObjectDocument>
-  public async create(serviceId: string, idPrefix: string, idType: string, data: any, id?: string): Promise<{activity: ActivityDocument, object: ObjectDocument}> {
-    const _id = new Types.ObjectId();
-    data.id = `${idPrefix}/${idType}/${id || _id}`;
-
-    this.logger.debug(`Creating object with id ${data.id}`);
-
-    data._serviceId = serviceId;
-
-    const session = await this.objectModel.db.startSession();
-
-    session.startTransaction();
-
-    try {
-      const object = await this.objectModel.create({...data, _id});
-      const activity = await this.activityService.create(idPrefix, data);
-
-      session.commitTransaction();
-      session.endSession();
-
-      return {activity, object}
-    }
-    catch (error: unknown) {
-      session.abortTransaction();
-      session.endSession();
-
-      if (error instanceof MongoServerError && error.code === 11000) {
-        throw new ConflictException('Object already exists');
-      }
-
-      throw error;
-    }
+  public async create(dto: ObjectRecordDto): Promise<any> {
+    this.logger.debug(`Creating object with id ${dto.id}`);
+    const object = await this.objectModel.create(dto);
+    return object;
   }
 
   public async findById(id: string|Schema.Types.ObjectId): Promise<any> {

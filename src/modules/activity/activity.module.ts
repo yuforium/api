@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ActivityService } from './services/activity.service';
 import { ActivitySchema } from './schema/activity.schema';
-import { ActivityController } from './activity.controller';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
@@ -18,6 +17,6 @@ import { HttpModule } from '@nestjs/axios';
   exports: [
     ActivityService
   ],
-  controllers: [ActivityController]
+  controllers: []
 })
 export class ActivityModule { }

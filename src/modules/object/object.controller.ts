@@ -1,5 +1,5 @@
 import { ClassSerializerInterceptor, Controller, Get, Param, SerializeOptions, UseInterceptors } from '@nestjs/common';
-import { ServiceId } from 'src/common/decorators/service-id.decorator';
+import { ServiceId } from '../../common/decorators/service-id.decorator';
 import { ObjectService } from './object.service';
 
 @Controller('object')

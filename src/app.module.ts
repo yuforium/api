@@ -8,12 +8,9 @@ import auth from './config/auth';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
-import { ForumModule } from './modules/forum/forum.module';
-import { InboxModule } from './modules/inbox/inbox.module';
-import { SharedInboxModule } from './modules/shared-inbox/shared-inbox.module';
 import { WellKnownModule } from './modules/well-known/well-known.module';
+import { ActivityPubModule } from './modules/activity-pub/activity-pub.module';
 import { ActivityModule } from './modules/activity/activity.module';
-import { ObjectModule } from './modules/object/object.module';
 
 @Module({
   imports: [
@@ -26,11 +23,9 @@ import { ObjectModule } from './modules/object/object.module';
     AuthModule,
     UserModule,
     WellKnownModule,
+    ActivityPubModule,
     ActivityModule,
-    InboxModule,
-    SharedInboxModule,
-    ForumModule,
-    ObjectModule
+    // ObjectModule
   ],
   controllers: [AppController],
   providers:   [AppService],

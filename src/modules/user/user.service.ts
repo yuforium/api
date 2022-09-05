@@ -24,47 +24,32 @@ export class UserService {
   public async create(serviceId: string, userDto: UserCreateDto): Promise<any> {
     const saltRounds = 10;
     const {username, password} = userDto;
-    const session = await this.userModel.db.startSession();
 
     if (password === undefined) {
       throw new Error('Password is required');
     }
 
-    session.startTransaction();
+    const user = await this.userModel.create({serviceId, username, password: await bcrypt.hash(password, saltRounds)});
+    const personDto = {
+      "@context": "https://www.w3.org/ns/activitystreams",
+      'type': "Person",
+      "id": `https://${serviceId}/user/${userDto.username}`,
+      "name": userDto.name,
+      "preferredUsername": user.username,
+      "summary": userDto.summary,
+      '_serviceId': serviceId
+    };
 
-    try {
-      const user = await this.userModel.create({serviceId, username, password: await bcrypt.hash(password, saltRounds)});
-      const personData = {
-        "@context": "https://www.w3.org/ns/activitystreams",
-        'type': "Person",
-        "id": `https://${serviceId}/user/${userDto.username}`,
-        "name": userDto.name,
-        "preferredUsername": user.username,
-        "summary": userDto.summary,
-      };
+    const person = await this.objectService.create(personDto);
 
-      const {activity, object} = await this.objectService.create(serviceId, `https://${serviceId}`, 'user', personData, userDto.username);
+    // @todo - a Create activity should be associated with the person object, attributed to the user, and to any other related information (such as IP address)
 
-      user.identities = [object._id];
-      user.defaultIdentity = object._id;
+    user.identities = [person._id];
+    user.defaultIdentity = person._id;
 
-      await user.save();
+    await user.save();
 
-      session.commitTransaction();
-      session.endSession();
-
-      return activity.object;
-    }
-    catch (error: unknown) {
-      session.abortTransaction();
-      session.endSession();
-
-      if (error instanceof MongoServerError && error.code === 11000) {
-        throw new ConflictException('Username already exists');
-      }
-
-      throw error;
-    }
+    return person;
   }
 
   public async findOne(serviceId: string, username: string): Promise<UserDocument | null> {

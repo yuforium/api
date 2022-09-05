@@ -19,7 +19,7 @@ export class AppController {
 
   constructor(
     protected readonly appService: AppService,
-    protected readonly objectService: ObjectService,
+    // protected readonly objectService: ObjectService,
     config: ConfigService
   ) { }
 

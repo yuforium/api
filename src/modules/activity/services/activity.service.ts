@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ActivityDocument, ActivityRecord } from '../schema/activity.schema';
+import { ActivityDocument, ActivityRecordDto } from '../schema/activity.schema';
 import { Create } from '@yuforium/activity-streams-validator';
 import { instanceToPlain, plainToClass } from 'class-transformer';
 import { Model, Types } from 'mongoose';
@@ -14,9 +14,7 @@ export class ActivityService {
   protected logger = new Logger(ActivityService.name);
 
   constructor(
-    @InjectModel('Activity') protected readonly activityModel: Model<ActivityDocument>,
-    // protected readonly syncStreamService: SyncActivityStreamService,
-    // public readonly processor: SyncActivityStreamService
+    @InjectModel('Activity') protected readonly activityModel: Model<ActivityDocument>
   ) { }
 
   /**
@@ -43,25 +41,13 @@ export class ActivityService {
   /**
    * Create a new activity
    *
-   * @param idPrefix
-   * @param objectDto
+   * @param dto
    * @returns
    */
-  public async create(activity: ActivityRecord): Promise<any> {
-    const session = await this.activityModel.db.startSession();
-    const _activityId = new Types.ObjectId(); // this is the internal id
-
-    // activity.actor = objectDto.attributedTo;
-    // activity.object = objectDto;
-    // activity.id = `${idPrefix}/activity/${_activityId}`;
-
-    // await this.processor.dispatch(activity);
-
-    return (await this.activityModel.create({_activityId, ...instanceToPlain(activity)})).toObject();
-  }
-
-  public async importCreate() {
-    throw new NotImplementedException();
+  public async create(dto: ActivityRecordDto): Promise<ActivityRecordDto> {
+    this.logger.debug(`Creating activity with id ${dto.id}`);
+    const activity = await this.activityModel.create(dto);
+    return activity;
   }
 
   // public async _create(serviceId: string, idPrefix: string, idType: string, data: any, id?: string): Promise<{activity?: ActivityDocument, object?: ObjectDocument}> {
