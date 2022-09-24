@@ -1,12 +1,9 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActivityDocument, ActivityRecordDto } from '../schema/activity.schema';
-import { Create } from '@yuforium/activity-streams-validator';
-import { instanceToPlain, plainToClass } from 'class-transformer';
-import { Model, Types } from 'mongoose';
-// import { ObjectService } from '../object/object.service';
-// import { ActivityDocument } from '../schema/activity.schema';
-// import { SyncActivityStreamService } from './sync-activity-stream.service';
+import { plainToInstance } from 'class-transformer';
+import { Model } from 'mongoose';
+import { ActivityDto } from '../dto/activity.dto';
 
 @Injectable()
 export class ActivityService {
@@ -22,21 +19,13 @@ export class ActivityService {
    * @param id
    * @returns
    */
-  public async get(id: string): Promise<ActivityDocument | null> {
-    return this.activityModel.findOne({id});
+  public async get(id: string): Promise<ActivityDto | null> {
+    const activity = this.activityModel.findOne({id});
+    if (activity) {
+      return plainToInstance(ActivityDto, activity, {excludeExtraneousValues: true});
+    }
+    return activity;
   }
-
-  // public async create(id, serviceId, dto) {
-  //   const session = await this.activityModel.db.startSession();
-
-  //   activity.actor = dto.attributedTo;
-  //   activity.object = dto;
-  //   activity.id = `${id}/activity/${_activityId}`;
-
-  //   await this.processor.dispatch(activity);
-
-  //   return (await this.activityModel.create({_activityId, ...instanceToPlain(activity)})).toObject();
-  // }
 
   /**
    * Create a new activity
@@ -44,10 +33,11 @@ export class ActivityService {
    * @param dto
    * @returns
    */
-  public async create(dto: ActivityRecordDto): Promise<ActivityRecordDto> {
+  public async create(dto: ActivityRecordDto): Promise<ActivityDto> {
     this.logger.debug(`Creating activity with id ${dto.id}`);
     const activity = await this.activityModel.create(dto);
-    return activity;
+
+    return plainToInstance(ActivityDto, activity, {excludeExtraneousValues: true});
   }
 
   // public async _create(serviceId: string, idPrefix: string, idType: string, data: any, id?: string): Promise<{activity?: ActivityDocument, object?: ObjectDocument}> {

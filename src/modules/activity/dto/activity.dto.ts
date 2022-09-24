@@ -3,6 +3,7 @@ import { PartialType, PickType } from "@nestjs/swagger";
 import { ActivityStreams } from "@yuforium/activity-streams-validator";
 import { Expose } from "class-transformer";
 import * as mongoose from "mongoose";
+import { ObjectDto } from "src/modules/object/dto/object.dto";
 
 const { Mixed } = mongoose.Schema.Types;
 
@@ -23,7 +24,8 @@ export class ActivityDto extends PartialType(
 
   @Prop({type: Mixed})
   @Expose()
-  public object!: ActivityStreams.StreamObject;
+  // public object!: ActivityStreams.StreamObject;
+  public object!: ObjectDto;
 
   @Prop({type: String})
   @Expose()

@@ -26,7 +26,7 @@ export class ObjectDto extends PartialType(
 
   @Prop({type: String, required: true})
   @Expose()
-  public type?: string;
+  public type!: string | string[];
 
   @Prop({type: String})
   @Expose()

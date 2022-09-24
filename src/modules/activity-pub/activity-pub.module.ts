@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ActivityModule } from '../activity/activity.module';
 import { ObjectModule } from '../object/object.module';
@@ -10,7 +11,8 @@ import { OutboxService } from './services/outbox.service';
   exports: [InboxService, OutboxService],
   imports: [
     ActivityModule,
-    ObjectModule
+    ObjectModule,
+    HttpModule
   ]
 })
 export class ActivityPubModule {}

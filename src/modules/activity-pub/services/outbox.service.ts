@@ -44,12 +44,13 @@ export class OutboxService {
   }
 
   protected async createFromObject(serviceId: ServiceId, actor: Actor, dto: ObjectCreateDto): Promise<[ActivityRecordDto, ObjectRecordDto]> {
+
     const _objectId = new Types.ObjectId();
     const _activityId = new Types.ObjectId();
-    const objectDto: ObjectRecordDto = Object.assign(new ObjectRecordDto(),{
+    const objectDto: ObjectRecordDto = Object.assign(new ObjectRecordDto(), {
       ...dto,
       _id: _objectId.toString(),
-      id: `${actor.id}/${dto.type?.toLowerCase() || 'object'}/${_objectId.toString()}`,
+      id: `${actor.id}/${dto.type && typeof dto.type === 'string' ? dto.type.toLowerCase() : 'object'}/${_objectId.toString()}`,
       _serviceId: serviceId,
       attributedTo: actor.id,
       _public: dto.to?.includes('https://www.w3.org/ns/activitystreams#Public') || false,

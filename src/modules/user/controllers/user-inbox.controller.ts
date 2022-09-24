@@ -7,7 +7,9 @@ import { ServiceId } from '../../../common/decorators/service-id.decorator';
 import { ObjectService } from 'src/modules/object/object.service';
 import { ActivityService } from '../../activity/services/activity.service';
 import { Request } from 'express';
-import { ObjectDocument } from 'src/modules/object/schema/object.schema';
+import { ObjectDocument } from '../../../modules/object/schema/object.schema';
+import { InboxService } from '../../../modules/activity-pub/services/inbox.service';
+import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
 
 @ApiTags('user')
 @Controller('user/:username/inbox')
@@ -16,7 +18,8 @@ export class UserInboxController {
 
   constructor(
     protected readonly activityService: ActivityService,
-    protected readonly objectService: ObjectService
+    protected readonly objectService: ObjectService,
+    protected readonly inboxService: InboxService
   ) { }
 
   @ApiBearerAuth()
@@ -39,8 +42,13 @@ export class UserInboxController {
   @Post()
   @UseGuards(AuthGuard(['jwt', 'anonymous']))
   @HttpCode(HttpStatus.ACCEPTED)
-  public async postInbox(@Req() req: Request, @Body() activity: any, @Param('username') username: string) {
-    // this.logger.debug(`Received "${activity.type}" activity from ${req.connection.remoteAddress}`);
+  public async postInbox(@ServiceId() serviceId: string, @Req() req: Request, @Body() activity: ActivityDto, @Param('username') username: string) {
+    const targetUserId = `https://{$serviceId}/user/${username}`;
+    if (activity.object.to !== targetUserId) {
+    }
+
+    this.logger.debug(`postInbox(): Received "${activity.type}" activity from ${req.connection.remoteAddress}`);
+    this.inboxService.accept(activity);
     // const receipt = await this.activityService.process(activity);
     // return {
     //   status: 'accepted',
