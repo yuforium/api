@@ -12,7 +12,7 @@ export class NoteCreateDto extends ObjectCreateDto {
   public content!: string;
 
   @ApiProperty({required: true, oneOf: [{type: 'string'}, {type: 'array', items: {type: 'string'}}], format: 'uri'})
-  @IsUrl({each: true})
+  // @IsUrl({each: true}) @todo this is not working properly
   @IsRequired()
   public to!: string | string[];
 

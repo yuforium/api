@@ -9,29 +9,27 @@ export class ActivityStreamsPipe implements PipeTransform {
   protected allowedTypes: string[] = [];
   // protected transformer: Function;
 
-  constructor(@Optional() protected transformer?: ActivityStreams.Transformer) {
+  constructor(@Optional() protected transformer: ActivityStreams.Transformer) {
     if (this.transformer === undefined) {
       this.transformer = ActivityStreams.transformer;
     }
-
-    // this.transformer = ActivityStreams.transformer(mappedTypes);
   }
 
   async transform(value: any, metadata: ArgumentMetadata) {
-    // const obj = this.transformer({value});
+    const obj = this.transformer.transform({value});
 
-    // if (!obj) {
-    //   throw new BadRequestException('Invalid type specified, use one of [' + Object.keys(this.mappedTypes).join(', ') + ']');
-    // }
+    if (!obj) {
+      throw new BadRequestException('Type not specified or supported');
+    }
 
-    // const errors = await validate(obj);
+    const errors = await validate(obj);
 
-    // if (errors.length) {
-    //   throw new BadRequestException(errors.reduce((prev: string[], error: ValidationError) => {
-    //     return prev.concat(error.constraints ? Object.values(error.constraints) : []);
-    //   }, []).join(', '));
-    // }
+    if (errors.length) {
+      throw new BadRequestException(errors.reduce((prev: string[], error: ValidationError) => {
+        return prev.concat(error.constraints ? Object.values(error.constraints) : []);
+      }, []).join(', '));
+    }
 
-    // return obj;
+    return obj;
   }
 }

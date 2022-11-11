@@ -1,4 +1,4 @@
-import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards, Logger } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Actor, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams';
@@ -22,6 +22,8 @@ type AllowedCreate = ObjectCreateDto | NoteCreateDto
 @Controller('user/:username/outbox')
 @ApiTags('activity-pub')
 export class UserOutboxController {
+  protected readonly logger = new Logger(UserOutboxController.name);
+
   constructor(
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService,
@@ -52,7 +54,8 @@ export class UserOutboxController {
 
     // @todo - auth should be done via decorator on the class method
     if (userId !== actor.id) {
-      throw new UnauthorizedException('You are not authorized to post to this user\'s outbox.');
+      this.logger.error(`Unauthorized access to outbox for ${userId} by ${actor.id}`);
+      throw new UnauthorizedException('You are not authorized to post to this outbox.');
     }
 
     Object.assign(dto, {

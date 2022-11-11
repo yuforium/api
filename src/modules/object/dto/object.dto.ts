@@ -7,25 +7,9 @@ import * as mongoose from "mongoose";
 const { Mixed } = mongoose.Schema.Types;
 
 /**
- * Default Object DTO
+ * Default Object DTO, which extends the ActivityStreams Object type and adds decorators for Mongoose and any custom validation overrides.
  */
-export class ObjectDto extends ActivityStreams.object('Object') { }
-
-export class ObjectDtoOld extends PartialType(PickType(ActivityStreams.object('Object'), [
-    'id',
-    'type',
-    'attributedTo',
-    'content',
-    'context',
-    'name',
-    'published',
-    'replies',
-    'inReplyTo',
-    'updated',
-    'to'
-  ] as const)) {
-  static type = 'Object';
-
+export class ObjectDto extends ActivityStreams.object('Object') {
   @Prop({type: String, required: true})
   @Expose()
   public id!: string;
