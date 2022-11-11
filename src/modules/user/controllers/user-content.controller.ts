@@ -1,12 +1,13 @@
 import { Controller, Get, Param, Query, ValidationPipe } from '@nestjs/common';
 import { ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiTags, getSchemaPath } from '@nestjs/swagger';
-import { ActivityStreams, OrderedCollectionPage } from '@yuforium/activity-streams-validator';
+import { ActivityStreams, OrderedCollectionPage } from '@yuforium/activity-streams';
 import { plainToInstance } from 'class-transformer';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
 import { ObjectService } from 'src/modules/object/object.service';
 import { ObjectDocument } from 'src/modules/object/schema/object.schema';
 import { UserContentQueryOptionsDto } from '../dto/user-content-query-options.dto';
 import { UserParamsDto } from '../dto/user-params.dto';
+import { ObjectDto } from 'src/modules/object/dto/object.dto';
 
 @ApiTags('user')
 @Controller('user/:username/content')
@@ -44,8 +45,8 @@ export class UserContentController {
     const userId = `https://${_serviceId}/user/${params.username}`;
 
     collectionPage.id = `${userId}/content`;
-    collectionPage.orderedItems = (await this.objectService.find({_serviceId, attributedTo: userId}, contentQuery))
-      .map((item: ObjectDocument) => plainToInstance(ActivityStreams.StreamObject, item));
+    collectionPage.items = (await this.objectService.find({_serviceId, attributedTo: userId}, contentQuery))
+      .map((item: ObjectDocument) => plainToInstance(ObjectDto, item));
 
     return collectionPage;
   }

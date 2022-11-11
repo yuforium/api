@@ -24,7 +24,7 @@ export class InboxService {
   }
 
   protected async acceptCreate(activity: ActivityDto): Promise<ActivityDto | null> {
-    if (await this.activityService.find(activity.id)) {
+    if (await this.activityService.find({id: activity.id})) {
       this.logger.debug(`acceptCreate(): activity already exists`);
       return null;
     }

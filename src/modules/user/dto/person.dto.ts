@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptions } from "@nestjs/swagger";
-import { Person } from "@yuforium/activity-streams-validator";
+import { Person } from "@yuforium/activity-streams";
 import { Exclude, Expose } from "class-transformer";
 
 @Exclude()

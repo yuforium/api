@@ -7,6 +7,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { ObjectService } from '../object/object.service';
 import { MongoServerError } from 'mongodb';
+import { ObjectDto } from '../object/dto/object.dto';
 
 // import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 

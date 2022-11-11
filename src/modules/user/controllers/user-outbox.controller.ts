@@ -1,11 +1,11 @@
 import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { ActivityStreams, Actor, Create, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams-validator';
+import { Actor, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams';
 import { plainToClass } from 'class-transformer';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
 import { SyncActivityStreamService } from 'src/modules/activity-stream/services/sync-activity-stream.service';
-import { NoteCreateDto } from '../../../common/dto/note-create.dto';
+import { NoteCreateDto } from '../../../common/dto/create/note-create.dto';
 import { ActivityService } from '../../activity/services/activity.service';
 import { ObjectService } from '../../object/object.service';
 import { UserParamsDto } from '../dto/user-params.dto';
@@ -13,6 +13,11 @@ import { Request } from 'express';
 import { User } from 'src/common/decorators/user.decorator';
 import { OutboxService } from 'src/modules/activity-pub/services/outbox.service';
 import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
+import { ActivityStreamsPipe } from 'src/common/pipes/activity-streams.pipe';
+import { ObjectCreateDto } from 'src/common/dto/create/object-create.dto';
+import { CreateTransformer } from 'src/common/transformer/create.transformer';
+
+type AllowedCreate = ObjectCreateDto | NoteCreateDto
 
 @Controller('user/:username/outbox')
 @ApiTags('activity-pub')
@@ -35,11 +40,13 @@ export class UserOutboxController {
     @ServiceId() serviceId: string,
     @User('actor') actor: Actor,
     @Req() req: Request,
-    @Body() noteDto: NoteCreateDto
+    @Body(new ActivityStreamsPipe(CreateTransformer)) dto: NoteCreateDto
   ) {
-    if (noteDto instanceof ActivityStreams.Activity) {
+    if (dto instanceof ActivityDto) {
       throw new NotImplementedException('Activity objects are not supported at this time.');
     }
+
+    NoteCreateDto.prototype.type;
 
     const userId = `https://${serviceId}/user/${params.username}`;
 
@@ -48,11 +55,13 @@ export class UserOutboxController {
       throw new UnauthorizedException('You are not authorized to post to this user\'s outbox.');
     }
 
-    noteDto.attributedTo = (req.user as any).actor.id;
-    noteDto.published = (new Date()).toISOString();
-    noteDto.to = Array.isArray(noteDto.to) ? noteDto.to : [noteDto.to as string];
+    Object.assign(dto, {
+      attributedTo: (req.user as any).actor.id,
+      published: (new Date()).toISOString(),
+      to: Array.isArray(dto.to) ? dto.to : [dto.to as string]
+    })
 
-    const activity = this.outboxService.create(serviceId, actor, noteDto);
+    const activity = this.outboxService.create(serviceId, actor, dto);
 
     return plainToClass(ActivityDto, activity);
   }

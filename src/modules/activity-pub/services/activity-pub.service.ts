@@ -3,7 +3,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
 import { AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
-import { instanceToPlain } from 'class-transformer';
+import { instanceToPlain, serialize } from 'class-transformer';
+import { ObjectDto } from 'src/modules/object/dto/object.dto';
+import { LinkDto } from 'src/modules/link/dto/link.dto';
 
 /**
  * Service responsible for interacting with (sending and receiving activities) to remote services
@@ -19,9 +21,15 @@ export class ActivityPubService {
 
   public async dispatch(activity: ActivityDto) {
     const obj = activity.object;
-    const to = obj.to ? Array.isArray(obj.to) ? obj.to : [obj.to] : [];
 
-    to.forEach(async (recipient) => {
+    if (obj instanceof LinkDto) {
+      this.logger.warn('dispatch(): Object is not an ObjectDto and is likely a LinkDto and should be resolved');
+      return;
+    }
+
+    const to = obj.to  ? Array.isArray(obj.to) ? obj.to : [obj.to] : [];
+
+    to.forEach(async (recipient: string) => {
       if (recipient === 'https://www.w3.org/ns/activitystreams#Public') {
         return;
       }
@@ -51,8 +59,16 @@ export class ActivityPubService {
           }
         })
         .catch(error => {
-          this.logger.error(`send(): "${error.message}" while sending ${activity.type} activity with id ${activity.id} to ${url}`);
-          throw error;
+          this.logger.error(`send(): "${error.message}" sending ${activity.type} id ${activity.id} to ${url}`);
+          if (typeof error.response?.data?.message === 'string') {
+            this.logger.error(error.response.data.message);
+          }
+
+          if (Array.isArray(error.response?.data?.message)) {
+            error.response.data.message.forEach((e: any) => {
+              this.logger.error(e);
+            });
+          }
         });
   }
 

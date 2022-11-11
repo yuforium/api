@@ -8,7 +8,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ServiceId } from './common/decorators/service-id.decorator';
 import { DomainDto } from './common/dto/domain.dto';
 import { ForumCreateDto } from './common/dto/forum-create.dto';
-import { ActivityStreams } from '@yuforium/activity-streams-validator';
+import { ActivityStreams } from '@yuforium/activity-streams';
 import { ObjectService } from './modules/object/object.service';
 import { plainToClass } from 'class-transformer';
 

@@ -1,7 +1,7 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Logger, NotImplementedException, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Logger, NotImplementedException, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Note } from '@yuforium/activity-streams-validator';
+import { Note } from '@yuforium/activity-streams';
 import { plainToClass } from 'class-transformer';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
 import { ObjectService } from 'src/modules/object/object.service';
@@ -9,7 +9,8 @@ import { ActivityService } from '../../activity/services/activity.service';
 import { Request } from 'express';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';
 import { InboxService } from '../../../modules/activity-pub/services/inbox.service';
-import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
+import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
+import { ObjectDto } from 'src/modules/object/dto/object.dto';
 
 @ApiTags('user')
 @Controller('user/:username/inbox')
@@ -42,12 +43,19 @@ export class UserInboxController {
   @Post()
   @UseGuards(AuthGuard(['jwt', 'anonymous']))
   @HttpCode(HttpStatus.ACCEPTED)
-  public async postInbox(@ServiceId() serviceId: string, @Req() req: Request, @Body() activity: ActivityDto, @Param('username') username: string) {
-    const targetUserId = `https://{$serviceId}/user/${username}`;
-    if (activity.object.to !== targetUserId) {
+  public async postInbox(
+    @ServiceId() serviceId: string, @Req() req: Request, @Body() activity: any, @Param('username') username: string
+  ) {
+    const targetUserId = `https://${serviceId}/user/${username}`;
+
+    if (typeof activity.object.to === 'string' && activity.object.to !== targetUserId) {
+      throw new BadRequestException(`The activity is not intended for the user ${targetUserId}.`);
+    }
+    else if (Array.isArray(activity.object.to) && !activity.object.to.includes(targetUserId)) {
+      throw new BadRequestException(`The activity is not intended for the user ${targetUserId}.`);
     }
 
-    this.logger.debug(`postInbox(): Received "${activity.type}" activity from ${req.connection.remoteAddress}`);
+    this.logger.debug(`postInbox(): Received "${activity.type}" activity for ${targetUserId} from ${req.socket.remoteAddress}`);
     this.inboxService.accept(activity);
     // const receipt = await this.activityService.process(activity);
     // return {

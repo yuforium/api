@@ -1,5 +1,5 @@
 import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
-import { Actor } from "@yuforium/activity-streams-validator";
+import { Actor } from "@yuforium/activity-streams";
 import * as mongoose from 'mongoose';
 
 export type UserDocument = User & mongoose.Document;

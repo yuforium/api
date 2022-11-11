@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
-import { Activity, Create } from '@yuforium/activity-streams-validator';
+import { ASActivity, ASObject, Create } from '@yuforium/activity-streams';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { StreamProcessor } from '../interfaces/stream-processor.interface';
 import { Connection, Types } from 'mongoose';
@@ -98,7 +98,7 @@ export class SyncActivityStreamService implements StreamProcessor, ActivityStrea
    * Consumes an activity
    * @param activity
    */
-  public async consume(activity: Activity) {
+  public async consume(activity: ASActivity) {
     this.logger.debug(`Consuming ${activity.type} activity with id ${activity.id}`);
   }
 
@@ -144,10 +144,17 @@ export class SyncActivityStreamService implements StreamProcessor, ActivityStrea
       });
   }
 
-  public async dispatch(activity: Activity) {
-    if (activity instanceof Create) {
+  public async getAddressees(activity: ASActivity) {
+    const obj = activity.object as ASObject;
 
-      (activity.object?.to as any)?.forEach(async (to: any) => {
+    return Array.isArray(obj.to) ? obj.to : [obj.to];
+  }
+
+  public async dispatch(activity: ASActivity) {
+    const addressees = await this.getAddressees(activity);
+
+    if (activity.type === 'Create') {
+      addressees.forEach(async (to: any) => {
         if (to !== 'https://www.w3.org/ns/activitystreams#Public') {
           this.logger.debug(`Sending ${activity.type} activity with id ${activity.id} to ${to}`);
 

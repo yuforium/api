@@ -9,7 +9,7 @@ import { instanceToPlain } from 'class-transformer';
 import { ActivityDto } from '../activity/dto/activity.dto';
 import { ServiceId } from 'src/common/types/service-id.type';
 import { ObjectDto } from './dto/object.dto';
-import { Actor } from '@yuforium/activity-streams-validator';
+import { Actor } from '@yuforium/activity-streams';
 
 @Injectable()
 export class ObjectService {

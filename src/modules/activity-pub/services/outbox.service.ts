@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { Actor } from '@yuforium/activity-streams-validator';
 import { instanceToPlain } from 'class-transformer';
 import { ServiceId } from 'src/common/types/service-id.type';
 import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
 import { ActivityRecordDto } from 'src/modules/activity/schema/activity.schema';
 import { ActivityService } from 'src/modules/activity/services/activity.service';
-import { ObjectCreateDto } from 'src/modules/object/dto/object-create.dto';
-import { ObjectDto } from 'src/modules/object/dto/object.dto';
+import { ObjectCreateDto } from 'src/common/dto/create/object-create.dto';
 import { ObjectService } from 'src/modules/object/object.service';
 import { ObjectRecordDto } from 'src/modules/object/schema/object.schema';
 import { Types } from 'mongoose';
 import { ActivityPubService } from './activity-pub.service';
+import { Actor } from '@yuforium/activity-streams';
 
 @Injectable()
 export class OutboxService {
@@ -55,6 +54,7 @@ export class OutboxService {
       attributedTo: actor.id,
       _public: dto.to?.includes('https://www.w3.org/ns/activitystreams#Public') || false,
       _activityId: _activityId.toString(),
+      published: new Date().toISOString(),
     });
 
     const object = await this.objectService.create(objectDto);
@@ -66,7 +66,8 @@ export class OutboxService {
       actor: actor.id,
       object: instanceToPlain(objectDto),
       _serviceId: serviceId,
-      _objectId: object._id
+      _objectId: object._id,
+      published: object.published,
     });
 
     const activity = await this.activityService.create(activityDto);
