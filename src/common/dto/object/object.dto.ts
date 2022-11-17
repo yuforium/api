@@ -54,7 +54,3 @@ export class ObjectDto extends ActivityStreams.object('Object') {
   @Expose()
   public to?: string | string[];
 }
-
-export class NoteDto extends ObjectDto {
-  static readonly type = 'Note';
-}

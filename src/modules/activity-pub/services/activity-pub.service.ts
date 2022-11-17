@@ -4,7 +4,7 @@ import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
 import { AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
 import { instanceToPlain, serialize } from 'class-transformer';
-import { ObjectDto } from 'src/modules/object/dto/object.dto';
+import { ObjectDto } from 'src/common/dto/object/object.dto';
 import { LinkDto } from 'src/modules/link/dto/link.dto';
 
 /**
@@ -27,7 +27,7 @@ export class ActivityPubService {
       return;
     }
 
-    const to = obj.to  ? Array.isArray(obj.to) ? obj.to : [obj.to] : [];
+    const to = obj.to ? Array.isArray(obj.to) ? obj.to : [obj.to] : [];
 
     to.forEach(async (recipient: string) => {
       if (recipient === 'https://www.w3.org/ns/activitystreams#Public') {
@@ -37,7 +37,7 @@ export class ActivityPubService {
       const url = await this.getInboxUrl(recipient.toString());
       this.logger.debug(`dispatch(): Sending ${activity.type} activity with id ${activity.id} to ${recipient}`);
       await this.send(url, activity);
-    })
+    });
     // iterate through the "to" field, and send the activity to each of the services
     // scenarios -
     // to self

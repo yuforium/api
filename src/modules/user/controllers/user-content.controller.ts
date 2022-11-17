@@ -7,7 +7,7 @@ import { ObjectService } from 'src/modules/object/object.service';
 import { ObjectDocument } from 'src/modules/object/schema/object.schema';
 import { UserContentQueryOptionsDto } from '../dto/user-content-query-options.dto';
 import { UserParamsDto } from '../dto/user-params.dto';
-import { ObjectDto } from 'src/modules/object/dto/object.dto';
+import { ObjectDto } from 'src/common/dto/object/object.dto';
 
 @ApiTags('user')
 @Controller('user/:username/content')

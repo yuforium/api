@@ -1,15 +1,33 @@
 import { Injectable } from '@nestjs/common';
-import { instanceToPlain } from 'class-transformer';
-import { ServiceId } from 'src/common/types/service-id.type';
-import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
-import { ActivityRecordDto } from 'src/modules/activity/schema/activity.schema';
 import { ActivityService } from 'src/modules/activity/services/activity.service';
-import { ObjectCreateDto } from 'src/common/dto/create/object-create.dto';
 import { ObjectService } from 'src/modules/object/object.service';
-import { ObjectRecordDto } from 'src/modules/object/schema/object.schema';
-import { Types } from 'mongoose';
 import { ActivityPubService } from './activity-pub.service';
-import { Actor } from '@yuforium/activity-streams';
+import { Activity, Actor, ASObject } from '@yuforium/activity-streams';
+
+export interface APObject extends ASObject {
+  [k: string]: any;
+}
+
+export interface APActivity extends Activity {
+  [k: string]: any;
+}
+
+export interface APActor extends Actor {
+  id: string;
+  [k: string]: any;
+}
+
+export interface APService {
+  toPlain(object: APObject): APObject;
+}
+
+export interface APActivityService {
+  create(type: 'Create', actorId: string, object: APObject): Promise<{activity: APActivity}>;
+}
+
+export interface APObjectService {
+  create(actorId: string, dto: APObject): Promise<{object: APObject}>;
+}
 
 @Injectable()
 export class OutboxService {
@@ -23,55 +41,19 @@ export class OutboxService {
 
   }
 
+  // the signature for this should be createObject(actor: Actor, dto: ASObject) - what to do with serviceId? It can be appended to the dto since that's a type
   /**
-   * Not to be confused with the "create" actviity, this creates an activity submitted by a user to their outbox.
+   * Create a new Object, and dispatches it to the appropriate recipients
+   * @param actor Actor who created the object
+   * @param dto Object to be created
+   * @returns
    */
-  public async create(serviceId: ServiceId, actor: Actor, dto: ObjectCreateDto | ActivityDto): Promise<ActivityDto> {
-    let activity;
-    let object;
-
-    if (!(dto instanceof ActivityDto)) {
-      [activity, object] = await (this.createFromObject(serviceId, actor, dto));
-    }
-    else {
-      activity = new ActivityRecordDto();
-    }
+  async createObject<T extends APObject = APObject>(actorId: string, dto: T): Promise<{activity: APActivity, object: APObject}> {
+    const {object} = await this.objectService.create(actorId, dto);
+    const {activity} = await this.activityService.create('Create', actorId, object);
 
     await this.activityPubService.dispatch(activity);
 
-    return activity;
-  }
-
-  protected async createFromObject(serviceId: ServiceId, actor: Actor, dto: ObjectCreateDto): Promise<[ActivityRecordDto, ObjectRecordDto]> {
-
-    const _objectId = new Types.ObjectId();
-    const _activityId = new Types.ObjectId();
-    const objectDto: ObjectRecordDto = Object.assign(new ObjectRecordDto(), {
-      ...dto,
-      _id: _objectId.toString(),
-      id: `${actor.id}/${dto.type && typeof dto.type === 'string' ? dto.type.toLowerCase() : 'object'}/${_objectId.toString()}`,
-      _serviceId: serviceId,
-      attributedTo: actor.id,
-      _public: dto.to?.includes('https://www.w3.org/ns/activitystreams#Public') || false,
-      _activityId: _activityId.toString(),
-      published: new Date().toISOString(),
-    });
-
-    const object = await this.objectService.create(objectDto);
-
-    const activityDto: ActivityRecordDto = Object.assign(new ActivityRecordDto(), {
-      _id: _activityId.toString(),
-      id: `${actor.id}/activity/${_activityId.toString()}`,
-      type: 'Create',
-      actor: actor.id,
-      object: instanceToPlain(objectDto),
-      _serviceId: serviceId,
-      _objectId: object._id,
-      published: object.published,
-    });
-
-    const activity = await this.activityService.create(activityDto);
-
-    return [activity, object];
+    return {activity, object};
   }
 }

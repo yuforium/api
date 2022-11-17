@@ -4,9 +4,11 @@ import { Exclude, Expose } from "class-transformer";
 
 @Exclude()
 export class PersonDto extends Person {
+  static type: 'Person' = 'Person';
+
   @ApiProperty({type: 'string', format: 'uri', description: 'The ID of the user'})
   @Expose()
-  id: string | undefined;
+  id!: string;
 
   @ApiProperty({type: 'string', description: 'The name of the user'})
   name: string | undefined;

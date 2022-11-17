@@ -4,8 +4,20 @@ import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserDocument } from '../user/schemas/user.schema';
 import { plainToClass } from 'class-transformer';
-import { PersonDto } from '../user/dto/person.dto';
+import { PersonDto } from '../../common/dto/object/person.dto';
 import { ObjectService } from '../object/object.service';
+import { Actor } from '@yuforium/activity-streams';
+
+export interface UserPayload {
+  _id: string;
+  username: string;
+  actor: UserActor;
+}
+
+export interface UserActor extends Actor {
+  id: string;
+  preferredUsername: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -47,10 +59,20 @@ export class AuthService {
       throw new Error('User has no default identity');
     }
 
-    const payload = {
-      username: user.username,
+    if (user.username === undefined) {
+      throw new Error('User has no assigned username');
+    }
+
+    const actor = await this.objectService.findOne(user.defaultIdentity);
+
+    if (actor === null) {
+      throw new Error('User\'s default identity not found');
+    }
+
+    const payload: UserPayload = {
       _id: user._id.toString(),
-      actor: plainToClass(PersonDto, await this.objectService.findById(user.defaultIdentity))
+      username: user.username,
+      actor: {...plainToClass(PersonDto, actor), preferredUsername: user.username}
     };
 
     return {

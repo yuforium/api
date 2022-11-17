@@ -5,7 +5,7 @@ import { plainToInstance } from 'class-transformer';
 import { ObjectDocument } from 'src/modules/object/schema/object.schema';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
 import { ObjectService } from '../../object/object.service';
-import { PersonDto } from '../dto/person.dto';
+import { PersonDto } from '../../../common/dto/object/person.dto';
 import { UserCreateDto } from '../dto/user-create.dto';
 import { UserService } from '../user.service';
 

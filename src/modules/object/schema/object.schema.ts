@@ -1,12 +1,15 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Exclude } from "class-transformer";
 import * as mongoose from 'mongoose';
-import { ObjectDto } from "../dto/object.dto";
+import { ObjectDto } from "../../../common/dto/object/object.dto";
 
 export type ObjectDocument = ObjectRecordDto & mongoose.Document;
 
 const {Mixed} = mongoose.Schema.Types;
 
+/**
+ * DTO for an Object record, which extends the Object DTO and adds any additional fields that are specific to the database record.
+ */
 @Schema({collection: 'objects', autoIndex: true})
 export class ObjectRecordDto extends ObjectDto {
   @Exclude()

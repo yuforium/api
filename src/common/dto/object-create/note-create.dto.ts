@@ -1,9 +1,9 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, OmitType } from "@nestjs/swagger";
 import { IsRequired } from "@yuforium/activity-streams";
-import { Equals, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, MinLength } from "class-validator";
-import { ObjectCreateDto } from "src/common/dto/create/object-create.dto";
+import { Equals, IsOptional, MaxLength } from "class-validator";
+import { ObjectCreateDto } from "src/common/dto/object-create/object-create.dto";
 
-export class NoteCreateDto extends ObjectCreateDto {
+export class NoteCreateDto extends OmitType(ObjectCreateDto, ['name'] as const) {
   static type = 'Note';
 
   @MaxLength(500) // make it compatible with Mastodon for now

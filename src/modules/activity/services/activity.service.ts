@@ -1,12 +1,15 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActivityDocument, ActivityRecordDto } from '../schema/activity.schema';
-import { plainToInstance } from 'class-transformer';
-import { Model } from 'mongoose';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { Model, Types } from 'mongoose';
 import { ActivityDto } from '../dto/activity.dto';
+import { APActivityService, APObject } from 'src/modules/activity-pub/services/outbox.service';
+import { Actor } from '@yuforium/activity-streams';
+import { ObjectDocument, ObjectRecordDto } from 'src/modules/object/schema/object.schema';
 
 @Injectable()
-export class ActivityService {
+export class ActivityService implements APActivityService {
 
   protected logger = new Logger(ActivityService.name);
 
@@ -33,11 +36,23 @@ export class ActivityService {
    * @param dto
    * @returns
    */
-  public async create(dto: ActivityRecordDto): Promise<ActivityDto> {
+  public async create(type: 'Create', actorId: string, object: APObject): Promise<{activity: ActivityDto}> {
+    const _id = new Types.ObjectId();
+
+    const dto = Object.assign(new ActivityRecordDto(), {
+      id: `${actorId}/activities/${_id.toString()}`,
+      type,
+      actor: actorId,
+      object: instanceToPlain(object),
+      published: type === 'Create' ? object.published : (new Date()).toISOString(),
+      _serviceId: object._serviceId,
+      _id,
+      _objectId: object._id,
+    });
+
     this.logger.debug(`Creating activity with id ${dto.id}`);
     const activity = await this.activityModel.create(dto);
-
-    return plainToInstance(ActivityDto, activity, {excludeExtraneousValues: true});
+    return {activity: plainToInstance(ActivityDto, activity, {excludeExtraneousValues: true, exposeUnsetFields: false})};
   }
 
   // public async _create(serviceId: string, idPrefix: string, idType: string, data: any, id?: string): Promise<{activity?: ActivityDocument, object?: ObjectDocument}> {

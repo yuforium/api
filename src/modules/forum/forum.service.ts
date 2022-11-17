@@ -10,6 +10,6 @@ export class ForumService {
 
   public async create(_serviceId: string, forumCreateDto: ForumCreateDto) {
     const dto = {...forumCreateDto, _serviceId, id: 'https://${_serviceId}/forum/${forumCreateDto.pathId}', type: 'Forum'};
-    const forum = await this.objectService.create(dto);
+    // const forum = await this.objectService.create(dto);
   }
 }

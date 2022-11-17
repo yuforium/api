@@ -2,7 +2,7 @@ import { ArgumentMetadata, BadRequestException, Injectable, Optional, PipeTransf
 import { ActivityStreams } from '@yuforium/activity-streams';
 import { Constructor } from '@yuforium/activity-streams/dist/util/constructor';
 import { validate, ValidationError } from 'class-validator';
-import { ObjectCreateDto } from 'src/common/dto/create/object-create.dto';
+import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
 
 @Injectable()
 export class ActivityStreamsPipe implements PipeTransform {
@@ -19,7 +19,7 @@ export class ActivityStreamsPipe implements PipeTransform {
     const obj = this.transformer.transform({value});
 
     if (!obj) {
-      throw new BadRequestException('Type not specified or supported');
+      throw new BadRequestException(`The type "${value.type}" is not supported.`);
     }
 
     const errors = await validate(obj);

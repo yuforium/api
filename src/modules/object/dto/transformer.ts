@@ -1,5 +1,6 @@
 import { ActivityStreams } from "@yuforium/activity-streams";
-import { NoteDto, ObjectDto } from "./object.dto";
+import { NoteDto } from "src/common/dto/object/note.dto";
+import { ObjectDto } from "../../../common/dto/object/object.dto";
 
 const transformer = new ActivityStreams.Transformer();
 

@@ -7,7 +7,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { ObjectService } from '../object/object.service';
 import { MongoServerError } from 'mongodb';
-import { ObjectDto } from '../object/dto/object.dto';
+import { ObjectDto } from '../../common/dto/object/object.dto';
 
 // import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 
@@ -31,26 +31,29 @@ export class UserService {
     }
 
     const user = await this.userModel.create({serviceId, username, password: await bcrypt.hash(password, saltRounds)});
+
     const personDto = {
       "@context": "https://www.w3.org/ns/activitystreams",
       'type': "Person",
       "id": `https://${serviceId}/user/${userDto.username}`,
+      "attributedTo": `https://${serviceId}`,
       "name": userDto.name,
       "preferredUsername": user.username,
       "summary": userDto.summary,
       '_serviceId': serviceId
     };
 
-    const person = await this.objectService.create(personDto);
+    // effectively the person is creating themselves
+    const {record} = await this.objectService.createActor(personDto);
 
     // @todo - a Create activity should be associated with the person object, attributed to the user, and to any other related information (such as IP address)
 
-    user.identities = [person._id];
-    user.defaultIdentity = person._id;
+    user.identities = [record._id];
+    user.defaultIdentity = record._id;
 
     await user.save();
 
-    return person;
+    return record;
   }
 
   public async findOne(serviceId: string, username: string): Promise<UserDocument | null> {

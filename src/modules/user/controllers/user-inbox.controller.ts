@@ -10,7 +10,7 @@ import { Request } from 'express';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';
 import { InboxService } from '../../../modules/activity-pub/services/inbox.service';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
-import { ObjectDto } from 'src/modules/object/dto/object.dto';
+import { ObjectDto } from 'src/common/dto/object/object.dto';
 
 @ApiTags('user')
 @Controller('user/:username/inbox')

@@ -29,8 +29,10 @@ export class InboxService {
       return null;
     }
 
-    const activityDto = plainToInstance(ActivityDto, await this.activityService.create(activity), { excludeExtraneousValues: true });
+    // @todo broken for now
+    // const activityDto = plainToInstance(ActivityDto, await this.activityService.create(activity), { excludeExtraneousValues: true });
 
-    return activityDto;
+    // return activityDto;
+    return null;
   }
 }

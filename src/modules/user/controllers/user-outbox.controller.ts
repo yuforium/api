@@ -1,11 +1,11 @@
 import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards, Logger } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Actor, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams';
+import { ASObject, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams';
 import { plainToClass } from 'class-transformer';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
 import { SyncActivityStreamService } from 'src/modules/activity-stream/services/sync-activity-stream.service';
-import { NoteCreateDto } from '../../../common/dto/create/note-create.dto';
+import { NoteCreateDto } from '../../../common/dto/object-create/note-create.dto';
 import { ActivityService } from '../../activity/services/activity.service';
 import { ObjectService } from '../../object/object.service';
 import { UserParamsDto } from '../dto/user-params.dto';
@@ -14,10 +14,15 @@ import { User } from 'src/common/decorators/user.decorator';
 import { OutboxService } from 'src/modules/activity-pub/services/outbox.service';
 import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
 import { ActivityStreamsPipe } from 'src/common/pipes/activity-streams.pipe';
-import { ObjectCreateDto } from 'src/common/dto/create/object-create.dto';
-import { CreateTransformer } from 'src/common/transformer/create.transformer';
+import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
+import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
+import { UserActor } from 'src/modules/auth/auth.service';
 
 type AllowedCreate = ObjectCreateDto | NoteCreateDto
+
+interface OutboxObjectCreateDto extends ObjectCreateDto {
+  serviceId: string;
+}
 
 @Controller('user/:username/outbox')
 @ApiTags('activity-pub')
@@ -40,20 +45,20 @@ export class UserOutboxController {
   public async postOutbox(
     @Param() params: UserParamsDto,
     @ServiceId() serviceId: string,
-    @User('actor') actor: Actor,
+    @User('actor') actor: UserActor,
     @Req() req: Request,
-    @Body(new ActivityStreamsPipe(CreateTransformer)) dto: NoteCreateDto
+    @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ASObject
   ) {
     if (dto instanceof ActivityDto) {
       throw new NotImplementedException('Activity objects are not supported at this time.');
     }
 
-    NoteCreateDto.prototype.type;
-
     const userId = `https://${serviceId}/user/${params.username}`;
 
+    const actorRecord = await this.objectService.get(actor.id);
+
     // @todo - auth should be done via decorator on the class method
-    if (userId !== actor.id) {
+    if (!actorRecord || actorRecord.type === 'Tombstone' || userId !== actor.id) {
       this.logger.error(`Unauthorized access to outbox for ${userId} by ${actor.id}`);
       throw new UnauthorizedException('You are not authorized to post to this outbox.');
     }
@@ -64,7 +69,7 @@ export class UserOutboxController {
       to: Array.isArray(dto.to) ? dto.to : [dto.to as string]
     })
 
-    const activity = this.outboxService.create(serviceId, actor, dto);
+    const {activity} = await this.outboxService.createObject<OutboxObjectCreateDto>(actor.id, {...dto as ObjectCreateDto, serviceId});
 
     return plainToClass(ActivityDto, activity);
   }
