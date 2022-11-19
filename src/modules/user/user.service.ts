@@ -30,30 +30,40 @@ export class UserService {
       throw new Error('Password is required');
     }
 
-    const user = await this.userModel.create({serviceId, username, password: await bcrypt.hash(password, saltRounds)});
+    try {
+      const user = await this.userModel.create({serviceId, username, password: await bcrypt.hash(password, saltRounds)});
 
-    const personDto = {
-      "@context": "https://www.w3.org/ns/activitystreams",
-      'type': "Person",
-      "id": `https://${serviceId}/user/${userDto.username}`,
-      "attributedTo": `https://${serviceId}`,
-      "name": userDto.name,
-      "preferredUsername": user.username,
-      "summary": userDto.summary,
-      '_serviceId': serviceId
-    };
+      const personDto = {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        'type': "Person",
+        "id": `https://${serviceId}/user/${userDto.username}`,
+        "attributedTo": `https://${serviceId}`,
+        "name": userDto.name,
+        "preferredUsername": user.username,
+        "summary": userDto.summary,
+        '_serviceId': serviceId
+      };
 
-    // effectively the person is creating themselves
-    const {record} = await this.objectService.createActor(personDto);
+      // effectively the person is creating themselves
+      const {record} = await this.objectService.createActor(personDto);
 
-    // @todo - a Create activity should be associated with the person object, attributed to the user, and to any other related information (such as IP address)
+      // @todo - a Create activity should be associated with the person object, attributed to the user, and to any other related information (such as IP address)
 
-    user.identities = [record._id];
-    user.defaultIdentity = record._id;
+      user.identities = [record._id];
+      user.defaultIdentity = record._id;
 
-    await user.save();
+      await user.save();
 
-    return record;
+      return record;
+    } catch (e) {
+      if (e instanceof MongoServerError) {
+        if (e.code === 11000) {
+          throw new ConflictException('Username already exists');
+        }
+      }
+
+      throw e;
+    }
   }
 
   public async findOne(serviceId: string, username: string): Promise<UserDocument | null> {
