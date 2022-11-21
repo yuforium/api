@@ -23,7 +23,13 @@ async function bootstrap () {
   // see https://github.com/nestjs/nest/issues/528 - enables DI in class-validator dto objects
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  app.enableCors({origin: "*"});
+  if (process.env.NODE_ENV === 'development') {
+    app.enableCors({origin: "*"});
+  }
+  else {
+    app.enableCors({origin: [`https://${process.env.DEFAULT_DOMAIN}`, `https://www.${process.env.DEFAULT_DOMAIN}`]});
+  }
+
   app.useGlobalPipes(new ValidationPipe({transform: true, whitelist: true}));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), {excludeExtraneousValues: true}));
 
