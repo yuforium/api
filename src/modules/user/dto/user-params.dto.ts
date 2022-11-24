@@ -1,7 +1,8 @@
-import { IsString, Matches } from "class-validator";
+import { IsNotEmpty, IsString, Matches } from "class-validator";
 
 export class UserParamsDto {
   @Matches(/^[a-z](?:-?[a-z0-9]+)*$/i)
   @IsString()
-  username: string | undefined;
+  @IsNotEmpty()
+  username!: string;
 }

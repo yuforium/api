@@ -67,7 +67,7 @@ export class UserService {
   }
 
   public async findOne(serviceId: string, username: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({serviceId, username});
+    return await this.userModel.findOne({serviceId, username});
   }
 
   public async findPerson(serviceId: string, username: string): Promise<any | undefined> {
