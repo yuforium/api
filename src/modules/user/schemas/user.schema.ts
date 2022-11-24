@@ -24,6 +24,9 @@ export class User {
   @Prop({type: mongoose.Schema.Types.ObjectId})
   defaultIdentity: mongoose.Schema.Types.ObjectId | undefined;
 
+  @Prop({type: String, required: true})
+  email!: string;
+
   actor!: Actor;
 }
 
