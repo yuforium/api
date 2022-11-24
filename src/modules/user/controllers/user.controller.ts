@@ -25,6 +25,19 @@ export class UserController {
     return users.map((user: ObjectDocument) => plainToInstance(PersonDto, user));
   }
 
+  @ApiOperation({operationId: 'exists'})
+  @Get('exists/:username')
+  @Header('Content-Type', 'application/activity+json')
+  public async userExists(@ServiceId() serviceId: string, @Param('username') username: string): Promise<boolean> {
+    const person = await this.userService.findOne(serviceId, username);
+
+    if (person) {
+      return true;
+    }
+
+    return false;
+  }
+
   @ApiOperation({operationId: 'whoami'})
   @Get('whoami')
   @UseGuards(AuthGuard('jwt'))
