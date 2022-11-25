@@ -31,7 +31,12 @@ export class UserService {
     }
 
     try {
-      const user = await this.userModel.create({serviceId, username, email: userDto.email, password: await bcrypt.hash(password, saltRounds)});
+      const user = await this.userModel.create({
+        serviceId,
+        username,
+        email: userDto.email,
+        password: await bcrypt.hash(password, saltRounds)
+      });
 
       const personDto = {
         "@context": "https://www.w3.org/ns/activitystreams",

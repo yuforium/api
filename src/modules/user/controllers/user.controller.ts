@@ -8,6 +8,7 @@ import { ObjectService } from '../../object/object.service';
 import { PersonDto } from '../../../common/dto/object/person.dto';
 import { UserCreateDto } from '../dto/user-create.dto';
 import { UserService } from '../user.service';
+import { UserParamsDto } from '../dto/user-params.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -28,8 +29,8 @@ export class UserController {
   @ApiOperation({operationId: 'exists'})
   @Get('exists/:username')
   @Header('Content-Type', 'application/activity+json')
-  public async userExists(@ServiceId() serviceId: string, @Param('username') username: string): Promise<boolean> {
-    const person = await this.userService.findOne(serviceId, username);
+  public async userExists(@ServiceId() serviceId: string, @Param() params: UserParamsDto): Promise<boolean> {
+    const person = await this.userService.findOne(serviceId, params.username.toLowerCase());
 
     if (person) {
       return true;
@@ -50,6 +51,9 @@ export class UserController {
   @Post()
   @Header('Content-Type', 'application/activity+json')
   public async create(@ServiceId() serviceId: string, @Body() userDto: UserCreateDto) {
+    userDto.username = userDto.username.toLowerCase();
+    userDto.email = userDto.email.toLowerCase();
+
     return plainToInstance(PersonDto, await this.userService.create(serviceId, userDto));
   }
 
@@ -58,7 +62,7 @@ export class UserController {
   @Get(':username')
   @Header('Content-Type', 'application/activity+json')
   public async findOne(@ServiceId() serviceId: string, @Param('username') username: string): Promise<PersonDto> {
-    const person = await this.userService.findPerson(serviceId, username);
+    const person = await this.userService.findPerson(serviceId, username.toLowerCase());
 
     if (person) {
       return plainToInstance(PersonDto, person);

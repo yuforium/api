@@ -15,12 +15,14 @@ export class UserCreateDto {
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
+  @MaxLength(256)
   name?: string;
 
   @ApiProperty()
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
+  @MaxLength(256)
   summary?: string;
 
   @Exclude()
@@ -30,14 +32,14 @@ export class UserCreateDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(6)
-  @MaxLength(256)
+  @MaxLength(64)
   password!: string;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @MinLength(3)
-  @MaxLength(256)
+  @MaxLength(128)
   @IsEmail()
   email!: string;
 }
