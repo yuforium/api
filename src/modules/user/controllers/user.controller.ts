@@ -51,6 +51,7 @@ export class UserController {
   @Post()
   @Header('Content-Type', 'application/activity+json')
   public async create(@ServiceId() serviceId: string, @Body() userDto: UserCreateDto) {
+    console.log('the service id is', serviceId);
     userDto.username = userDto.username.toLowerCase();
     userDto.email = userDto.email.toLowerCase();
 
@@ -65,7 +66,9 @@ export class UserController {
     const person = await this.userService.findPerson(serviceId, username.toLowerCase());
 
     if (person) {
-      return plainToInstance(PersonDto, person);
+      const r = plainToInstance(PersonDto, person);
+      r.preferredUsername = username;
+      return r;
     }
 
     throw new NotFoundException('User does not exist');

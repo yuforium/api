@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { ObjectService } from '../object/object.service';
 import { MongoServerError } from 'mongodb';
 import { ObjectDto } from '../../common/dto/object/object.dto';
+import { generateKeyPairSync } from "crypto";
 
 // import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 
@@ -31,22 +32,30 @@ export class UserService {
     }
 
     try {
+      const {publicKey, privateKey} = await this.generateUserKeyPair(serviceId, username);
+
       const user = await this.userModel.create({
         serviceId,
         username,
         email: userDto.email,
-        password: await bcrypt.hash(password, saltRounds)
+        password: await bcrypt.hash(password, saltRounds),
+        privateKey: privateKey.toString()
       });
 
       const personDto = {
-        "@context": "https://www.w3.org/ns/activitystreams",
-        'type': "Person",
-        "id": `https://${serviceId}/user/${userDto.username}`,
-        "attributedTo": `https://${serviceId}`,
-        "name": userDto.name,
-        "preferredUsername": user.username,
-        "summary": userDto.summary,
-        '_serviceId': serviceId
+        '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
+        'type': 'Person',
+        'id': `https://${serviceId}/user/${userDto.username}`,
+        'attributedTo': `https://${serviceId}`,
+        'name': userDto.name,
+        'preferredUsername': user.username,
+        'summary': userDto.summary,
+        '_serviceId': serviceId,
+        'publicKey': {
+          'id': `https://${serviceId}/user/${userDto.username}#main-key`,
+          'owner': `https://${serviceId}/user/${userDto.username}`,
+          'publicKeyPem': publicKey.toString()
+        }
       };
 
       // effectively the person is creating themselves
@@ -89,5 +98,61 @@ export class UserService {
 
   public async find(): Promise<any[]> {
     return this.userModel.find({});
+  }
+
+  public async generateUserKeyPair(serviceId: string, username: string): Promise<any> {
+    const {publicKey, privateKey} = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: {
+        type: 'spki',
+        format: 'pem'
+      },
+      privateKeyEncoding: {
+        type: 'pkcs8',
+        format: 'pem',
+        cipher: 'aes-256-cbc',
+        passphrase: ''
+      }
+    });
+
+    return {publicKey, privateKey};
+  }
+
+  public async resetKey(serviceId: string, username: string): Promise<any> {
+    const user = await this.findOne(serviceId, username);
+
+    if (user) {
+      const other = await this.objectService.findOne({_id: user.defaultIdentity});
+      console.log('other is', other);
+    }
+
+    if (!user) {
+      this.logger.error(`User "${username}" not found`);
+      return null;
+    }
+
+    const person = await this.objectService.findOne({_id: user.defaultIdentity});
+
+    if (person) {
+      person['@context'] = ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'];
+      const {publicKey, privateKey} = await this.generateUserKeyPair(serviceId, username);
+
+      person.publicKey = {
+        'id': `${person.id}#main-key`,
+        'owner': person.id,
+        'publicKeyPem': publicKey.toString()
+      }
+
+      user.privateKey = privateKey.toString();
+
+      await person.save();
+      await user.save();
+
+      this.logger.log(`Reset key for user "${username}"`);
+    }
+    else {
+      this.logger.error(`Default identity not found for user: ${username}`);
+      return null;
+    }
   }
 }

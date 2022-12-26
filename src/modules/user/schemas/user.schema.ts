@@ -22,10 +22,13 @@ export class User {
   identities: any[] = [];
 
   @Prop({type: mongoose.Schema.Types.ObjectId})
-  defaultIdentity: mongoose.Schema.Types.ObjectId | undefined;
+  defaultIdentity!: mongoose.Schema.Types.ObjectId;
 
   @Prop({type: String, required: true})
   email!: string;
+
+  @Prop({type: String})
+  privateKey: string | undefined;
 
   actor!: Actor;
 }
