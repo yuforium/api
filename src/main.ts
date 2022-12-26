@@ -4,11 +4,16 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface'
 import { ClassSerializerInterceptor, ConsoleLogger, ValidationPipe } from '@nestjs/common'
 import { useContainer } from 'class-validator'
+import * as bodyParser from 'body-parser'
 
 async function bootstrap () {
   const app = await NestFactory.create(AppModule, {
+    bodyParser: false, // see below re: bodyParser
     logger: ['log', 'error', 'warn', 'debug', 'verbose']
   });
+
+  // nest's built-in bodyParser is only configured to parse application/json, we need to create our own
+  app.use(bodyParser.json({type: ['application/activity+json', 'application/json']}));
 
   const options = new DocumentBuilder()
     .setTitle("Yuforium API Specification")
@@ -33,6 +38,6 @@ async function bootstrap () {
   app.useGlobalPipes(new ValidationPipe({transform: true, whitelist: true}));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), {excludeExtraneousValues: true}));
 
-  await app.listen(3000);
+  await app.listen(3001);
 }
 bootstrap();

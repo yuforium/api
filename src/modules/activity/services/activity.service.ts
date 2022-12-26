@@ -17,6 +17,10 @@ export class ActivityService implements APActivityService {
     @InjectModel('Activity') protected readonly activityModel: Model<ActivityDocument>
   ) { }
 
+  public id() {
+    return new Types.ObjectId();
+  }
+
   /**
    * Get an Activity by its id
    * @param id
@@ -30,13 +34,19 @@ export class ActivityService implements APActivityService {
     return activity;
   }
 
+  public async createActivity(activity: ActivityRecordDto): Promise<ActivityDto> {
+    const activityRecord = await this.activityModel.create(activity);
+    console.log('the created record is', activityRecord);
+    return plainToInstance(ActivityDto, activityRecord, {excludeExtraneousValues: true});
+  }
+
   /**
    * Create a new activity
    *
    * @param dto
    * @returns
    */
-  public async create(type: 'Create', actorId: string, object: APObject): Promise<{activity: ActivityDto}> {
+  public async create(type: 'Create' | 'Follow', actorId: string, object: APObject): Promise<{activity: ActivityDto}> {
     const _id = new Types.ObjectId();
 
     const dto = Object.assign(new ActivityRecordDto(), {

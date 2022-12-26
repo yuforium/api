@@ -18,7 +18,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "doc": "compodoc -p tsconfig.json -s"
   },
   "dependencies": {
     "@nestjs/axios": "^0.1.0",
@@ -31,6 +32,7 @@
     "@nestjs/platform-express": "^9.0.5",
     "@nestjs/swagger": "^6.0.4",
     "@yuforium/activity-streams": "^0.1.2",
+    "@yuforium/http-signature": "^0.0.1",
     "bcrypt": "^5.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
@@ -45,6 +47,7 @@
     "swagger-ui-express": "^4.1.2"
   },
   "devDependencies": {
+    "@compodoc/compodoc": "^1.1.19",
     "@nestjs/cli": "^8.2.5",
     "@nestjs/schematics": "^8.0.10",
     "@nestjs/testing": "^9.0.5",
@@ -57,6 +60,7 @@
     "@types/psl": "^1.1.0",
     "@types/supertest": "^2.0.8",
     "jest": "^27.5.1",
+    "multicast-service-discovery": "^4.0.3",
     "prettier": "1.19.1",
     "supertest": "^4.0.2",
     "ts-jest": "^27.1.4",
@@ -64,7 +68,7 @@
     "ts-node": "^8.4.1",
     "tsconfig-paths": "^3.9.0",
     "tslint": "^5.20.0",
-    "typedoc": "^0.22.10",
+    "typedoc": "^0.22.18",
     "typescript": "^4.4.4"
   },
   "jest": {

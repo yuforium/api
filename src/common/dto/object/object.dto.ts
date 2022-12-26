@@ -10,6 +10,10 @@ const { Mixed } = mongoose.Schema.Types;
  * Default Object DTO, which extends the ActivityStreams Object type and adds decorators for Mongoose and any custom validation overrides.
  */
 export class ObjectDto extends ActivityStreams.object('Object') {
+  @Prop({type: mongoose.Schema.Types.Mixed, required: true})
+  @Expose()
+  public '@context'?: string | string[] = 'https://www.w3.org/ns/activitystreams';
+
   @Prop({type: String, required: true})
   @Expose()
   public id!: string;
@@ -53,4 +57,12 @@ export class ObjectDto extends ActivityStreams.object('Object') {
   @Prop({type: Mixed})
   @Expose()
   public to?: string | string[];
+
+  @Prop({type: Mixed})
+  @Expose()
+  public publicKey?: {
+    id: string;
+    owner: string;
+    publicKeyPem: string;
+  }
 }

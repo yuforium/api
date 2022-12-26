@@ -34,16 +34,16 @@ export class ActivityDto extends ActivityStreams.activity('Activity') {
   @IsRequired()
   @Expose()
   @ValidateNested({each: true})
-  @Transform(params => transformer.transform(params))
+  @Transform(params => {
+    if (typeof params.value === 'string') {
+      return params.value;
+    }
+    return transformer.transform(params);
+  })
   public object!: any;
 
-  @Prop({type: String})
-  @IsOptional()
-  @Expose()
-  public target!: string;
-
-  @Prop({type: String, required: true})
-  @IsRequired()
-  @Expose()
-  public published!: string;
+  // @Prop({type: String, required: true})
+  // @IsRequired()
+  // @Expose()
+  // public published!: string;
 }

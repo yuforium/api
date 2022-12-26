@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Logger, NotImplementedException, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Logger, NotImplementedException, Param, Post, RawBodyRequest, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Note } from '@yuforium/activity-streams';
@@ -46,17 +46,25 @@ export class UserInboxController {
   public async postInbox(
     @ServiceId() serviceId: string, @Req() req: Request, @Body() activity: any, @Param('username') username: string
   ) {
+    const signature = req.header('Signature');
     const targetUserId = `https://${serviceId}/user/${username}`;
 
-    if (typeof activity.object.to === 'string' && activity.object.to !== targetUserId) {
-      throw new BadRequestException(`The activity is not intended for the user ${targetUserId}.`);
-    }
-    else if (Array.isArray(activity.object.to) && !activity.object.to.includes(targetUserId)) {
-      throw new BadRequestException(`The activity is not intended for the user ${targetUserId}.`);
-    }
+    // if (typeof activity.object.to === 'string' && activity.object.to !== targetUserId) {
+    //   throw new BadRequestException(`The activity is not intended for the user ${targetUserId}.`);
+    // }
+    // else if (Array.isArray(activity.object.to) && !activity.object.to.includes(targetUserId)) {
+    //   throw new BadRequestException(`The activity is not intended for the user ${targetUserId}.`);
+    // }
+
+    console.log('headers are', req.headers);
 
     this.logger.debug(`postInbox(): Received "${activity.type}" activity for ${targetUserId} from ${req.socket.remoteAddress}`);
-    this.inboxService.accept(activity);
+    this.inboxService.accept<ActivityDto>(activity, {requestSignature: {headers: req.headers, path: `/user/${username}/inbox`, method: 'post'}});
+
+    return {
+      'status': 'Accepted',
+      'id': activity.id,
+    }
     // const receipt = await this.activityService.process(activity);
     // return {
     //   status: 'accepted',

@@ -6,6 +6,9 @@ import { Exclude, Expose } from "class-transformer";
 export class PersonDto extends Person {
   static type: 'Person' = 'Person';
 
+  @Expose()
+  '@context': string | string[] = 'https://www.w3.org/ns/activitystreams';
+
   @ApiProperty({type: 'string', format: 'uri', description: 'The ID of the user'})
   @Expose()
   id!: string;
@@ -24,6 +27,13 @@ export class PersonDto extends Person {
   @ApiProperty({type: 'string'})
   @Expose()
   preferredUsername: string | undefined;
+
+  @Expose()
+  publicKey?: {
+    id: string;
+    owner: string;
+    publicKeyPem: string;
+  }
 
   @ApiProperty({type: 'string', format: 'uri'})
   @Expose()
