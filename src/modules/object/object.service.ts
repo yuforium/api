@@ -35,9 +35,16 @@ export class ObjectService {
     return new Types.ObjectId();
   }
 
-  public async create(dto: ObjectCreateDto): Promise<ObjectDto> {
-
-    return await this.objectModel.create(dto);
+  public async create(dto: ObjectRecordDto): Promise<ObjectDto> {
+    try {
+      const obj = await this.objectModel.create(dto);
+      console.log('obj created');
+      return plainToInstance(ObjectDto, obj);
+    }
+    catch (err) {
+      this.logger.error(`create(): ${(err as Error).message}`)
+      throw err;
+    }
     // return await this.createObject(dto, options);
 
     // return {

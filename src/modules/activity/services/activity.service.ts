@@ -46,23 +46,24 @@ export class ActivityService implements APActivityService {
    * @param dto
    * @returns
    */
-  public async create(type: 'Create' | 'Follow', actorId: string, object: APObject): Promise<{activity: ActivityDto}> {
-    const _id = new Types.ObjectId();
+  public async create(dto: ActivityRecordDto): Promise<ActivityDto> {
+    // const _id = new Types.ObjectId();
 
-    const dto = Object.assign(new ActivityRecordDto(), {
-      id: `${actorId}/activities/${_id.toString()}`,
-      type,
-      actor: actorId,
-      object: instanceToPlain(object),
-      published: type === 'Create' ? object.published : (new Date()).toISOString(),
-      _serviceId: object._serviceId,
-      _id,
-      _objectId: object._id,
-    });
+    // const dto = Object.assign(new ActivityRecordDto(), {
+    //   id: `${actorId}/activities/${_id.toString()}`,
+    //   type,
+    //   actor: actorId,
+    //   object: instanceToPlain(object),
+    //   published: type === 'Create' ? object.published : (new Date()).toISOString(),
+    //   _serviceId: object._serviceId,
+    //   _id,
+    //   _objectId: object._id,
+    // });
 
-    this.logger.debug(`Creating activity with id ${dto.id}`);
+    // this.logger.debug(`Creating activity with id ${dto.id}`);
     const activity = await this.activityModel.create(dto);
-    return {activity: plainToInstance(ActivityDto, activity, {excludeExtraneousValues: true, exposeUnsetFields: false})};
+    console.log('activity created!', activity);
+    return plainToInstance(ActivityDto, activity, {excludeExtraneousValues: true, exposeUnsetFields: false});
   }
 
   // public async _create(serviceId: string, idPrefix: string, idType: string, data: any, id?: string): Promise<{activity?: ActivityDocument, object?: ObjectDocument}> {

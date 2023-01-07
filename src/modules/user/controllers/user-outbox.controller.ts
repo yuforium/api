@@ -54,7 +54,6 @@ export class UserOutboxController {
     }
 
     const userId = `https://${serviceId}/user/${params.username}`;
-
     const actorRecord = await this.objectService.get(actor.id);
 
     // @todo - auth should be done via decorator on the class method
@@ -63,15 +62,18 @@ export class UserOutboxController {
       throw new UnauthorizedException('You are not authorized to post to this outbox.');
     }
 
+    this.logger.debug(`postOutbox(): ${params.username} creating a ${dto.type}`)
+
     Object.assign(dto, {
       attributedTo: (req.user as any).actor.id,
       published: (new Date()).toISOString(),
       to: Array.isArray(dto.to) ? dto.to : [dto.to as string]
     })
 
-    const {activity} = await this.outboxService.createObject<OutboxObjectCreateDto>(actor.id, {...dto as ObjectCreateDto, serviceId});
+    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(actor.id, {...dto as ObjectCreateDto, serviceId});
 
-    return plainToClass(ActivityDto, activity);
+    console.log('activity is', activity);
+    return activity;
   }
 
   /**

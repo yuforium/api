@@ -34,7 +34,7 @@ export interface APService {
 }
 
 export interface APActivityService {
-  create(type: 'Create', actorId: string, object: APObject): Promise<{activity: APActivity}>;
+  create(dto: APActivity): Promise<APActivity>;
 }
 
 export interface APObjectService {
@@ -67,14 +67,18 @@ export class OutboxService {
    * @param dto Object to be created
    * @returns
    */
-  async createObject<T extends ObjectCreateDto>(actorId: string, dto: T): Promise<{activity: APActivity, object: APObject}> {
+  async createActivityFromObject<T extends APObject = APObject>(actorId: string, dto: T): Promise<any> {
     dto = Object.assign({}, dto);
 
-    const object = await this.objectService.create(dto);
-    const {activity} = await this.activityService.create('Create', actorId, object);
+    const activity = await this.outboxProcessor.createActivityFromObject<T>(dto);
 
-    // await this.activityPubService.dispatch(activity);
+    return activity;
 
-    return {activity, object};
+    // const object = await this.objectService.create(dto);
+    // const {activity} = await this.activityService.create('Create', actorId, object);
+
+    // // await this.activityPubService.dispatch(activity);
+
+    // return {activity, object};
   }
 }
