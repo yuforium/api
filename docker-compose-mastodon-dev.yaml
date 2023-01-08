@@ -1,0 +1,9 @@
+version: "3.3"
+services:
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx-mastodon.conf:/etc/nginx/conf.d/yuforium.conf
+    ports:
+      - "80:80"
+      - "443:443"
