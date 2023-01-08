@@ -36,7 +36,6 @@ export class ActivityService implements APActivityService {
 
   public async createActivity(activity: ActivityRecordDto): Promise<ActivityDto> {
     const activityRecord = await this.activityModel.create(activity);
-    console.log('the created record is', activityRecord);
     return plainToInstance(ActivityDto, activityRecord, {excludeExtraneousValues: true});
   }
 
@@ -62,7 +61,6 @@ export class ActivityService implements APActivityService {
 
     // this.logger.debug(`Creating activity with id ${dto.id}`);
     const activity = await this.activityModel.create(dto);
-    console.log('activity created!', activity);
     return plainToInstance(ActivityDto, activity, {excludeExtraneousValues: true, exposeUnsetFields: false});
   }
 

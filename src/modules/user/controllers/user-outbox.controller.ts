@@ -72,7 +72,6 @@ export class UserOutboxController {
 
     const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(actor.id, {...dto as ObjectCreateDto, serviceId});
 
-    console.log('activity is', activity);
     return activity;
   }
 

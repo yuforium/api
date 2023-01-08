@@ -82,7 +82,6 @@ export class ActivityPubService {
       body: JSON.stringify(activity),
     });
 
-    console.log(response);
 
     return response;
 

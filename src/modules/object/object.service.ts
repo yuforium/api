@@ -38,7 +38,6 @@ export class ObjectService {
   public async create(dto: ObjectRecordDto): Promise<ObjectDto> {
     try {
       const obj = await this.objectModel.create(dto);
-      console.log('obj created');
       return plainToInstance(ObjectDto, obj);
     }
     catch (err) {

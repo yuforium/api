@@ -56,8 +56,6 @@ export class UserInboxController {
     //   throw new BadRequestException(`The activity is not intended for the user ${targetUserId}.`);
     // }
 
-    console.log('headers are', req.headers);
-
     this.logger.debug(`postInbox(): Received "${activity.type}" activity for ${targetUserId} from ${req.socket.remoteAddress}`);
     this.inboxService.accept<ActivityDto>(activity, {requestSignature: {headers: req.headers, path: `/user/${username}/inbox`, method: 'post'}});
 

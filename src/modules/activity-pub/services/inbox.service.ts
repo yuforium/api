@@ -106,13 +106,10 @@ export class InboxService {
   }
 
   protected async undo(activity: ActivityDto): Promise<ActivityDto | null> {
-
-    console.log(`processing an undo request`, activity);
     return null;
   }
 
   protected async follow(activity: ActivityDto): Promise<ActivityDto | null> {
-    console.log(`processing a follow request`, activity);
     return null;
   }
 

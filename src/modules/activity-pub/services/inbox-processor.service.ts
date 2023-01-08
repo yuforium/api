@@ -39,11 +39,7 @@ export class InboxProcessorService implements APInboxProcessor {
       throw new Error('Object does not exist');
     }
 
-    console.log('the follow dto is', followDto);
-
     const follow = await this.activityService.createActivity(followDto);
-
-    console.log('the created follow activity is', follow);
 
     const _id = this.objectService.id().toString();
 

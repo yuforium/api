@@ -12,7 +12,6 @@ export class WebfingerController {
   public async webfinger(@ServiceId() serviceId: string, @Query('resource') resource: string): Promise<any> {
     const [, username, parsedServiceId] = /^acct:([A-Za-z0-9_]*)@(.*)$/i.exec(resource) || [];
 
-    console.log(`username is ${username} and serviceId is ${parsedServiceId}`);
     if (!username || !parsedServiceId) {
       throw new NotFoundException();
     }

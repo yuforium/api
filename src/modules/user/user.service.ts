@@ -123,7 +123,6 @@ export class UserService {
 
     if (user) {
       const other = await this.objectService.findOne({_id: user.defaultIdentity});
-      console.log('other is', other);
     }
 
     if (!user) {

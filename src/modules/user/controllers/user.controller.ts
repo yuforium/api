@@ -51,7 +51,6 @@ export class UserController {
   @Post()
   @Header('Content-Type', 'application/activity+json')
   public async create(@ServiceId() serviceId: string, @Body() userDto: UserCreateDto) {
-    console.log('the service id is', serviceId);
     userDto.username = userDto.username.toLowerCase();
     userDto.email = userDto.email.toLowerCase();
 
