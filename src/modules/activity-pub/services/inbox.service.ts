@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable, Logger, NotImplementedException } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { parse, verify, VerifyOptions } from '@yuforium/http-signature';
 import { APActivity, APActor, OutboxService } from './outbox.service';
 import { InboxProcessorService } from './inbox-processor.service';
 import { ActivityPubService } from './activity-pub.service';
+import * as psl from 'psl';
 
 type APInboxProcessorType = 'create' | 'follow';
 
@@ -45,6 +45,13 @@ export class InboxService {
     // if requestSignature is provided, verify the signature.  If we don't have a public key for the user, we can't verify the signature, and we
     // should queue processing of the activity for later.
     const {requestSignature} = options || {};
+
+    // @todo domain checking can be moved into activity dto validation
+    const parsedUrl = new URL(activity.actor);
+    if (!psl.isValid(parsedUrl.hostname)) {
+      throw new TypeError('Invalid URL');
+    }
+
     const response = await fetch(activity.actor, {headers: {'Accept': 'application/activity+json'}});
     const actor = await response.json();
 
