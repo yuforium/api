@@ -86,7 +86,7 @@ export class InboxService {
 
     const type = activity.type.toLowerCase() as 'create' | 'follow';
 
-    if (!type || typeof type !== 'string') {
+    if (!type || typeof type !== 'string' || !['create', 'follow'].includes(type)) {
       throw new Error();
     }
 
