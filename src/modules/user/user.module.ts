@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { UserService } from './user.service';
@@ -19,7 +19,7 @@ import { ActivityPubModule } from '../activity-pub/activity-pub.module';
     ObjectModule,
     ActivityModule,
     ActivityStreamModule,
-    ActivityPubModule
+    forwardRef(() => ActivityPubModule)
   ],
   controllers: [
     UserOutboxController,

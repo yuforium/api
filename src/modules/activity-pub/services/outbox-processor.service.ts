@@ -4,7 +4,7 @@ import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto'
 import { ActivityRecordDto } from 'src/modules/activity/schema/activity.schema';
 import { ActivityService } from 'src/modules/activity/services/activity.service';
 import { ObjectService } from 'src/modules/object/object.service';
-import { ObjectRecordDto } from 'src/modules/object/schema/object.schema';
+import { ObjectDocument, ObjectRecordDto } from 'src/modules/object/schema/object.schema';
 import { APActivity, APObject } from './outbox.service';
 
 @Injectable()
@@ -18,19 +18,26 @@ export class OutboxProcessorService {
     return dto;
   }
 
-  public async createActivityFromObject<T extends APObject = APObject>(dto: T): Promise<APObject> {
-
+  public async createActivityFromObject<T extends APObject = APObject>(dto: T): Promise<APActivity> {
     const id = this.objectService.id();
-    const idType = typeof dto === 'string' && dto ? (dto as string).toLowerCase() : 'object'; 
-    
-    Object.assign(dto, {
-      id: `${dto.attributedTo}/${idType}/${id.toString()}`,
-      '@context': 'https://www.w3.org/ns/activitystreams'
+    const idType = typeof dto === 'string' && dto ? (dto as string).toLowerCase() : 'object';
+    const actor = await this.objectService.findOne({
+      id: dto.attributedTo,
+      _serviceId: {$ne: null}
     });
 
-    // dto.id = `${dto.attributedTo}/${dto.type}/${id.toString()}`;
+    if (!actor) {
+      throw new Error('Actor does not exist');
+    }
     
-    // first line fails, second line works
+    Object.assign(dto, {
+      id: `${actor.id}/${idType}/${id.toString()}`,
+      '@context': 'https://www.w3.org/ns/activitystreams',
+      _serviceId: actor._serviceId,
+      _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public'
+    });
+
+    // first line fails, second line works, note that Object.assign works above
     // dto['@context'] = 'https://www.w3.org/ns/activitystreams';
     // dto['context'] = 'wtf';
 
@@ -48,5 +55,14 @@ export class OutboxProcessorService {
     const activity = await this.activityService.create(activityDto)
 
     return activity;
+  }
+
+  /**
+   * Return an object that is associated with this instance.
+   * @param id 
+   * @returns 
+   */
+  public async getLocalObject(id: string): Promise<ObjectDocument | null> {
+    return this.objectService.findOne({id, _serviceId: {$ne: null}});
   }
 }

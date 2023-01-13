@@ -108,7 +108,7 @@ export class ObjectService {
     return this.objectModel.find(params, {}, options);
   }
 
-  public async findOne(params: any): Promise<any> {
+  public async findOne(params: any): Promise<ObjectDocument | null> {
     return this.objectModel.findOne(params);
   }
 

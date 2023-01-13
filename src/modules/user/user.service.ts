@@ -80,6 +80,12 @@ export class UserService {
     }
   }
 
+  /**
+   * @todo this method is problematic, it shouldn't be limited to finding just by username and be more like the Mongoose findOne() method
+   * @param serviceId 
+   * @param username 
+   * @returns 
+   */
   public async findOne(serviceId: string, username: string): Promise<UserDocument | null> {
     return await this.userModel.findOne({serviceId, username: {'$eq': username}});
   }
@@ -93,7 +99,7 @@ export class UserService {
       return this.objectService.findOne({_id: user.defaultIdentity});
     }
 
-    return Promise.resolve(undefined);
+    return undefined;
   }
 
   public async find(): Promise<any[]> {

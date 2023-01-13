@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotImplementedException, Scope } from '@nestjs/common';
 import { ActivityService } from 'src/modules/activity/services/activity.service';
 import { ObjectService } from 'src/modules/object/object.service';
 import { ActivityPubService } from './activity-pub.service';
 import { Activity, Actor, ASObject, ASObjectOrLink } from '@yuforium/activity-streams';
 import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
 import { OutboxProcessorService } from './outbox-processor.service';
+import { sign } from '@yuforium/http-signature';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+import { PersonDto } from 'src/common/dto/object/person.dto';
+import { UserService } from 'src/modules/user/user.service';
+import * as crypto from 'crypto';
 
 export interface APObject extends ASObject {
   [k: string]: any;
@@ -41,13 +47,15 @@ export interface APObjectService {
   create(actorId: string, dto: APObject): Promise<{object: APObject}>;
 }
 
-@Injectable()
+@Injectable({scope: Scope.REQUEST})
 export class OutboxService {
   constructor(
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService,
     protected readonly activityPubService: ActivityPubService,
-    protected readonly outboxProcessor: OutboxProcessorService
+    protected readonly processor: OutboxProcessorService,
+    protected readonly userService: UserService,
+    @Inject(REQUEST) protected readonly request: Request
   ) {}
 
   public async find() {
@@ -55,7 +63,7 @@ export class OutboxService {
   }
 
   public async create<T extends APActivity = APActivity>(dto: T) {
-    const activity = await this.outboxProcessor.create(dto);
+    const activity = await this.processor.create(dto);
 
     // await this.activityPubService.dispatch(activity);
   }
@@ -70,15 +78,137 @@ export class OutboxService {
   async createActivityFromObject<T extends APObject = APObject>(actorId: string, dto: T): Promise<any> {
     dto = Object.assign({}, dto);
 
-    const activity = await this.outboxProcessor.createActivityFromObject<T>(dto);
-
-    return activity;
+    const activity = await this.processor.createActivityFromObject<T>(dto);
 
     // const object = await this.objectService.create(dto);
     // const {activity} = await this.activityService.create('Create', actorId, object);
 
-    // // await this.activityPubService.dispatch(activity);
+    await this.dispatch(activity);
 
     // return {activity, object};
+
+    return activity;
+  }
+
+  // @todo handle cc/bcc fields as well
+  /**
+   * Extract dispatch targets from an activity.  These targets still need to be resolved (i.e. if the target is a collection like a followers collection).
+   * @param activity 
+   * @returns 
+   */
+  protected async getDispatchTargets(activity: APActivity): Promise<string[]> {
+    let to = [];
+
+    if (typeof activity.object !== 'object' || activity.object.type === 'Link') {
+      throw new NotImplementedException('link resolution is not supported');
+    }
+
+    const obj = activity.object as ASObject;
+    
+    if (Array.isArray(obj.to)) {
+      to.push(...obj.to);
+    }
+    else if (typeof obj.to === 'string' && obj.to) {
+      to.push(obj.to);
+    }
+
+    const filterPredicate = async (id: any) => {
+      if (id === 'https://www.w3.org/ns/activitystreams#Public') {
+        return false;
+      }
+      
+      // don't bother with local users
+      if (await this.processor.getLocalObject(id.toString())) {
+        return false;
+      }
+
+      return true;
+    };
+
+    const filterVals = await Promise.all(to.map(val => filterPredicate(val)));
+
+    to = to.filter((v, i) => filterVals[i]).map(v => v.toString());
+    to = await Promise.all(to.map(v => this.getInboxUrl(v)));
+
+    return to;
+  }
+
+  protected async dispatch(activity: APActivity) {
+    let dispatchTo = await this.getDispatchTargets(activity);
+    
+    dispatchTo.forEach(async to => {
+      const response = await this.send(to, activity);
+      return response;
+    });
+  }
+
+  protected async getInboxUrl(address: string): Promise<string> {
+    // this.logger.debug(`getInboxUrl(): Getting inbox url for ${address}`);
+
+    const actor = (await fetch(address, {headers: {'Accept': 'application/activity+json'}}).then(res => res.json()));
+
+    return (actor as any).inbox;
+  }
+
+  /**
+   * @todo for a production system, this would need to resolved targets (i.e. if the target was a followers collection).  this would/should be done with queueing.
+   * @param url 
+   * @param activity 
+   * @returns 
+   */
+  protected async send(url: string, activity: APActivity): Promise<any> {
+    const parsedUrl = new URL(url);
+
+    const actor = (this.request.user as any)?.actor as PersonDto;
+    const username = (this.request.user as any)?.username as string;
+    const user = await this.userService.findOne('yuforium.dev', username);
+    const now = new Date();
+    const created = Math.floor(now.getTime() / 1000);
+    const privateKey = crypto.createPrivateKey({key: user?.privateKey as string, passphrase: ''});
+    const body = JSON.stringify(activity);
+    const signer = crypto.createSign('RSA-SHA256');
+    signer.update(body);
+    // const digest = signer.sign(privateKey, 'hex');
+    const digest = 'SHA-256=' + crypto.createHash('sha256').update(body).digest('base64');
+  
+    const opts = sign({
+      requestPath: parsedUrl.pathname,
+      method: 'post',
+      keyId: actor.publicKey?.id as string,
+      algorithm: 'rsa-sha256',
+      privateKey,
+      created,
+      expires: created + 300,
+      headers: ['(request-target)', 'host', 'date', 'digest'],
+      headerValues: {
+        host: parsedUrl.host,
+        date: now.toUTCString(),
+        digest
+      }
+    });
+
+    // console.log(opts);
+    // console.log(`keyId="http://yuforium.dev/user/chris#main-key",headers="${opts.headers?.join(" ")}",signature="${opts.signature}"`);
+
+    // console.log('digest is', digest);
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/activity+json',
+          'Accept': 'application/activity+json',
+          'Digest': digest,
+          'Signature': `keyId="http://yuforium.dev/user/chris#main-key",headers="${opts.headers?.join(" ")}",signature="${opts.signature}"`,
+          // '(request-target)': `${parsedUrl.pathname}`,
+          'date': now.toUTCString()
+        },
+        body: JSON.stringify(activity),
+      }).then(res => res.text());
+      console.log(response);
+      return response;
+    }
+    catch (err) {
+      console.log(err);
+    }
   }
 }
