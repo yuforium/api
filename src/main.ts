@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface'
 import { ClassSerializerInterceptor, ConsoleLogger, ValidationPipe } from '@nestjs/common'
 import { useContainer } from 'class-validator'
-import * as bodyParser from 'body-parser'
+import * as bodyParser from 'body-parser';
 
 async function bootstrap () {
   const app = await NestFactory.create(AppModule, {
@@ -36,7 +36,7 @@ async function bootstrap () {
   }
 
   app.useGlobalPipes(new ValidationPipe({transform: true, whitelist: true}));
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), {excludeExtraneousValues: true}));
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), {excludeExtraneousValues: true, groups: ['sslToPlain']}));
 
   await app.listen(3001);
 }

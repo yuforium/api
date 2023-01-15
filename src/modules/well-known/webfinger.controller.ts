@@ -1,5 +1,7 @@
 import { BadRequestException, Controller, Get, Logger, NotFoundException, Query } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { ServiceId } from '../../common/decorators/service-id.decorator';
+import { WebfingerDto } from './dto/webfinger.dto';
 import { WebfingerService } from './webfinger.service';
 
 @Controller('.well-known/webfinger')
@@ -16,8 +18,8 @@ export class WebfingerController {
       throw new NotFoundException();
     }
 
-    const acct = this.webfingerService.getAccount(serviceId, username);
+    const response = this.webfingerService.getAccount(serviceId, username);
 
-    return acct;
+    return plainToInstance(WebfingerDto, response);
   }
 }

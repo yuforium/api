@@ -1,8 +1,10 @@
 import { Prop } from "@nestjs/mongoose";
 import { OmitType, PartialType, PickType } from "@nestjs/swagger";
 import { ActivityStreams, ASObject, Collection, IsRequired } from "@yuforium/activity-streams";
-import { Expose } from "class-transformer";
+import { Expose, Transform } from "class-transformer";
+import { validateHeaderValue } from "http";
 import * as mongoose from "mongoose";
+import { sslToPlain } from "../util/ssl-to-plain";
 
 const { Mixed } = mongoose.Schema.Types;
 
@@ -14,6 +16,7 @@ export class ObjectDto extends ActivityStreams.object('Object') {
   @Expose()
   public '@context'?: string | string[] = 'https://www.w3.org/ns/activitystreams';
 
+  @Transform(sslToPlain, {groups: ['sslToPlain']})
   @Prop({type: String, required: true})
   @Expose()
   public id!: string;

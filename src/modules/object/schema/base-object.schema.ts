@@ -1,5 +1,5 @@
 import { Prop } from "@nestjs/mongoose";
-import { Exclude } from "class-transformer";
+import { Exclude, Transform } from "class-transformer";
 import { ObjectDto } from "src/common/dto/object/object.dto";
 
 type Constructor = new (...args: any[]) => {};
@@ -20,6 +20,14 @@ export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TB
     @Prop({type: String})
     @Exclude()
     public _serviceId?: string;
+
+    @Prop({type: String})
+    @Exclude()
+    public _host?: string;
+
+    @Prop({type: String})
+    @Exclude()
+    public _path?: string;
 
     @Prop({type: Boolean, default: false})
     @Exclude()

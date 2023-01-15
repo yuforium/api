@@ -11,6 +11,9 @@ export class ActivityRecordDto extends ActivityDto {
 
   @Prop({type: String, required: false})
   _serviceId?: string;
+
+  @Prop({type: String, required: false})
+  _path?: string
 }
 
 export const ActivitySchema = SchemaFactory.createForClass(ActivityRecordDto);

@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotImplementedException, Scope } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotImplementedException, Scope } from '@nestjs/common';
 import { ActivityService } from 'src/modules/activity/services/activity.service';
 import { ObjectService } from 'src/modules/object/object.service';
 import { ActivityPubService } from './activity-pub.service';
@@ -49,6 +49,8 @@ export interface APObjectService {
 
 @Injectable({scope: Scope.REQUEST})
 export class OutboxService {
+  protected logger = new Logger(OutboxService.name);
+
   constructor(
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService,
@@ -187,10 +189,6 @@ export class OutboxService {
       }
     });
 
-    // console.log(opts);
-    // console.log(`keyId="http://yuforium.dev/user/chris#main-key",headers="${opts.headers?.join(" ")}",signature="${opts.signature}"`);
-
-    // console.log('digest is', digest);
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -203,12 +201,12 @@ export class OutboxService {
           'date': now.toUTCString()
         },
         body: JSON.stringify(activity),
-      }).then(res => res.text());
-      console.log(response);
+      });
       return response;
     }
     catch (err) {
-      console.log(err);
+      this.logger.error(`send(): failed delivery to ${url}`);
+      throw err;
     }
   }
 }
