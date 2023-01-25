@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptions } from "@nestjs/swagger";
 import { ASObjectOrLink, Person } from "@yuforium/activity-streams";
 import { Exclude, Expose, Transform, Type } from "class-transformer";
+import { ObjectRecordDto } from "src/modules/object/schema/object.schema";
 import { sslToPlain } from "../util/ssl-to-plain";
 
 export class PublicKey {
@@ -17,7 +18,7 @@ export class PublicKey {
 }
 
 @Exclude()
-export class PersonDto extends Person {
+export class PersonDto extends ObjectRecordDto {
   static type: 'Person' = 'Person';
 
   @Expose()
@@ -32,7 +33,7 @@ export class PersonDto extends Person {
   name: string | undefined;
 
   @Transform(sslToPlain, {groups: ['sslToPlain']})
-  attributedTo?: ASObjectOrLink | ASObjectOrLink[] | undefined;
+  attributedTo?: string | undefined;
 
   @ApiProperty({type: 'string'})
   @Expose()

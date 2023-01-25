@@ -58,4 +58,13 @@ export class UserContentController {
 
     return collectionPage;
   }
+
+  @Get('posts/:postId')
+  public async getPost(
+    @ServiceId() _serviceId: string,
+    @Param() params: UserParamsDto,
+    @Param('postId') postId: string
+  ): Promise<any> {
+    return await this.objectService.getByPath(_serviceId, `users/${params.username}/posts`, postId);
+  }
 }

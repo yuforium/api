@@ -7,7 +7,7 @@ export type UserDocument = User & mongoose.Document;
 @Schema({collection: 'user', autoIndex: true})
 export class User {
   @Prop({type: String, required: true})
-  serviceId!: string;
+  hostname!: string;
 
   @Prop({type: String, required: true, lowercase: true})
   username!: string;

@@ -9,6 +9,7 @@ import { ObjectService } from '../object/object.service';
 import { MongoServerError } from 'mongodb';
 import { ObjectDto } from '../../common/dto/object/object.dto';
 import { generateKeyPairSync } from "crypto";
+import { PersonDto } from 'src/common/dto/object/person.dto';
 
 // import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 
@@ -23,7 +24,7 @@ export class UserService {
     // protected activityStreamService: ActivityPubService
   ) { }
 
-  public async create(serviceId: string, userDto: UserCreateDto): Promise<any> {
+  public async create(hostname: string, userDto: UserCreateDto): Promise<any> {
     const saltRounds = 10;
     const {username, password} = userDto;
 
@@ -32,28 +33,35 @@ export class UserService {
     }
 
     try {
-      const {publicKey, privateKey} = await this.generateUserKeyPair(serviceId, username);
+      const {publicKey, privateKey} = await this.generateUserKeyPair();
 
       const user = await this.userModel.create({
-        serviceId,
+        hosname: hostname,
         username,
         email: userDto.email,
         password: await bcrypt.hash(password, saltRounds),
         privateKey: privateKey.toString()
       });
 
+      const _path = 'users';
+      const _pathId = userDto.username;
+
       const personDto = {
         '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
         'type': 'Person',
-        'id': `https://${serviceId}/user/${userDto.username}`,
-        'attributedTo': `https://${serviceId}`,
+        'id': `https://${hostname}/${_path}/${_pathId}`,
+        'attributedTo': `https://${hostname}/${_path}/${_pathId}`, // assume the user is creating themselves for now
         'name': userDto.name,
         'preferredUsername': user.username,
         'summary': userDto.summary,
-        '_serviceId': serviceId,
+        '_hostname': hostname,
+        '_path': 'users',
+        '_pathId': _pathId,
+        '_local': true,
+        _public: true,
         'publicKey': {
-          'id': `https://${serviceId}/user/${userDto.username}#main-key`,
-          'owner': `https://${serviceId}/user/${userDto.username}`,
+          'id': `https://${hostname}/${_path}/${_pathId}#main-key`,
+          'owner': `https://${hostname}/${_path}/${_pathId}`,
           'publicKeyPem': publicKey.toString()
         }
       };
@@ -106,7 +114,7 @@ export class UserService {
     return this.userModel.find({});
   }
 
-  public async generateUserKeyPair(serviceId: string, username: string): Promise<any> {
+  public async generateUserKeyPair(): Promise<any> {
     const {publicKey, privateKey} = generateKeyPairSync('rsa', {
       modulusLength: 2048,
       publicKeyEncoding: {
@@ -140,7 +148,7 @@ export class UserService {
 
     if (person) {
       person['@context'] = ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'];
-      const {publicKey, privateKey} = await this.generateUserKeyPair(serviceId, username);
+      const {publicKey, privateKey} = await this.generateUserKeyPair();
 
       person.publicKey = {
         'id': `${person.id}#main-key`,

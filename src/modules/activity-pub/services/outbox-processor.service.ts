@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { ObjectDto } from 'src/common/dto/object';
 import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
 import { ActivityRecordDto } from 'src/modules/activity/schema/activity.schema';
 import { ActivityService } from 'src/modules/activity/services/activity.service';
@@ -20,7 +21,7 @@ export class OutboxProcessorService {
 
   public async createActivityFromObject<T extends APObject = APObject>(dto: T): Promise<APActivity> {
     const id = this.objectService.id();
-    const idType = typeof dto === 'string' && dto ? (dto as string).toLowerCase() : 'object';
+    const idType = typeof dto.type === 'string' && dto.type ? (dto.type as string).toLowerCase() : 'object';
     const actor = await this.objectService.findOne({
       id: dto.attributedTo,
       _serviceId: {$ne: null}
@@ -29,27 +30,34 @@ export class OutboxProcessorService {
     if (!actor) {
       throw new Error('Actor does not exist');
     }
-    
-    Object.assign(dto, {
-      id: `${actor.id}/${idType}/${id.toString()}`,
+    const recordDto: ObjectRecordDto = {
+      ...dto as ObjectDto,
       '@context': 'https://www.w3.org/ns/activitystreams',
-      _serviceId: actor._serviceId,
-      _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public'
-    });
+      id: `https://${actor.id}/posts/${id.toString()}`,
+      _hostname: actor._hostname,
+      _path: `${actor._path}/${actor._pathId}/posts/${id.toString()}`,
+      _pathId: id.toString(),
+      _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public',
+      _local: true
+    };
 
     // first line fails, second line works, note that Object.assign works above
     // dto['@context'] = 'https://www.w3.org/ns/activitystreams';
     // dto['context'] = 'wtf';
 
-    const obj = await this.objectService.create(dto as ObjectRecordDto);
+    const obj = await this.objectService.create(recordDto);
 
     const activityId = this.activityService.id();
 
     const activityDto: ActivityRecordDto = {
-      id: `${dto.attributedTo}/create/${activityId.toString()}`,
+      id: `${dto.attributedTo}/activities/${activityId.toString()}`,
       type: 'Create',
       actor: `${dto.attributedTo}`,
-      object: instanceToPlain(obj)
+      object: instanceToPlain(obj),
+      _hostname: actor._hostname,
+      _path: `${actor._path}/${actor._pathId}/activities`,
+      _pathId: activityId.toString(),
+      _local: true
     }
 
     const activity = await this.activityService.create(activityDto)

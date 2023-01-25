@@ -1,7 +1,7 @@
 import { Prop } from "@nestjs/mongoose";
 import { OmitType, PartialType, PickType } from "@nestjs/swagger";
 import { ActivityStreams, ASObject, Collection, IsRequired } from "@yuforium/activity-streams";
-import { Expose, Transform } from "class-transformer";
+import { Exclude, Expose, Transform } from "class-transformer";
 import { validateHeaderValue } from "http";
 import * as mongoose from "mongoose";
 import { sslToPlain } from "../util/ssl-to-plain";

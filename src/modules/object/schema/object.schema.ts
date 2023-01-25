@@ -14,3 +14,7 @@ export class ObjectRecordDto extends BaseObjectSchema<GConstructor<ObjectDto>>(O
 }
 
 export const ObjectSchema = SchemaFactory.createForClass(ObjectRecordDto);
+
+ObjectSchema.pre('find', () => {
+    console.log(this);
+});

@@ -193,15 +193,20 @@ export class OutboxService {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/activity+json',
-          'Accept': 'application/activity+json',
-          'Digest': digest,
-          'Signature': `keyId="http://yuforium.dev/user/chris#main-key",headers="${opts.headers?.join(" ")}",signature="${opts.signature}"`,
-          // '(request-target)': `${parsedUrl.pathname}`,
+          'content-type': 'application/activity+json',
+          'accept': 'application/activity+json',
+          'digest': digest,
+          'signature': `keyId="http://yuforium.dev/user/chris#main-key",headers="${opts.headers?.join(" ")}",signature="${opts.signature}"`,
           'date': now.toUTCString()
         },
         body: JSON.stringify(activity),
       });
+      if (response.ok) {
+        this.logger.log(`send(): ${response.status} code received sending ${activity.id} to ${url}`);
+      }
+      else {
+        this.logger.error(`send(): ${response.status} code received sending ${activity.id} to ${url} with response "${await response.text()}"`);
+      }
       return response;
     }
     catch (err) {

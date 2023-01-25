@@ -14,7 +14,7 @@ import { ActivityModule } from './modules/activity/activity.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({load: [database, service, auth]}),
+    ConfigModule.forRoot({load: [database, service, auth], isGlobal: true}),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -28,7 +28,8 @@ import { ActivityModule } from './modules/activity/activity.module';
     // ObjectModule
   ],
   controllers: [AppController],
-  providers:   [AppService],
+  providers:   [AppService, ConfigService],
+  exports:    [ConfigService]
 })
 export class AppModule {
   constructor() { }

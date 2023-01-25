@@ -48,7 +48,8 @@ export class InboxService {
 
     // @todo domain checking can be moved into activity dto validation
     const parsedUrl = new URL(activity.actor);
-    if (!psl.isValid(parsedUrl.hostname)) {
+    
+    if (!psl.isValid(parsedUrl.hostname) && (parsedUrl.hostname.substring(parsedUrl.hostname.length -6) !== '.local')) {
       throw new TypeError('Invalid URL');
     }
 
@@ -59,17 +60,17 @@ export class InboxService {
       const {headers} = options.requestSignature;
 
       if (typeof headers.signature !== 'string') {
-        throw new BadRequestException();
+        throw new BadRequestException('Signature header is required');
       }
 
       const signature = parse(headers.signature);
       const publicKey = actor.publicKey;
-
+      
       /**
        * @todo the activity could have its actor in JSON format, which would require comparing against activity.actor.id
        */
       if (actor.id !== activity.actor) {
-        throw new BadRequestException();
+        throw new BadRequestException('Actor does not match');
       }
 
       const verifyOptions: VerifyOptions = {
@@ -83,25 +84,32 @@ export class InboxService {
       const verified = verify(verifyOptions);
 
       if (!verified) {
-        throw new BadRequestException();
+        this.logger.error(`accept(): signature verification failed for ${activity.actor}`);
+        throw new BadRequestException('Signature verification failed');
       }
     }
+
+    this.logger.debug(`accept(): signature verified for ${activity.id}`);
 
     if (Array.isArray(activity.type)) {
       throw new Error('Activity type must be a string, multiple values for type are not allowed at this time');
     }
 
-    const type = activity.type.toLowerCase() as 'create' | 'follow';
+    const type = activity.type.toLowerCase() as 'create' | 'follow' | 'undo';
 
-    if (!type || typeof type !== 'string' || !['create', 'follow'].includes(type)) {
-      throw new Error();
+    if (!type || typeof type !== 'string') {
+      throw new Error('Activity type is required');
+    }
+    else if (!['create', 'follow', 'undo'].includes(type)) {
+      throw new Error(`The activity type ${type} is not supported`);
     }
 
     if (this.processor[type]) {
+      this.logger.debug(`accept(): processing ${type} activity ${activity.id}`);
       await this.processor[type](activity, actor);
     }
     else {
-      throw new NotImplementedException('This activity type is not supported');
+      throw new Error('This activity type is not supported');
     }
   }
 
@@ -110,6 +118,7 @@ export class InboxService {
   }
 
   protected async follow(activity: ActivityDto): Promise<ActivityDto | null> {
+    console.log('follow is null for now');
     return null;
   }
 

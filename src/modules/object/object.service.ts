@@ -15,6 +15,7 @@ import { PersonDto } from 'src/common/dto/object/person.dto';
 import { RelationshipDocument, RelationshipRecordDto, RelationshipSchema } from './schema/relationship.schema';
 import { RelationshipDto } from 'src/common/dto/object/relationship.dto';
 import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ObjectService {
@@ -24,11 +25,16 @@ export class ObjectService {
     @InjectModel('Object') protected objectModel: Model<ObjectDocument>,
     @InjectModel('Relationship') protected relationshipModel: Model<RelationshipDocument>,
     @InjectConnection() protected connection: Connection,
+    protected configService: ConfigService,
     protected activityService: ActivityService
   ) { }
 
   public async get(id: string): Promise<ObjectDocument | null> {
     return this.objectModel.findOne({id});
+  }
+
+  public async getByPath(_serviceId: string, _servicePath: string, _servicePathId: string) {
+    return this.objectModel.findOne({_serviceId, _servicePath, _servicePathId});
   }
 
   public id() {
@@ -100,7 +106,7 @@ export class ObjectService {
     return {record};
   }
 
-  public async findById(id: string|Schema.Types.ObjectId): Promise<any> {
+  public async findById(id: string | Schema.Types.ObjectId): Promise<any> {
     return this.objectModel.findById(id);
   }
 

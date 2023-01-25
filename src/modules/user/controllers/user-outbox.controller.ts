@@ -24,7 +24,7 @@ interface OutboxObjectCreateDto extends ObjectCreateDto {
   serviceId: string;
 }
 
-@Controller('user/:username/outbox')
+@Controller('users/:username/outbox')
 @ApiTags('activity-pub')
 export class UserOutboxController {
   protected readonly logger = new Logger(UserOutboxController.name);
@@ -53,7 +53,7 @@ export class UserOutboxController {
       throw new NotImplementedException('Activity objects are not supported at this time.');
     }
 
-    const userId = `https://${serviceId}/user/${params.username}`;
+    const userId = `https://${serviceId}/users/${params.username}`;
     const actorRecord = await this.objectService.get(actor.id);
 
     // @todo - auth should be done via decorator on the class method

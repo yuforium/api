@@ -7,9 +7,12 @@ export type GConstructor<T = {}> = new (...args: any[]) => T
 type ObjectRecordConstructor = GConstructor<ObjectDto>;
 
 type BaseObjectRecord = {
-  _serviceId?: string;
+  _hostname: string;
+  _path: string;
+  _pathId: string;
   _id?: string;
-  _public?: boolean;
+  _public: boolean;
+  _local: boolean;
 }
 
 export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TBase): TBase & GConstructor<BaseObjectRecord>{
@@ -17,21 +20,25 @@ export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TB
     @Exclude()
     public _id?: string;
 
-    @Prop({type: String})
+    @Prop({type: String, required: true})
     @Exclude()
-    public _serviceId?: string;
+    public _hostname!: string;
 
-    @Prop({type: String})
+    @Prop({type: String, required: true})
     @Exclude()
-    public _host?: string;
+    public _path!: string;
 
-    @Prop({type: String})
+    @Prop({type: String, required: true})
     @Exclude()
-    public _path?: string;
+    public _pathId!: string;
 
     @Prop({type: Boolean, default: false})
     @Exclude()
-    public _public?: boolean;
+    public _public!: boolean;
+
+    @Prop({type: Boolean, required: true})
+    @Exclude()
+    public _local!: boolean;
   }
 
   return BaseObjectSchema;

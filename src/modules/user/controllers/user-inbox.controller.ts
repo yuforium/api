@@ -13,7 +13,7 @@ import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ObjectDto } from 'src/common/dto/object/object.dto';
 
 @ApiTags('user')
-@Controller('user/:username/inbox')
+@Controller('users/:username/inbox')
 export class UserInboxController {
   protected logger = new Logger(UserInboxController.name);
 
@@ -57,8 +57,16 @@ export class UserInboxController {
     // }
 
     this.logger.debug(`postInbox(): Received "${activity.type}" activity for ${targetUserId} from ${req.socket.remoteAddress}`);
-    this.inboxService.accept<ActivityDto>(activity, {requestSignature: {headers: req.headers, path: `/user/${username}/inbox`, method: 'post'}});
+    
+    try {
+      await this.inboxService.accept<ActivityDto>(activity, {requestSignature: {headers: req.headers, path: `/users/${username}/inbox`, method: 'post'}});
+    }
+    catch (e: any) {
+      this.logger.error(`postInbox(): Activity "${activity.type}" for ${targetUserId} from ${req.socket.remoteAddress} was rejected: ${e.message}`);
+      throw e;
+    }
 
+    this.logger.debug(`postInbox(): Activity "${activity.type}" for ${targetUserId} from ${req.socket.remoteAddress} was accepted`);
     return {
       'status': 'Accepted',
       'id': activity.id,

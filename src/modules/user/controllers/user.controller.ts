@@ -11,7 +11,7 @@ import { UserService } from '../user.service';
 import { UserParamsDto } from '../dto/user-params.dto';
 
 @ApiTags('user')
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(
     protected userService: UserService,
