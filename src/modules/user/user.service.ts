@@ -36,7 +36,7 @@ export class UserService {
       const {publicKey, privateKey} = await this.generateUserKeyPair();
 
       const user = await this.userModel.create({
-        hosname: hostname,
+        hostname,
         username,
         email: userDto.email,
         password: await bcrypt.hash(password, saltRounds),
@@ -48,13 +48,13 @@ export class UserService {
 
       const personDto = {
         '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
-        'type': 'Person',
-        'id': `https://${hostname}/${_path}/${_pathId}`,
-        'attributedTo': `https://${hostname}/${_path}/${_pathId}`, // assume the user is creating themselves for now
-        'name': userDto.name,
-        'preferredUsername': user.username,
-        'summary': userDto.summary,
-        '_hostname': hostname,
+        type: 'Person',
+        id: `https://${hostname}/${_path}/${_pathId}`,
+        attributedTo: `https://${hostname}/${_path}/${_pathId}`, // assume the user is creating themselves for now
+        name: userDto.name,
+        preferredUsername: user.username,
+        summary: userDto.summary,
+        _hostname: hostname,
         '_path': 'users',
         '_pathId': _pathId,
         '_local': true,
