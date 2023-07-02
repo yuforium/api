@@ -1,5 +1,5 @@
 import { Expose, Transform } from "class-transformer";
-import { sslToPlain } from "src/common/dto/util/ssl-to-plain";
+import { sslToPlain } from "../../../common/dto/util/ssl-to-plain";
 
 export class WebfingerLinkDto {
     @Expose()

@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { Note } from '@yuforium/activity-streams';
 import { plainToClass } from 'class-transformer';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
-import { ObjectService } from 'src/modules/object/object.service';
+import { ObjectService } from '../../../modules/object/object.service';
 import { ActivityService } from '../../activity/services/activity.service';
 import { Request } from 'express';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';

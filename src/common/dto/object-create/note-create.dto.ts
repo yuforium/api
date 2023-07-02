@@ -1,7 +1,7 @@
 import { ApiProperty, OmitType } from "@nestjs/swagger";
 import { IsRequired } from "@yuforium/activity-streams";
 import { Equals, IsOptional, MaxLength } from "class-validator";
-import { ObjectCreateDto } from "src/common/dto/object-create/object-create.dto";
+import { ObjectCreateDto } from "../../../common/dto/object-create/object-create.dto";
 
 export class NoteCreateDto extends OmitType(ObjectCreateDto, ['name'] as const) {
   static type = 'Note';

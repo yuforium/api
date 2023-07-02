@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptions } from "@nestjs/swagger";
 import { ASObjectOrLink, Person } from "@yuforium/activity-streams";
 import { Exclude, Expose, Transform, Type } from "class-transformer";
-import { ObjectRecordDto } from "src/modules/object/schema/object.schema";
+import { ObjectRecordDto } from "../../../modules/object/schema/object.schema";
 import { sslToPlain } from "../util/ssl-to-plain";
 
 export class PublicKey {

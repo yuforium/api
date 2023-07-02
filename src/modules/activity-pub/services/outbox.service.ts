@@ -1,15 +1,14 @@
 import { Inject, Injectable, Logger, NotImplementedException, Scope } from '@nestjs/common';
-import { ActivityService } from 'src/modules/activity/services/activity.service';
-import { ObjectService } from 'src/modules/object/object.service';
+import { ActivityService } from '../../../modules/activity/services/activity.service';
+import { ObjectService } from '../../../modules/object/object.service';
 import { ActivityPubService } from './activity-pub.service';
 import { Activity, Actor, ASObject, ASObjectOrLink } from '@yuforium/activity-streams';
-import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
 import { OutboxProcessorService } from './outbox-processor.service';
 import { sign } from '@yuforium/http-signature';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { PersonDto } from 'src/common/dto/object/person.dto';
-import { UserService } from 'src/modules/user/user.service';
+import { PersonDto } from '../../../common/dto/object/person.dto';
+import { UserService } from '../../../modules/user/user.service';
 import * as crypto from 'crypto';
 
 export interface APObject extends ASObject {

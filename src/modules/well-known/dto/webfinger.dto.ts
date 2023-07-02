@@ -1,5 +1,5 @@
 import { Expose, Transform, Type } from "class-transformer";
-import { sslToPlain } from "src/common/dto/util/ssl-to-plain";
+import { sslToPlain } from "../../../common/dto/util/ssl-to-plain";
 import { WebfingerLinkDto } from "./webfinger-link.dto";
 
 export class WebfingerDto {

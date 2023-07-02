@@ -1,11 +1,11 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
-import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
+import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
 import { instanceToPlain, serialize } from 'class-transformer';
-import { ObjectDto } from 'src/common/dto/object/object.dto';
-import { LinkDto } from 'src/modules/link/dto/link.dto';
+import { ObjectDto } from '../../../common/dto/object/object.dto';
+import { LinkDto } from '../../../modules/link/dto/link.dto';
 
 export interface DispatchOptions {
   requestSignature?: {

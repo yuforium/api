@@ -3,11 +3,11 @@ import { ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiTags, getSchemaPat
 import { ActivityStreams, OrderedCollectionPage } from '@yuforium/activity-streams';
 import { plainToInstance } from 'class-transformer';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
-import { ObjectService } from 'src/modules/object/object.service';
-import { ObjectDocument } from 'src/modules/object/schema/object.schema';
+import { ObjectService } from '../../../modules/object/object.service';
+import { ObjectDocument } from '../../../modules/object/schema/object.schema';
 import { UserContentQueryOptionsDto } from '../dto/user-content-query-options.dto';
 import { UserParamsDto } from '../dto/user-params.dto';
-import { ObjectDto } from 'src/common/dto/object/object.dto';
+import { ObjectDto } from '../../../common/dto/object/object.dto';
 import { UserService } from '../user.service';
 
 @ApiTags('user')

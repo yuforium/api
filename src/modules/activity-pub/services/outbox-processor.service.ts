@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
-import { ObjectDto } from 'src/common/dto/object';
-import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
-import { ActivityRecordDto } from 'src/modules/activity/schema/activity.schema';
-import { ActivityService } from 'src/modules/activity/services/activity.service';
-import { ObjectService } from 'src/modules/object/object.service';
-import { ObjectDocument, ObjectRecordDto } from 'src/modules/object/schema/object.schema';
+import { ObjectDto } from '../../../common/dto/object';
+import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
+import { ActivityRecordDto } from '../../../modules/activity/schema/activity.schema';
+import { ActivityService } from '../../../modules/activity/services/activity.service';
+import { ObjectService } from '../../../modules/object/object.service';
+import { ObjectDocument, ObjectRecordDto } from '../../../modules/object/schema/object.schema';
 import { APActivity, APObject } from './outbox.service';
 
 @Injectable()

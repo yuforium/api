@@ -4,19 +4,19 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs
 import { ASObject, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams';
 import { plainToClass } from 'class-transformer';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
-import { SyncActivityStreamService } from 'src/modules/activity-stream/services/sync-activity-stream.service';
+import { SyncActivityStreamService } from '../../../modules/activity-stream/services/sync-activity-stream.service';
 import { NoteCreateDto } from '../../../common/dto/object-create/note-create.dto';
 import { ActivityService } from '../../activity/services/activity.service';
 import { ObjectService } from '../../object/object.service';
 import { UserParamsDto } from '../dto/user-params.dto';
 import { Request } from 'express';
-import { User } from 'src/common/decorators/user.decorator';
-import { OutboxService } from 'src/modules/activity-pub/services/outbox.service';
-import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
-import { ActivityStreamsPipe } from 'src/common/pipes/activity-streams.pipe';
-import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
+import { User } from '../../../common/decorators/user.decorator';
+import { OutboxService } from '../../../modules/activity-pub/services/outbox.service';
+import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
+import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
+import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
 import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
-import { UserActor } from 'src/modules/auth/auth.service';
+import { UserActor } from '../../../modules/auth/auth.service';
 
 type AllowedCreate = ObjectCreateDto | NoteCreateDto
 
