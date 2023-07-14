@@ -111,6 +111,7 @@ export class ObjectService {
   }
 
   public async find(params: any = {}, options: any = {}): Promise<any> {
+    this.logger.debug(`find(): params: ${JSON.stringify(params)}`);
     return this.objectModel.find(params, {}, options);
   }
 

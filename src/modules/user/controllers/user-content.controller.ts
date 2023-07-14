@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Param, Query, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Logger, NotFoundException, Param, Query, ValidationPipe } from '@nestjs/common';
 import { ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { ActivityStreams, OrderedCollectionPage } from '@yuforium/activity-streams';
 import { plainToInstance } from 'class-transformer';
@@ -11,13 +11,20 @@ import { ObjectDto } from '../../../common/dto/object/object.dto';
 import { UserService } from '../user.service';
 
 @ApiTags('user')
-@Controller('user/:username/content')
+@Controller('users/:username/content')
 export class UserContentController {
+  protected readonly logger: Logger = new Logger(this.constructor.name);
 
   constructor(
     protected readonly objectService: ObjectService,
     protected readonly userService: UserService,
   ) { }
+
+  @Get('page/:pageNumber')
+  public async getContentPage(@Query('pageNumber') pageNumber: number) {
+    console.log(pageNumber);
+
+  }
 
   /**
    * Get user's content
@@ -44,11 +51,14 @@ export class UserContentController {
     @Query('contentQuery') contentQuery: UserContentQueryOptionsDto):
   Promise<OrderedCollectionPage> {
     const collectionPage = new OrderedCollectionPage();
-    const userId = `https://${_serviceId}/user/${params.username}`;
+    const userId = `https://${_serviceId}/users/${params.username}`;
 
     const user = await this.userService.findOne(_serviceId, params.username);
 
+    this.logger.log(`getContent(): User: ${params.username}`);
+
     if (!user) {
+      this.logger.log(`getContent(): User not found: ${params.username}`);
       throw new NotFoundException();
     }
 
@@ -60,6 +70,7 @@ export class UserContentController {
   }
 
   @Get('posts/:postId')
+  @ApiParam({name: 'username', type: 'string', required: true, example: 'chris'})
   public async getPost(
     @ServiceId() _serviceId: string,
     @Param() params: UserParamsDto,

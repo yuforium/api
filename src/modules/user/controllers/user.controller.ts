@@ -1,6 +1,6 @@
 import { Body, ClassSerializerInterceptor, Controller, Get, Header, NotFoundException, Param, Post, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { ObjectDocument } from 'src/modules/object/schema/object.schema';
 import { ServiceId } from '../../../common/decorators/service-id.decorator';
@@ -27,6 +27,7 @@ export class UserController {
   }
 
   @ApiOperation({operationId: 'exists'})
+  @ApiParam({name: 'username', type: 'string', required: true, example: 'chris'})
   @Get('exists/:username')
   @Header('Content-Type', 'application/activity+json')
   public async userExists(@ServiceId() serviceId: string, @Param() params: UserParamsDto): Promise<boolean> {

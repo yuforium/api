@@ -9,7 +9,7 @@ export const ServiceId = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
     logger.debug(`Processing hostname ${request.hostname}`);
     // @todo this needs to be revisited
-    let domain = /*psl.get(request.hostname) ||*/ process.env.DEFAULT_DOMAIN as string;
+    let domain = psl.get(request.hostname);
     logger.debug(`Using domain ${domain} as serviceId`);
 
     if (typeof domain !== 'string') {

@@ -4,7 +4,7 @@ import * as mongoose from 'mongoose';
 
 export type UserDocument = User & mongoose.Document;
 
-@Schema({collection: 'user', autoIndex: true})
+@Schema({collection: 'users', autoIndex: true})
 export class User {
   @Prop({type: String, required: true})
   hostname!: string;
