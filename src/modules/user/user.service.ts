@@ -132,6 +132,29 @@ export class UserService {
     return {publicKey, privateKey};
   }
 
+/**
+ * Reset a user's password
+ * @param serviceId 
+ * @param username 
+ * @param hashedPassword bcrypt hashed password
+ * @returns 
+ */
+public async resetPassword(serviceId: string, username: string, hashedPassword: string): Promise<string | undefined> {
+  const user = await this.findOne(serviceId, username);
+
+  if (!user) {
+    this.logger.error(`User "${username}" not found`);
+    return;
+  }
+
+  // const newPassword = Math.random().toString(36).slice(-8); // generate a random 8-character password
+  // const hashedPassword = await bcrypt.hash(newPassword, 10); // hash the password using bcrypt
+
+  user.password = hashedPassword;
+  await user.save(); // save the updated user document
+
+  return hashedPassword;
+}
   public async resetKey(serviceId: string, username: string): Promise<any> {
     const user = await this.findOne(serviceId, username);
 
