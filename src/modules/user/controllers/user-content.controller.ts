@@ -22,8 +22,7 @@ export class UserContentController {
 
   @Get('page/:pageNumber')
   public async getContentPage(@Query('pageNumber') pageNumber: number) {
-    console.log(pageNumber);
-
+    // console.log(pageNumber);
   }
 
   /**
@@ -62,8 +61,10 @@ export class UserContentController {
       throw new NotFoundException();
     }
 
+    const queryParams = {_serviceId, attributedTo: userId, type: contentQuery.type};
+
     collectionPage.id = `${userId}/content`;
-    collectionPage.items = (await this.objectService.find({_serviceId, attributedTo: userId}, contentQuery))
+    collectionPage.items = (await this.objectService.find(queryParams, contentQuery))
       .map((item: ObjectDocument) => plainToInstance(ObjectDto, item));
 
     return collectionPage;

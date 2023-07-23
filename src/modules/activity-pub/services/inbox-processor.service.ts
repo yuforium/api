@@ -59,7 +59,7 @@ export class InboxProcessorService implements APInboxProcessor {
       _local: false
     };
 
-    console.log(activityRecordDto);
+    // console.log(activityRecordDto);
 
     this.logger.debug(`follow(): creating activity ${activityRecordDto.id}`);
     const activity = await this.activityService.createActivity(activityRecordDto);

@@ -118,7 +118,7 @@ export class InboxService {
   }
 
   protected async follow(activity: ActivityDto): Promise<ActivityDto | null> {
-    console.log('follow is null for now');
+    // console.log('follow is null for now');
     return null;
   }
 
