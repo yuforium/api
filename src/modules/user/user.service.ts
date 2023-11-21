@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger, Res } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, Res } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 // import { ActivityPubService } from '../activity-pub/activity-pub.service';
@@ -10,6 +10,7 @@ import { MongoServerError } from 'mongodb';
 import { ObjectDto } from '../../common/dto/object/object.dto';
 import { generateKeyPairSync } from "crypto";
 import { PersonDto } from 'src/common/dto/object/person.dto';
+import { validate } from 'class-validator';
 
 // import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 
@@ -24,7 +25,7 @@ export class UserService {
     // protected activityStreamService: ActivityPubService
   ) { }
 
-  public async create(hostname: string, userDto: UserCreateDto): Promise<any> {
+  public async create(_domain: string, userDto: UserCreateDto): Promise<any> {
     const saltRounds = 10;
     const {username, password} = userDto;
 
@@ -32,11 +33,19 @@ export class UserService {
       throw new Error('Password is required');
     }
 
+    // @todo - consider if we should require an actual domain record to exist 
+    // to allow for the creation of a user
+    // const domain = await this.objectService.find({id: `https://${serviceId}`});
+
+    // if (!domain || domain.type === 'Tombstone') {
+    //   throw new BadRequestException('The serviceId provided is not valid.');
+    // }
+
     try {
       const {publicKey, privateKey} = await this.generateUserKeyPair();
 
       const user = await this.userModel.create({
-        hostname,
+        _domain,
         username,
         email: userDto.email,
         password: await bcrypt.hash(password, saltRounds),
@@ -46,7 +55,7 @@ export class UserService {
       const _path = 'users';
       const _pathId = userDto.username;
 
-      const personDto = {
+      const personDtoParams = {
         '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
         type: 'Person',
         id: `https://${hostname}/${_path}/${_pathId}`,
@@ -54,18 +63,23 @@ export class UserService {
         name: userDto.name,
         preferredUsername: user.username,
         summary: userDto.summary,
-        _hostname: hostname,
-        '_path': 'users',
-        '_pathId': _pathId,
-        '_local': true,
+        _domain,
+        to: [],
+        _local: true,
         _public: true,
-        'publicKey': {
-          'id': `https://${hostname}/${_path}/${_pathId}#main-key`,
-          'owner': `https://${hostname}/${_path}/${_pathId}`,
-          'publicKeyPem': publicKey.toString()
+        _outbox: undefined,
+        _inbox: [],
+        _destination: [],
+        publicKey: {
+          id: `https://${hostname}/${_path}/${_pathId}#main-key`,
+          owner: `https://${hostname}/${_path}/${_pathId}`,
+          publicKeyPem: publicKey.toString()
         }
       };
 
+      const personDto = Object.assign(new PersonDto(), personDtoParams);
+      await validate(personDto);
+      
       // effectively the person is creating themselves
       const {record} = await this.objectService.createActor(personDto);
 

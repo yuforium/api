@@ -1,20 +1,33 @@
 import { Prop } from "@nestjs/mongoose";
 import { Exclude, Transform } from "class-transformer";
 import { ObjectDto } from "src/common/dto/object/object.dto";
+import * as mongoose from "mongoose";
+
+const { Mixed } = mongoose.Schema.Types;
 
 type Constructor = new (...args: any[]) => {};
 export type GConstructor<T = {}> = new (...args: any[]) => T
 type ObjectRecordConstructor = GConstructor<ObjectDto>;
 
 type BaseObjectRecord = {
-  _hostname: string;
-  _path: string;
-  _pathId: string;
-  _id?: string;
+  _domain: string;
   _public: boolean;
   _local: boolean;
+  _inbox?: mongoose.Types.ObjectId[];
+  _outbox?: mongoose.Types.ObjectId;
+  _destination?: mongoose.Types.ObjectId[];
 }
 
+/**
+ * This is a mixin that defines common fields that are used for all stored
+ * objects.  These are metadata fields that are used to for storage and 
+ * querying only, and should be excluded from the API response.
+ * 
+ * These fields should also be reconstructable.
+ * 
+ * @param Base 
+ * @returns GConstructor<BaseObjectRecord & ObjectDto>
+ */
 export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TBase): TBase & GConstructor<BaseObjectRecord>{
   class BaseObjectSchema extends Base implements BaseObjectRecord {
     @Exclude()
@@ -22,20 +35,44 @@ export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TB
 
     @Prop({type: String, required: true})
     @Exclude()
-    public _hostname!: string;
+    public _domain!: string;
 
-    @Prop({type: String, required: true})
+    /**
+     * Specifies an actor or list of actors for where the object was received 
+     * via the inbox.
+     *  
+     * This is based on the to/cc/bcc field. 
+     */
+    @Prop({type: [mongoose.Types.ObjectId], required: true})
     @Exclude()
-    public _path!: string;
+    public _inbox?: mongoose.Types.ObjectId[] = [];
 
-    @Prop({type: String, required: true})
+    /**
+     * Actor who created the object.  This is used to determine the outbox from 
+     * which the object originated.
+     */
+    @Prop({type: mongoose.Types.ObjectId, required: false})
     @Exclude()
-    public _pathId!: string;
+    public _outbox?: mongoose.Types.ObjectId;
 
+    /**
+     * Combined _inbox and _outbox.  This is used for querying content, only 
+     * differs from _inbox because it includes the _outbox.
+     */
+    @Prop({type: [mongoose.Types.ObjectId], required: true})
+    @Exclude()
+    public _destination: mongoose.Types.ObjectId[] = [];
+
+    /**
+     * Specifies if this is a public object.  Used for querying content.
+     */
     @Prop({type: Boolean, default: false})
     @Exclude()
     public _public!: boolean;
 
+    /**
+     * Specifies if this is a local object.
+     */
     @Prop({type: Boolean, required: true})
     @Exclude()
     public _local!: boolean;

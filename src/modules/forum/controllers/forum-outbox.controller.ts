@@ -1,0 +1,94 @@
+import { Body, Controller, Logger, NotImplementedException, Param, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import { OutboxService } from '../../activity-pub/services/outbox.service';
+import { SyncActivityStreamService } from '../../../modules/activity-stream/services/sync-activity-stream.service';
+import { ActivityService } from '../../../modules/activity/services/activity.service';
+import { ObjectService } from '../../../modules/object/object.service';
+import { ForumParams } from '../dto/forum-params.dto';
+import { ServiceId } from '../../../common/decorators/service-id.decorator';
+import { User } from '../../../common/decorators/user.decorator';
+import { UserActor } from '../../../modules/auth/auth.service';
+import { ASObject } from '@yuforium/activity-streams';
+import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
+import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
+import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
+import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
+import { NoteCreateDto } from '../../../common/dto/object-create/note-create.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { ObjectDto } from '../../../common/dto/object';
+
+interface OutboxObjectCreateDto extends ObjectCreateDto {
+  serviceId: string;
+}
+
+/**
+ * Forum Outbox Controller
+ * Note that this controller has a lot of overlap to the UserOutboxController.  This functionality can probably be merged into a 
+ * parent class.
+ */
+@Controller('forums/:pathId/outbox')
+@ApiTags('forum')
+export class ForumOutboxController {
+  protected readonly logger = new Logger(ForumOutboxController.name);
+
+  constructor(
+    protected readonly activityService: ActivityService,
+    protected readonly objectService: ObjectService,
+    protected readonly activityStreamService: SyncActivityStreamService,
+    protected readonly outboxService: OutboxService
+  ) { }
+
+  @ApiBearerAuth()
+  @ApiOperation({operationId: 'postOutbox', summary: 'Post to a forum outbox'})
+  @ApiExtraModels(NoteCreateDto)
+  @ApiBody({
+    schema: {
+      oneOf: [
+        {
+          $ref: getSchemaPath(NoteCreateDto)
+        }
+      ]
+    }
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @Post()
+  public async postOutbox(
+    @Param() params: ForumParams,
+    @ServiceId() serviceId: string,
+    @User('actor') actor: UserActor,
+    @Req() req: Request,
+    @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ASObject
+  ) {
+    if (dto instanceof ActivityDto) {
+      throw new NotImplementedException('Activity objects are not supported at this time.');
+    }
+
+    const forumId = `https://${serviceId}/forums/${params.pathId}`;
+    const forum = await this.objectService.get(forumId) || Object.assign(new ObjectDto(), {
+      id: forumId,
+    });
+
+    const actorRecord = await this.objectService.get(actor.id);
+
+    // @todo - auth should be done via decorator on the class method
+    if (!actorRecord || actorRecord.type === 'Tombstone') {
+      this.logger.error(`Unauthorized access to forum outbox by ${actor.id}`);
+      throw new UnauthorizedException('You are not authorized to post to this outbox.');
+    }
+
+    this.logger.debug(`postOutbox(): ${actor.preferredUsername} is posting to ${params.pathId}'s outbox`);
+
+    // @todo document how and why to/cc are set for various targets
+    // see also https://github.com/mastodon/mastodon/issues/8067 and https://github.com/mastodon/mastodon/pull/3844#issuecomment-314897285
+    Object.assign(dto, {
+      attributedTo: [actor.id, `https://${serviceId}/forums/${params.pathId}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
+      published: new Date().toISOString(),
+      to: ['https://www.w3.org/ns/activitystreams#Public'],
+      cc: [`${params.pathId}/followers`], // @todo consider 
+    });
+
+    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(actor, {...dto as ObjectCreateDto, serviceId});
+
+    return activity;
+  }
+}

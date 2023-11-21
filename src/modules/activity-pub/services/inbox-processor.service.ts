@@ -7,7 +7,7 @@ import { ObjectService } from '../../../modules/object/object.service';
 import { RelationshipRecordDto } from '../../../modules/object/schema/relationship.schema';
 import { ActivityPubService } from './activity-pub.service';
 import { APInboxProcessor } from './inbox.service';
-import { APActivity, APActor } from './outbox.service';
+import { APActivity, APActor } from './outbox-dispatch.service';
 
 
 @Injectable()

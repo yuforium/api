@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OutboxService } from './outbox.service';
+import { OutboxDispatchService } from './outbox-dispatch.service';
 
-describe('OutboxProcessorService', () => {
-  let service: OutboxService;
+describe('OutboxService', () => {
+  let service: OutboxDispatchService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [OutboxService],
+      providers: [OutboxDispatchService],
     }).compile();
 
-    service = module.get<OutboxService>(OutboxService);
+    service = module.get<OutboxDispatchService>(OutboxDispatchService);
   });
 
   it('should be defined', () => {

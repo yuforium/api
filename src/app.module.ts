@@ -11,6 +11,7 @@ import { UserModule } from './modules/user/user.module';
 import { WellKnownModule } from './modules/well-known/well-known.module';
 import { ActivityPubModule } from './modules/activity-pub/activity-pub.module';
 import { ActivityModule } from './modules/activity/activity.module';
+import { ForumModule } from './modules/forum/forum.module';
 
 @Module({
   imports: [
@@ -25,11 +26,12 @@ import { ActivityModule } from './modules/activity/activity.module';
     WellKnownModule,
     ActivityPubModule,
     ActivityModule,
+    ForumModule
     // ObjectModule
   ],
   controllers: [AppController],
-  providers:   [AppService, ConfigService],
-  exports:    [ConfigService]
+  providers: [AppService, ConfigService],
+  exports: [ConfigService]
 })
 export class AppModule {
   constructor() { }

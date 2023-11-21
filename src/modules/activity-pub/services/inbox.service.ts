@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, Logger, NotImplementedException } from
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { parse, verify, VerifyOptions } from '@yuforium/http-signature';
-import { APActivity, APActor, OutboxService } from './outbox.service';
+import { APActivity, APActor, OutboxDispatchService } from './outbox-dispatch.service';
 import { InboxProcessorService } from './inbox-processor.service';
 import { ActivityPubService } from './activity-pub.service';
 import * as psl from 'psl';
@@ -35,7 +35,7 @@ export class InboxService {
     protected readonly activityService: ActivityService,
     protected readonly processor: InboxProcessorService,
     protected readonly activityPubService: ActivityPubService,
-    protected readonly outboxService: OutboxService
+    protected readonly outboxService: OutboxDispatchService
   ) { }
 
   /**

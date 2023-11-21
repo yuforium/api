@@ -4,7 +4,7 @@ import { ActivityDocument, ActivityRecordDto } from '../schema/activity.schema';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { Model, Types } from 'mongoose';
 import { ActivityDto } from '../dto/activity.dto';
-import { APActivityService, APObject } from 'src/modules/activity-pub/services/outbox.service';
+import { APActivityService, APObject } from 'src/modules/activity-pub/services/outbox-dispatch.service';
 import { Actor } from '@yuforium/activity-streams';
 import { ObjectDocument, ObjectRecordDto } from 'src/modules/object/schema/object.schema';
 

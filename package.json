@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "doc": "compodoc -p tsconfig.json -s"
+    "doc": "compodoc -p tsconfig.json -s -w"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.0",

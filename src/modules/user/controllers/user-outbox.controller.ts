@@ -1,4 +1,4 @@
-import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards, Logger } from '@nestjs/common';
+import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards, Logger, BadRequestException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ASObject, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams';
@@ -11,7 +11,7 @@ import { ObjectService } from '../../object/object.service';
 import { UserParamsDto } from '../dto/user-params.dto';
 import { Request } from 'express';
 import { User } from '../../../common/decorators/user.decorator';
-import { OutboxService } from '../../../modules/activity-pub/services/outbox.service';
+import { OutboxDispatchService } from '../../activity-pub/services/outbox-dispatch.service';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
 import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
@@ -22,6 +22,7 @@ type AllowedCreate = ObjectCreateDto | NoteCreateDto
 
 interface OutboxObjectCreateDto extends ObjectCreateDto {
   serviceId: string;
+  _originPath: string;
 }
 
 @Controller('users/:username/outbox')
@@ -33,7 +34,7 @@ export class UserOutboxController {
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService,
     protected readonly activityStreamService: SyncActivityStreamService,
-    protected readonly outboxService: OutboxService
+    protected readonly outboxService: OutboxDispatchService
   ) { }
 
   @ApiBearerAuth()
@@ -68,9 +69,11 @@ export class UserOutboxController {
       attributedTo: (req.user as any).actor.id,
       published: (new Date()).toISOString(),
       to: Array.isArray(dto.to) ? dto.to : [dto.to as string]
-    })
+    });
 
-    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(actor.id, {...dto as ObjectCreateDto, serviceId});
+    const _originPath = `users/${params.username}`;
+
+    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(actor.id, {...dto as ObjectCreateDto, serviceId, _originPath});
 
     return activity;
   }

@@ -16,15 +16,7 @@ export class ActivityRecordDto extends ActivityDto {
 
   @Exclude()
   @Prop({type: String, required: true})
-  _hostname!: string;
-
-  @Exclude()
-  @Prop({type: String, required: true})
-  _path!: string;
-
-  @Exclude()
-  @Prop({type: String, required: true})
-  _pathId!: string;
+  _domain!: string;
 
   @Exclude()
   @Prop({type: Boolean, default: false})

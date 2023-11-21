@@ -7,8 +7,8 @@ import { ForumDto } from '../dto/forum.dto';
 import { ForumCollectionDto } from '../dto/forum-collection.dto';
 import { ForumParams } from '../dto/forum-params.dto';
 import { ForumService } from '../forum.service';
-import { ForumCreateDto } from 'src/common/dto/forum-create.dto';
-import { ObjectDocument } from 'src/modules/object/schema/object.schema';
+import { ForumCreateDto } from '../../../common/dto/forum-create.dto';
+import { ObjectDocument } from '../../../modules/object/schema/object.schema';
 
 @ApiTags('forum')
 @Controller('forum')
@@ -37,18 +37,18 @@ export class ForumController {
   }
 
   @ApiOperation({operationId: 'getForum'})
-  @ApiResponse({status: 200, description: "Successful response"})
+  @ApiResponse({status: 200, description: "Successful response", type: ForumDto})
   @ApiResponse({status: 404, description: "Forum does not exist"})
   @Get(':pathId')
-  public async findOne(@ServiceId() serviceId: string, @Param() params: ForumParams) {
+  public async findOne(@ServiceId() serviceId: string, @Param() params: ForumParams): Promise<ForumDto> {
     const forum = await this.objectService.get(`https://${serviceId}/forum/${params.pathId}`);
 
     if (!forum) {
       const tempForum = new ForumDto();
       tempForum.id = `https://${serviceId}/forum/${params.pathId}`;
-      tempForum.name = 'Unallocated Forum';
+      tempForum.name = `${params.pathId}`;
+      tempForum.summary = 'This forum has not been allocated yet.';
       return tempForum;
-      // throw new NotFoundException();
     }
 
     return plainToClass(ForumDto, forum);
