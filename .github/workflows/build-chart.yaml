@@ -6,6 +6,7 @@ on:
       - helm-chart
     paths:
       - chart/**
+      - .github/**
 jobs:
   build:
     runs-on: ubuntu-latest
