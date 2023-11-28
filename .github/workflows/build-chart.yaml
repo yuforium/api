@@ -25,3 +25,5 @@ jobs:
         password: ${{ steps.auth.outputs.access_token }}
     - run: |
         export CHART_VERSION=$(helm show chart chart | yq e '.version')
+        helm package chart
+        helm push api-$CHART_VERSION.tgz oci://us-central1-docker.pkg.dev/yuforium/api  
