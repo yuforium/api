@@ -16,3 +16,11 @@ jobs:
       uses: google-github-actions/auth@v1
       with:
         credentials_json: '${{ secrets.GCLOUD_AUTH }}'
+        token_format: access_token
+    - uses: docker/login-action@v1
+      with:
+        registry: us-central1-docker.pkg.dev
+        username: oauth2accesstoekn
+        password: ${{ steps.auth.outputs.access_token }}
+    - run: |
+        export CHART_VERSION=$(helm show chart chart | yq e '.version')
