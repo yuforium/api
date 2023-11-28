@@ -3,10 +3,8 @@ on:
   push:
     branches:
       - main
-      - helm-chart
     paths:
       - chart/**
-      - .github/**
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,4 +24,4 @@ jobs:
     - run: |
         export CHART_VERSION=$(helm show chart chart | yq e '.version')
         helm package chart
-        helm push api-$CHART_VERSION.tgz oci://us-central1-docker.pkg.dev/yuforium/api  
+        helm push api-$CHART_VERSION.tgz oci://us-central1-docker.pkg.dev/yuforium/api
