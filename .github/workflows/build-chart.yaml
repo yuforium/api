@@ -21,7 +21,7 @@ jobs:
     - uses: docker/login-action@v1
       with:
         registry: us-central1-docker.pkg.dev
-        username: oauth2accesstoekn
+        username: oauth2accesstoken
         password: ${{ steps.auth.outputs.access_token }}
     - run: |
         export CHART_VERSION=$(helm show chart chart | yq e '.version')
