@@ -53,9 +53,9 @@ export class InboxProcessorService implements APInboxProcessor {
 
     const activityRecordDto = {
       ...activityDto,
-      _hostname: followee._hostname,
-      _path: `${followee._path}/${followee._pathId}/activities/${activityDto.id}`,
-      _pathId: activityDto.id,
+      _domain: followee._domain,
+      // _path: `${followee._path}/${followee._pathId}/activities/${activityDto.id}`,
+      // _pathId: activityDto.id,
       _local: false
     };
 
@@ -68,7 +68,6 @@ export class InboxProcessorService implements APInboxProcessor {
     const _id = this.objectService.id().toString();
 
     const relationshipDto: RelationshipRecordDto = {
-      _id,
       id: `${followee.id}/relationship/${_id.toString()}`,
       type: 'Relationship',
       summary: 'Follows',
@@ -76,11 +75,12 @@ export class InboxProcessorService implements APInboxProcessor {
       _relationship: 'followerOf',
       subject: activity.actor,
       object: activity.object as string,
-      _hostname: followee._hostname,
-      _path: `${followee._path}/${followee._pathId}/relationships/${_id.toString()}`,
-      _pathId: _id.toString(),
+      _domain: followee._domain,
+      // _path: `${followee._path}/${followee._pathId}/relationships/${_id.toString()}`,
+      // _pathId: _id.toString(),
       _public: true,
-      _local: true
+      _local: true,
+      to: []
     };
 
     const relationship = await this.objectService.createRelationship(relationshipDto);
@@ -90,9 +90,9 @@ export class InboxProcessorService implements APInboxProcessor {
     const _acceptId = this.activityService.id().toString();
     const acceptActivityDto: ActivityRecordDto = {
       _id: _acceptId,
-      _hostname: relationship._hostname,
-      _path: `${followee._path}/${followee._pathId}/activities`,
-      _pathId: _acceptId,
+      _domain: relationship._domain,
+      // _path: `${followee._path}/${followee._pathId}/activities`,
+      // _pathId: _acceptId,
       _local: true,
       id: `${followee.id}/activities/${_acceptId}`,
       type: 'Accept',

@@ -10,15 +10,19 @@ import { ObjectModule } from '../object/object.module';
 import { UserContentController } from './controllers/user-content.controller';
 import { ActivityStreamModule } from '../activity-stream/activity-stream.module';
 import { ActivityPubModule } from '../activity-pub/activity-pub.module';
+import { PersonRecordDto, PersonSchema } from '../object/schema/person.schema';
+import { OutboxDispatchService } from '../activity-pub/services/outbox-dispatch.service';
 
 @Module({
   providers: [UserService],
   exports: [UserService],
   imports: [
     MongooseModule.forFeature([{name: User.name, schema: UserSchema}]),
+    MongooseModule.forFeature([{name: PersonRecordDto.name, schema: PersonSchema}]),
     ObjectModule,
     ActivityModule,
     ActivityStreamModule,
+    ActivityPubModule,
     forwardRef(() => ActivityPubModule)
   ],
   controllers: [

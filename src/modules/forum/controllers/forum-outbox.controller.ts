@@ -5,7 +5,7 @@ import { SyncActivityStreamService } from '../../../modules/activity-stream/serv
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { ObjectService } from '../../../modules/object/object.service';
 import { ForumParams } from '../dto/forum-params.dto';
-import { ServiceId } from '../../../common/decorators/service-id.decorator';
+import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { User } from '../../../common/decorators/user.decorator';
 import { UserActor } from '../../../modules/auth/auth.service';
 import { ASObject } from '@yuforium/activity-streams';
@@ -54,7 +54,7 @@ export class ForumOutboxController {
   @Post()
   public async postOutbox(
     @Param() params: ForumParams,
-    @ServiceId() serviceId: string,
+    @ServiceDomain() serviceDomain: string,
     @User('actor') actor: UserActor,
     @Req() req: Request,
     @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ASObject
@@ -63,7 +63,7 @@ export class ForumOutboxController {
       throw new NotImplementedException('Activity objects are not supported at this time.');
     }
 
-    const forumId = `https://${serviceId}/forums/${params.pathId}`;
+    const forumId = `https://${serviceDomain}/forums/${params.pathId}`;
     const forum = await this.objectService.get(forumId) || Object.assign(new ObjectDto(), {
       id: forumId,
     });
@@ -81,13 +81,13 @@ export class ForumOutboxController {
     // @todo document how and why to/cc are set for various targets
     // see also https://github.com/mastodon/mastodon/issues/8067 and https://github.com/mastodon/mastodon/pull/3844#issuecomment-314897285
     Object.assign(dto, {
-      attributedTo: [actor.id, `https://${serviceId}/forums/${params.pathId}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
+      attributedTo: [actor.id, `https://${serviceDomain}/forums/${params.pathId}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
       published: new Date().toISOString(),
       to: ['https://www.w3.org/ns/activitystreams#Public'],
       cc: [`${params.pathId}/followers`], // @todo consider 
     });
 
-    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(actor, {...dto as ObjectCreateDto, serviceId});
+    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(serviceDomain, actor, {...dto as ObjectCreateDto, serviceId: serviceDomain});
 
     return activity;
   }

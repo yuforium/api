@@ -1,16 +1,15 @@
-import { BadRequestException, ConflictException, Injectable, Logger, Res } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-// import { ActivityPubService } from '../activity-pub/activity-pub.service';
+import { Model, Schema, Types } from 'mongoose';
 import { UserCreateDto } from './dto/user-create.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { ObjectService } from '../object/object.service';
 import { MongoServerError } from 'mongodb';
-import { ObjectDto } from '../../common/dto/object/object.dto';
 import { generateKeyPairSync } from "crypto";
 import { PersonDto } from 'src/common/dto/object/person.dto';
 import { validate } from 'class-validator';
+import { PersonDocument, PersonRecordDto } from '../object/schema/person.schema';
 
 // import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 
@@ -19,10 +18,9 @@ export class UserService {
   protected logger = new Logger(UserService.name);
 
   constructor(
+    protected readonly objectService: ObjectService,
     @InjectModel(User.name) protected userModel: Model<UserDocument>,
-    protected readonly objectService: ObjectService
-    // @InjectModel(Person.name) protected personModel: Model<PersonDocument>,
-    // protected activityStreamService: ActivityPubService
+    @InjectModel(PersonRecordDto.name) protected personModel: Model<PersonDocument>,
   ) { }
 
   public async create(_domain: string, userDto: UserCreateDto): Promise<any> {
@@ -58,8 +56,8 @@ export class UserService {
       const personDtoParams = {
         '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
         type: 'Person',
-        id: `https://${hostname}/${_path}/${_pathId}`,
-        attributedTo: `https://${hostname}/${_path}/${_pathId}`, // assume the user is creating themselves for now
+        id: `https://${_domain}/${_path}/${_pathId}`,
+        attributedTo: `https://${_domain}/${_path}/${_pathId}`, // assume the user is creating themselves for now
         name: userDto.name,
         preferredUsername: user.username,
         summary: userDto.summary,
@@ -71,8 +69,8 @@ export class UserService {
         _inbox: [],
         _destination: [],
         publicKey: {
-          id: `https://${hostname}/${_path}/${_pathId}#main-key`,
-          owner: `https://${hostname}/${_path}/${_pathId}`,
+          id: `https://${_domain}/${_path}/${_pathId}#main-key`,
+          owner: `https://${_domain}/${_path}/${_pathId}`,
           publicKeyPem: publicKey.toString()
         }
       };
@@ -204,5 +202,9 @@ public async resetPassword(serviceId: string, username: string, hashedPassword: 
       this.logger.error(`Default identity not found for user: ${username}`);
       return null;
     }
+  }
+
+  public async findPersonById(_id: string | Schema.Types.ObjectId): Promise<PersonDocument | null> {
+    return this.personModel.findOne({_id, type: 'Person'});
   }
 }

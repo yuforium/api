@@ -10,8 +10,8 @@ import { OutboxService } from './services/outbox.service';
 import { OutboxDispatchService } from './services/outbox-dispatch.service';
 
 @Module({
-  providers: [InboxService, OutboxService, ActivityPubService, InboxProcessorService, OutboxService],
-  exports: [InboxService, OutboxService],
+  providers: [InboxService, OutboxService, ActivityPubService, InboxProcessorService, OutboxService, OutboxDispatchService],
+  exports: [InboxService, OutboxService, OutboxDispatchService],
   imports: [
     ActivityModule,
     ObjectModule,

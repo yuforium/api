@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ASObject, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams';
 import { plainToClass } from 'class-transformer';
-import { ServiceId } from '../../../common/decorators/service-id.decorator';
+import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { SyncActivityStreamService } from '../../../modules/activity-stream/services/sync-activity-stream.service';
 import { NoteCreateDto } from '../../../common/dto/object-create/note-create.dto';
 import { ActivityService } from '../../activity/services/activity.service';
@@ -16,7 +16,7 @@ import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
 import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
 import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
-import { UserActor } from '../../../modules/auth/auth.service';
+import { UserActor, UserPayload } from '../../../modules/auth/auth.service';
 
 type AllowedCreate = ObjectCreateDto | NoteCreateDto
 
@@ -45,7 +45,7 @@ export class UserOutboxController {
   @Post()
   public async postOutbox(
     @Param() params: UserParamsDto,
-    @ServiceId() serviceId: string,
+    @ServiceDomain() serviceDomain: string,
     @User('actor') actor: UserActor,
     @Req() req: Request,
     @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ASObject
@@ -54,7 +54,7 @@ export class UserOutboxController {
       throw new NotImplementedException('Activity objects are not supported at this time.');
     }
 
-    const userId = `https://${serviceId}/users/${params.username}`;
+    const userId = `https://${serviceDomain}/users/${params.username}`;
     const actorRecord = await this.objectService.get(actor.id);
 
     // @todo - auth should be done via decorator on the class method
@@ -73,7 +73,7 @@ export class UserOutboxController {
 
     const _originPath = `users/${params.username}`;
 
-    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(actor.id, {...dto as ObjectCreateDto, serviceId, _originPath});
+    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(serviceDomain, actor, {...dto as ObjectCreateDto, serviceId: serviceDomain, _originPath});
 
     return activity;
   }
@@ -89,7 +89,7 @@ export class UserOutboxController {
   @ApiParam({name: 'username', type: 'string', required: true})
   @UseGuards(AuthGuard(['anonymous', 'jwt']))
   @Get()
-  public async getOutbox(@ServiceId() serviceId: string, @Param() params: UserParamsDto, @Req() req: Request): Promise<OrderedCollection> {
+  public async getOutbox(@ServiceDomain() serviceId: string, @Param() params: UserParamsDto, @Req() req: Request): Promise<OrderedCollection> {
     const collection = new OrderedCollection();
     const actor = `https://${serviceId}/user/${params.username}`;
     const filter: any = {actor, 'object.to': 'https://www.w3.org/ns/activitystreams#Public'};
@@ -115,7 +115,7 @@ export class UserOutboxController {
   @UseGuards(AuthGuard(['anonymous', 'jwt']))
   @Get('page/:page')
   public async getOutboxPage(
-    @ServiceId() serviceId: string,
+    @ServiceDomain() serviceId: string,
     @Param() params: UserParamsDto,
     @Param('page') page: number,
     @Req() req: Request):

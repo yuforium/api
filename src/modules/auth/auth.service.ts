@@ -7,6 +7,8 @@ import { plainToClass } from 'class-transformer';
 import { PersonDto } from '../../common/dto/object/person.dto';
 import { ObjectService } from '../object/object.service';
 import { Actor } from '@yuforium/activity-streams';
+import { Schema, Types } from 'mongoose';
+import { PersonDocument, PersonRecordDto } from '../object/schema/person.schema';
 
 export interface UserPayload {
   _id: string;
@@ -14,7 +16,11 @@ export interface UserPayload {
   actor: UserActor;
 }
 
+/**
+ * This should derive from a DTO and should have id and _id properties associated with it
+ */
 export interface UserActor extends Actor {
+  _id: string | Schema.Types.ObjectId;
   id: string;
   preferredUsername: string;
 }
@@ -63,7 +69,7 @@ export class AuthService {
       throw new Error('User has no assigned username');
     }
 
-    const actor = await this.objectService.findOne(user.defaultIdentity);
+    const actor = await this.userService.findPersonById(user.defaultIdentity);
 
     if (actor === null) {
       throw new Error('User\'s default identity not found');
@@ -72,7 +78,7 @@ export class AuthService {
     const payload: UserPayload = {
       _id: user._id.toString(),
       username: user.username,
-      actor: {...plainToClass(PersonDto, actor), preferredUsername: user.username}
+      actor: {...plainToClass(PersonRecordDto, actor as PersonDto), preferredUsername: user.username} as PersonRecordDto & {_id: string, preferredUsername: string}
     };
 
     return {

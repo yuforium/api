@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { ObjectDocument } from 'src/modules/object/schema/object.schema';
-import { ServiceId } from '../../../common/decorators/service-id.decorator';
+import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ObjectService } from '../../object/object.service';
 import { PersonDto } from '../../../common/dto/object/person.dto';
 import { UserCreateDto } from '../dto/user-create.dto';
@@ -21,7 +21,7 @@ export class UserController {
   @ApiOperation({operationId: 'find'})
   @Get()
   @Header('Content-Type', 'application/activity+json')
-  public async findUsers(@ServiceId() _serviceId: string): Promise<any[]> {
+  public async findUsers(@ServiceDomain() _serviceId: string): Promise<any[]> {
     const users = await this.objectService.find({_serviceId, type: 'Person'});
     return users.map((user: ObjectDocument) => plainToInstance(PersonDto, user));
   }
@@ -30,7 +30,7 @@ export class UserController {
   @ApiParam({name: 'username', type: 'string', required: true, example: 'chris'})
   @Get('exists/:username')
   @Header('Content-Type', 'application/activity+json')
-  public async userExists(@ServiceId() serviceId: string, @Param() params: UserParamsDto): Promise<boolean> {
+  public async userExists(@ServiceDomain() serviceId: string, @Param() params: UserParamsDto): Promise<boolean> {
     const person = await this.userService.findOne(serviceId, params.username.toLowerCase());
 
     if (person) {
@@ -51,7 +51,7 @@ export class UserController {
   @ApiOperation({operationId: 'create'})
   @Post()
   @Header('Content-Type', 'application/activity+json')
-  public async create(@ServiceId() serviceId: string, @Body() userDto: UserCreateDto) {
+  public async create(@ServiceDomain() serviceId: string, @Body() userDto: UserCreateDto) {
     userDto.username = userDto.username.toLowerCase();
     userDto.email = userDto.email.toLowerCase();
 
@@ -62,7 +62,7 @@ export class UserController {
   @ApiResponse({status: 404, type: PersonDto})
   @Get(':username')
   @Header('Content-Type', 'application/activity+json')
-  public async findOne(@ServiceId() serviceId: string, @Param('username') username: string): Promise<PersonDto> {
+  public async findOne(@ServiceDomain() serviceId: string, @Param('username') username: string): Promise<PersonDto> {
     const person = await this.userService.findPerson(serviceId, username.toLowerCase());
 
     if (person) {

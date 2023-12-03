@@ -10,6 +10,7 @@ import { Request } from 'express';
 import { PersonDto } from '../../../common/dto/object/person.dto';
 import { UserService } from '../../user/user.service';
 import * as crypto from 'crypto';
+import { UserActor, UserPayload } from 'src/modules/auth/auth.service';
 
 export interface APObject extends ASObject {
   [k: string]: any;
@@ -72,10 +73,10 @@ export class OutboxDispatchService {
    * @param dto Object to be created
    * @returns
    */
-  async createActivityFromObject<T extends APObject = APObject>(actorId: string, dto: T): Promise<any> {
+  async createActivityFromObject<T extends APObject = APObject>(serviceDomain: string, actor: UserActor, dto: T): Promise<any> {
     dto = Object.assign({}, dto);
 
-    const activity = await this.processor.createActivityFromObject<T>(dto);
+    const activity = await this.processor.createActivityFromObject<T>(serviceDomain, actor, dto);
 
     // const object = await this.objectService.create(dto);
     // const {activity} = await this.activityService.create('Create', actorId, object);

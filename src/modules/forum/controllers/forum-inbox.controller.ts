@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Logger, NotImplementedException, Param, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ServiceId } from '../../../common/decorators/service-id.decorator';
+import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { ForumParams } from '../dto/forum-params.dto';
 import { Request } from 'express';
@@ -14,7 +14,7 @@ export class ForumInboxController {
 
   @ApiOperation({operationId: 'getForumInbox'})
   @Get()
-  public async getForumInbox(@ServiceId() serviceId: string, @Param() params: ForumParams) {
+  public async getForumInbox(@ServiceDomain() serviceId: string, @Param() params: ForumParams) {
     throw new NotImplementedException();
   }
 

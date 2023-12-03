@@ -2,6 +2,7 @@ import { Prop } from "@nestjs/mongoose";
 import { Exclude, Transform } from "class-transformer";
 import { ObjectDto } from "src/common/dto/object/object.dto";
 import * as mongoose from "mongoose";
+import { Schema } from "mongoose";
 
 const { Mixed } = mongoose.Schema.Types;
 
@@ -10,11 +11,12 @@ export type GConstructor<T = {}> = new (...args: any[]) => T
 type ObjectRecordConstructor = GConstructor<ObjectDto>;
 
 type BaseObjectRecord = {
+  _id?: string | Schema.Types.ObjectId;
   _domain: string;
   _public: boolean;
   _local: boolean;
   _inbox?: mongoose.Types.ObjectId[];
-  _outbox?: mongoose.Types.ObjectId;
+  _outbox?: Schema.Types.ObjectId;
   _destination?: mongoose.Types.ObjectId[];
 }
 
@@ -23,7 +25,7 @@ type BaseObjectRecord = {
  * objects.  These are metadata fields that are used to for storage and 
  * querying only, and should be excluded from the API response.
  * 
- * These fields should also be reconstructable.
+ * It should be possible to reconstruct any of these fields if necessary.
  * 
  * @param Base 
  * @returns GConstructor<BaseObjectRecord & ObjectDto>
@@ -31,7 +33,7 @@ type BaseObjectRecord = {
 export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TBase): TBase & GConstructor<BaseObjectRecord>{
   class BaseObjectSchema extends Base implements BaseObjectRecord {
     @Exclude()
-    public _id?: string;
+    public _id!: string | Schema.Types.ObjectId;
 
     @Prop({type: String, required: true})
     @Exclude()
@@ -53,7 +55,7 @@ export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TB
      */
     @Prop({type: mongoose.Types.ObjectId, required: false})
     @Exclude()
-    public _outbox?: mongoose.Types.ObjectId;
+    public _outbox?: Schema.Types.ObjectId;
 
     /**
      * Combined _inbox and _outbox.  This is used for querying content, only 

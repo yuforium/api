@@ -2,7 +2,7 @@ import { Controller, Get, Logger, NotFoundException, Param, Query, ValidationPip
 import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { ActivityStreams, OrderedCollectionPage } from '@yuforium/activity-streams';
 import { plainToInstance } from 'class-transformer';
-import { ServiceId } from '../../../common/decorators/service-id.decorator';
+import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ObjectService } from '../../../modules/object/object.service';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';
 import { UserContentQueryOptionsDto } from '../dto/user-content-query-options.dto';
@@ -52,7 +52,7 @@ export class UserContentController {
   })
   @Get()
   public async getContent(
-    @ServiceId() _serviceId: string,
+    @ServiceDomain() _serviceId: string,
     @Param() params: UserParamsDto,
     @Query('contentQuery') contentQuery: UserContentQueryOptionsDto):
   Promise<OrderedCollectionPageDto> {
@@ -80,7 +80,7 @@ export class UserContentController {
   @Get('posts/:postId')
   @ApiParam({name: 'username', type: 'string', required: true, example: 'chris'})
   public async getPost(
-    @ServiceId() _serviceId: string,
+    @ServiceDomain() _serviceId: string,
     @Param() params: UserParamsDto,
     @Param('postId') postId: string
   ): Promise<any> {

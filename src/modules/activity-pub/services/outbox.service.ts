@@ -8,7 +8,8 @@ import { ObjectService } from '../../object/object.service';
 import { ObjectDocument, ObjectRecordDto } from '../../object/schema/object.schema';
 import { APActivity, APObject } from './outbox-dispatch.service';
 import { ASObject, ASObjectOrLink } from '@yuforium/activity-streams';
-import { UserActor } from 'src/modules/auth/auth.service';
+import { UserActor, UserPayload } from 'src/modules/auth/auth.service';
+import { Schema, Types } from 'mongoose';
 
 @Injectable()
 export class OutboxService {
@@ -21,16 +22,16 @@ export class OutboxService {
     return dto;
   }
 
-  public async createActivityFromObject<T extends ASObject = ASObject>(actor: UserActor, dto: T): Promise<APActivity> {
+  public async createActivityFromObject<T extends ASObject = ASObject>(serviceDomain: string, actor: UserActor, dto: T): Promise<APActivity> {
     const id = this.objectService.id();
     const idType = typeof dto.type === 'string' && dto.type ? (dto.type as string).toLowerCase() : 'object';
 
     const recordDto: ObjectRecordDto = {
       ...dto as ObjectDto,
       '@context': 'https://www.w3.org/ns/activitystreams',
-      id: `${actor.id}/posts/${id.toString()}`,
-      _domain: actor._domain,
-      _outbox: actor._id,
+      id: `${actor._id}/posts/${id.toString()}`,
+      _domain: serviceDomain,
+      _outbox: new Schema.Types.ObjectId(actor._id.toString()),
       _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public',
       _local: true
     };
@@ -50,9 +51,9 @@ export class OutboxService {
       type: 'Create',
       actor: Array.isArray(dto.attributedTo) ? dto.attributedTo[0] as string : dto.attributedTo as string,
       object: instanceToPlain(obj),
-      _domain: _domain,
-      _path: `${actor._path}/${actor._pathId}/activities`,
-      _pathId: activityId.toString(),
+      _domain: serviceDomain,
+      // _path: `${actor._path}/${actor._pathId}/activities`,
+      // _pathId: activityId.toString(),
       _local: true
     }
 
