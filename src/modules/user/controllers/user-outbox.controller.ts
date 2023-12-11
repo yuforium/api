@@ -16,7 +16,7 @@ import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
 import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
 import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
-import { UserActor, UserPayload } from '../../../modules/auth/auth.service';
+import { JwtUser } from '../../../modules/auth/auth.service';
 
 type AllowedCreate = ObjectCreateDto | NoteCreateDto
 
@@ -46,7 +46,7 @@ export class UserOutboxController {
   public async postOutbox(
     @Param() params: UserParamsDto,
     @ServiceDomain() serviceDomain: string,
-    @User('actor') actor: UserActor,
+    @User() user: JwtUser,
     @Req() req: Request,
     @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ASObject
   ) {
@@ -55,11 +55,11 @@ export class UserOutboxController {
     }
 
     const userId = `https://${serviceDomain}/users/${params.username}`;
-    const actorRecord = await this.objectService.get(actor.id);
+    const actorRecord = await this.objectService.get(user.actor.id);
 
     // @todo - auth should be done via decorator on the class method
-    if (!actorRecord || actorRecord.type === 'Tombstone' || userId !== actor.id) {
-      this.logger.error(`Unauthorized access to outbox for ${userId} by ${actor.id}`);
+    if (!actorRecord || actorRecord.type === 'Tombstone' || userId !== user.actor.id) {
+      this.logger.error(`Unauthorized access to outbox for ${userId} by ${user.actor.id}`);
       throw new UnauthorizedException('You are not authorized to post to this outbox.');
     }
 
@@ -73,7 +73,7 @@ export class UserOutboxController {
 
     const _originPath = `users/${params.username}`;
 
-    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(serviceDomain, actor, {...dto as ObjectCreateDto, serviceId: serviceDomain, _originPath});
+    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(serviceDomain, user, {...dto as ObjectCreateDto, serviceId: serviceDomain, _originPath});
 
     return activity;
   }

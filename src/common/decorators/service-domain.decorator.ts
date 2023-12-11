@@ -2,24 +2,23 @@
 // @todo consider renaming `serviceId` to `serviceDomain`
 import * as psl from 'psl';
 import { createParamDecorator, ExecutionContext, Logger } from "@nestjs/common";
-import { ServiceId as ServiceIdType } from '../types/service-id.type';
+import { ServiceDomain as ServiceDomainType } from '../types/service-domain.type';
+import { parse } from 'tldts';
 
 const logger = new Logger('ServiceId');
 
 export const ServiceDomain = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): ServiceIdType => {
+  (data: unknown, ctx: ExecutionContext): ServiceDomainType => {
     const request = ctx.switchToHttp().getRequest();
     logger.debug(`Processing hostname ${request.hostname}`);
     // @todo this needs to be revisited
-    console.time('psl.get');
-    let domain = psl.get(request.hostname);
-    console.timeEnd('psl.get');
-    logger.debug(`Using domain ${domain} as serviceId`);
+    let domain = parse(request.hostname);
 
-    if (typeof domain !== 'string') {
+    if (domain.domain === null) {
       throw new Error('not a valid name');
     }
 
-    return domain;
+    logger.debug(`Using domain ${domain.domain} as serviceDomain`);
+    return domain.domain;
   }
 );

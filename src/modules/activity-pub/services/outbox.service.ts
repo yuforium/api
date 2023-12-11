@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { instanceToPlain } from 'class-transformer';
 import { ObjectDto } from '../../../common/dto/object';
-import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
 import { ActivityRecordDto } from '../../activity/schema/activity.schema';
 import { ActivityService } from '../../activity/services/activity.service';
 import { ObjectService } from '../../object/object.service';
 import { ObjectDocument, ObjectRecordDto } from '../../object/schema/object.schema';
-import { APActivity, APObject } from './outbox-dispatch.service';
-import { ASObject, ASObjectOrLink } from '@yuforium/activity-streams';
-import { UserActor, UserPayload } from 'src/modules/auth/auth.service';
-import { Schema, Types } from 'mongoose';
+import { APActivity } from './outbox-dispatch.service';
+import { ASObject } from '@yuforium/activity-streams';
+import { JwtUser } from 'src/modules/auth/auth.service';
+import { Schema } from 'mongoose';
 
 @Injectable()
 export class OutboxService {
@@ -22,16 +21,16 @@ export class OutboxService {
     return dto;
   }
 
-  public async createActivityFromObject<T extends ASObject = ASObject>(serviceDomain: string, actor: UserActor, dto: T): Promise<APActivity> {
+  public async createActivityFromObject<T extends ASObject = ASObject>(serviceDomain: string, user: JwtUser, dto: T): Promise<APActivity> {
     const id = this.objectService.id();
     const idType = typeof dto.type === 'string' && dto.type ? (dto.type as string).toLowerCase() : 'object';
 
     const recordDto: ObjectRecordDto = {
       ...dto as ObjectDto,
       '@context': 'https://www.w3.org/ns/activitystreams',
-      id: `${actor._id}/posts/${id.toString()}`,
+      id: `${user.actor.id}/posts/${id.toString()}`,
       _domain: serviceDomain,
-      _outbox: new Schema.Types.ObjectId(actor._id.toString()),
+      _outbox: new Schema.Types.ObjectId(user._id.toString()),
       _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public',
       _local: true
     };

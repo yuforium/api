@@ -7,8 +7,6 @@ import { InboxProcessorService } from './inbox-processor.service';
 import { ActivityPubService } from './activity-pub.service';
 import * as psl from 'psl';
 
-type APInboxProcessorType = 'create' | 'follow';
-
 type ProcessorFunction = (activity: APActivity, actor: APActor) => Promise<APActivity | null>;
 
 export interface APInboxProcessor {
@@ -39,7 +37,7 @@ export class InboxService {
   ) { }
 
   /**
-   * Accept an incoming activity.
+   * Accept an incoming activity.  This is the entry point for all incoming activities.
    */
   public async accept<T extends APActivity>(activity: T, options?: AcceptOptions) {
     // if requestSignature is provided, verify the signature.  If we don't have a public key for the user, we can't verify the signature, and we

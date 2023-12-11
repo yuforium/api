@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, Header, NotFoundException, Param, Post, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, Header, Logger, NotFoundException, Param, Post, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
@@ -13,6 +13,8 @@ import { UserParamsDto } from '../dto/user-params.dto';
 @ApiTags('user')
 @Controller('users')
 export class UserController {
+  protected logger = new Logger(UserController.name);
+  
   constructor(
     protected userService: UserService,
     protected objectService: ObjectService
@@ -52,6 +54,7 @@ export class UserController {
   @Post()
   @Header('Content-Type', 'application/activity+json')
   public async create(@ServiceDomain() serviceId: string, @Body() userDto: UserCreateDto) {
+    this.logger.debug(`Creating user ${userDto.username}`);
     userDto.username = userDto.username.toLowerCase();
     userDto.email = userDto.email.toLowerCase();
 

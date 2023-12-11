@@ -3,26 +3,26 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserDocument } from '../user/schemas/user.schema';
-import { plainToClass } from 'class-transformer';
+import { Exclude, instanceToPlain, plainToClass, plainToInstance } from 'class-transformer';
 import { PersonDto } from '../../common/dto/object/person.dto';
 import { ObjectService } from '../object/object.service';
-import { Actor } from '@yuforium/activity-streams';
-import { Schema, Types } from 'mongoose';
-import { PersonDocument, PersonRecordDto } from '../object/schema/person.schema';
+import { PersonRecordDto } from '../object/schema/person.schema';
 
-export interface UserPayload {
+export interface JwtUser {
   _id: string;
   username: string;
-  actor: UserActor;
+  actor: PersonDto;
 }
 
 /**
  * This should derive from a DTO and should have id and _id properties associated with it
  */
-export interface UserActor extends Actor {
-  _id: string | Schema.Types.ObjectId;
-  id: string;
-  preferredUsername: string;
+export class JwtUserActor extends PersonDto {
+  id!: string;
+  preferredUsername!: string;
+
+  @Exclude()
+  to!: string | string[];
 }
 
 @Injectable()
@@ -69,16 +69,22 @@ export class AuthService {
       throw new Error('User has no assigned username');
     }
 
-    const actor = await this.userService.findPersonById(user.defaultIdentity);
+    const actorRecord = await this.userService.findPersonById(user.defaultIdentity);
 
-    if (actor === null) {
+    if (actorRecord === null) {
       throw new Error('User\'s default identity not found');
     }
 
-    const payload: UserPayload = {
+    const actor = plainToInstance(JwtUserActor, actorRecord, {excludeExtraneousValues: true});
+
+    console.log(Object.keys(instanceToPlain(actor)));
+
+    const payloadActor = {...plainToClass(PersonRecordDto, actor, {excludeExtraneousValues: true}), preferredUsername: user.username} as PersonRecordDto & {_id: string, preferredUsername: string};
+
+    const payload: JwtUser = {
       _id: user._id.toString(),
       username: user.username,
-      actor: {...plainToClass(PersonRecordDto, actor as PersonDto), preferredUsername: user.username} as PersonRecordDto & {_id: string, preferredUsername: string}
+      actor: instanceToPlain(actor) as JwtUserActor
     };
 
     return {

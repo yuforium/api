@@ -7,7 +7,7 @@ import { ObjectService } from '../../../modules/object/object.service';
 import { ForumParams } from '../dto/forum-params.dto';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { User } from '../../../common/decorators/user.decorator';
-import { UserActor } from '../../../modules/auth/auth.service';
+import { JwtUser, JwtUserActor } from '../../../modules/auth/auth.service';
 import { ASObject } from '@yuforium/activity-streams';
 import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
 import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
@@ -55,7 +55,7 @@ export class ForumOutboxController {
   public async postOutbox(
     @Param() params: ForumParams,
     @ServiceDomain() serviceDomain: string,
-    @User('actor') actor: UserActor,
+    @User() user: JwtUser,
     @Req() req: Request,
     @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ASObject
   ) {
@@ -68,26 +68,26 @@ export class ForumOutboxController {
       id: forumId,
     });
 
-    const actorRecord = await this.objectService.get(actor.id);
+    const actorRecord = await this.objectService.get(user.actor.id);
 
     // @todo - auth should be done via decorator on the class method
     if (!actorRecord || actorRecord.type === 'Tombstone') {
-      this.logger.error(`Unauthorized access to forum outbox by ${actor.id}`);
+      this.logger.error(`Unauthorized access to forum outbox by ${user.actor.id}`);
       throw new UnauthorizedException('You are not authorized to post to this outbox.');
     }
 
-    this.logger.debug(`postOutbox(): ${actor.preferredUsername} is posting to ${params.pathId}'s outbox`);
+    this.logger.debug(`postOutbox(): ${user.actor.preferredUsername} is posting to ${params.pathId}'s outbox`);
 
     // @todo document how and why to/cc are set for various targets
     // see also https://github.com/mastodon/mastodon/issues/8067 and https://github.com/mastodon/mastodon/pull/3844#issuecomment-314897285
     Object.assign(dto, {
-      attributedTo: [actor.id, `https://${serviceDomain}/forums/${params.pathId}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
+      attributedTo: [user.actor.id, `https://${serviceDomain}/forums/${params.pathId}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
       published: new Date().toISOString(),
       to: ['https://www.w3.org/ns/activitystreams#Public'],
       cc: [`${params.pathId}/followers`], // @todo consider 
     });
 
-    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(serviceDomain, actor, {...dto as ObjectCreateDto, serviceId: serviceDomain});
+    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(serviceDomain, user, {...dto as ObjectCreateDto, serviceId: serviceDomain});
 
     return activity;
   }
