@@ -3,26 +3,14 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserDocument } from '../user/schemas/user.schema';
-import { Exclude, instanceToPlain, plainToClass, plainToInstance } from 'class-transformer';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PersonDto } from '../../common/dto/object/person.dto';
 import { ObjectService } from '../object/object.service';
-import { PersonRecordDto } from '../object/schema/person.schema';
+import { UserActorDto } from '../user/dto/user-actor.dto';
 
 export interface JwtUser {
   _id: string;
-  username: string;
   actor: PersonDto;
-}
-
-/**
- * This should derive from a DTO and should have id and _id properties associated with it
- */
-export class JwtUserActor extends PersonDto {
-  id!: string;
-  preferredUsername!: string;
-
-  @Exclude()
-  to!: string | string[];
 }
 
 @Injectable()
@@ -75,16 +63,12 @@ export class AuthService {
       throw new Error('User\'s default identity not found');
     }
 
-    const actor = plainToInstance(JwtUserActor, actorRecord, {excludeExtraneousValues: true});
-
-    console.log(Object.keys(instanceToPlain(actor)));
-
-    const payloadActor = {...plainToClass(PersonRecordDto, actor, {excludeExtraneousValues: true}), preferredUsername: user.username} as PersonRecordDto & {_id: string, preferredUsername: string};
+    const actor = plainToInstance(UserActorDto, actorRecord, {excludeExtraneousValues: true});
+    actor.preferredUsername = user.username;
 
     const payload: JwtUser = {
       _id: user._id.toString(),
-      username: user.username,
-      actor: instanceToPlain(actor) as JwtUserActor
+      actor: instanceToPlain(actor) as UserActorDto
     };
 
     return {

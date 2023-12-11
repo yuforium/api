@@ -10,6 +10,7 @@ import { generateKeyPairSync } from "crypto";
 import { PersonDto } from 'src/common/dto/object/person.dto';
 import { validate } from 'class-validator';
 import { PersonDocument, PersonRecordDto } from '../object/schema/person.schema';
+import { UserActorDocument, UserActorRecordDto } from './schemas/user-actor.schema';
 
 // import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 
@@ -20,7 +21,7 @@ export class UserService {
   constructor(
     protected readonly objectService: ObjectService,
     @InjectModel(User.name) protected userModel: Model<UserDocument>,
-    @InjectModel(PersonRecordDto.name) protected personModel: Model<PersonDocument>,
+    @InjectModel(UserActorRecordDto.name) protected userActorModel: Model<UserActorRecordDto>,
   ) { }
 
   public async create(_domain: string, userDto: UserCreateDto): Promise<any> {
@@ -205,7 +206,7 @@ public async resetPassword(serviceId: string, username: string, hashedPassword: 
     }
   }
 
-  public async findPersonById(_id: string | Schema.Types.ObjectId): Promise<PersonDocument | null> {
-    return this.personModel.findOne({_id, type: 'Person'});
+  public async findPersonById(_id: string | Schema.Types.ObjectId): Promise<UserActorDocument | null> {
+    return this.userActorModel.findOne({_id, type: 'Person'});
   }
 }

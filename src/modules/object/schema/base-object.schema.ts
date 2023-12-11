@@ -78,6 +78,12 @@ export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TB
     @Prop({type: Boolean, required: true})
     @Exclude()
     public _local!: boolean;
+
+    @Exclude()
+    public $__?: any;
+
+    @Exclude()
+    public $doc?: any;
   }
 
   return BaseObjectSchema;

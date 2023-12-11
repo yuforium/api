@@ -10,7 +10,7 @@ import { Request } from 'express';
 import { PersonDto } from '../../../common/dto/object/person.dto';
 import { UserService } from '../../user/user.service';
 import * as crypto from 'crypto';
-import { JwtUser, JwtUserActor } from 'src/modules/auth/auth.service';
+import { JwtUser } from 'src/modules/auth/auth.service';
 
 export interface APObject extends ASObject {
   [k: string]: any;

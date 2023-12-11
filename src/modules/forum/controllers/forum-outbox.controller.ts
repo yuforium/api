@@ -7,7 +7,7 @@ import { ObjectService } from '../../../modules/object/object.service';
 import { ForumParams } from '../dto/forum-params.dto';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { User } from '../../../common/decorators/user.decorator';
-import { JwtUser, JwtUserActor } from '../../../modules/auth/auth.service';
+import { JwtUser } from '../../../modules/auth/auth.service';
 import { ASObject } from '@yuforium/activity-streams';
 import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
 import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
