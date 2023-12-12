@@ -45,7 +45,7 @@ export class UserOutboxController {
   @Post()
   public async postOutbox(
     @Param() params: UserParamsDto,
-    @ServiceDomain() serviceDomain: string,
+    @ServiceDomain() domain: string,
     @User() user: JwtUser,
     @Req() req: Request,
     @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ASObject
@@ -54,8 +54,10 @@ export class UserOutboxController {
       throw new NotImplementedException('Activity objects are not supported at this time.');
     }
 
-    const userId = `https://${serviceDomain}/users/${params.username}`;
+    const userId = `https://${domain}/users/${params.username}`;
     const actorRecord = await this.objectService.get(user.actor.id);
+
+    console.log('actorRecord', actorRecord);
 
     // @todo - auth should be done via decorator on the class method
     if (!actorRecord || actorRecord.type === 'Tombstone' || userId !== user.actor.id) {
@@ -73,7 +75,7 @@ export class UserOutboxController {
 
     const _originPath = `users/${params.username}`;
 
-    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(serviceDomain, user, {...dto as ObjectCreateDto, serviceId: serviceDomain, _originPath});
+    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(domain, user, {...dto as ObjectCreateDto, serviceId: domain, _originPath});
 
     return activity;
   }

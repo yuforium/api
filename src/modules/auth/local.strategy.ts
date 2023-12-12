@@ -3,6 +3,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-local";
 import { AuthService } from "./auth.service";
 import * as psl from 'psl';
+import { ServiceDomain, resolveDomain } from "src/common/decorators/service-domain.decorator";
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -13,7 +14,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   public async validate(req: any, username: string, password: string) {
-    const serviceId = psl.get(req.hostname) || psl.get(process.env.DEFAULT_DOMAIN as string);
+    const serviceId = resolveDomain(req.hostname);
 
     if (typeof serviceId !== 'string') {
       throw new Error('not a valid domain name');

@@ -22,27 +22,29 @@ export class AuthService {
     protected objectService: ObjectService
   ) { }
 
-  public async validateUser(serviceId: string, username: string, password: string): Promise<any> {
-    const user = await this.userService.findOne(serviceId, username);
+  public async validateUser(serviceDomain: string, username: string, password: string): Promise<any> {
+    const user = await this.userService.findOne(serviceDomain, username);
 
-    this.logger.debug(`Validating user "${username}@${serviceId}"`);
+    console.log('user', user)
+
+    this.logger.debug(`Validating user "${username}@${serviceDomain}"`);
 
     if (user) {
-      this.logger.verbose(`User "${username}@${serviceId}" found`);
+      this.logger.verbose(`User "${username}@${serviceDomain}" found`);
 
       if (user.password === undefined) {
         throw new UnauthorizedException();
       }
 
       if (await await bcrypt.compare(password, user.password)) {
-        this.logger.debug(`User "${username}@${serviceId}" password matches, validation succeeded`);
+        this.logger.debug(`User "${username}@${serviceDomain}" password matches, validation succeeded`);
         return user;
       }
 
-      this.logger.debug(`User "${username}@${serviceId}" password does not match, validation failed`);
+      this.logger.debug(`User "${username}@${serviceDomain}" password does not match, validation failed`);
     }
     else {
-      this.logger.debug(`User "${username}@${serviceId}" not found, validation failed`);
+      this.logger.debug(`User "${username}@${serviceDomain}" not found, validation failed`);
     }
 
     return undefined;

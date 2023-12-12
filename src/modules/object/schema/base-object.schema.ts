@@ -32,9 +32,15 @@ type BaseObjectRecord = {
  */
 export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TBase): TBase & GConstructor<BaseObjectRecord>{
   class BaseObjectSchema extends Base implements BaseObjectRecord {
+    /**
+     * The database ID of the object.
+     */
     @Exclude()
-    public _id!: string | Schema.Types.ObjectId;
+    public _id!: Schema.Types.ObjectId;
 
+    /**
+     * The domain of the object.  This is used for querying content.
+     */
     @Prop({type: String, required: true})
     @Exclude()
     public _domain!: string;
@@ -78,12 +84,6 @@ export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TB
     @Prop({type: Boolean, required: true})
     @Exclude()
     public _local!: boolean;
-
-    @Exclude()
-    public $__?: any;
-
-    @Exclude()
-    public $doc?: any;
   }
 
   return BaseObjectSchema;

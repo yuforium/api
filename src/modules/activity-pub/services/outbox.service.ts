@@ -5,8 +5,7 @@ import { ActivityRecordDto } from '../../activity/schema/activity.schema';
 import { ActivityService } from '../../activity/services/activity.service';
 import { ObjectService } from '../../object/object.service';
 import { ObjectDocument, ObjectRecordDto } from '../../object/schema/object.schema';
-import { APActivity } from './outbox-dispatch.service';
-import { ASObject } from '@yuforium/activity-streams';
+import { ASObject, Activity } from '@yuforium/activity-streams';
 import { JwtUser } from 'src/modules/auth/auth.service';
 import { Schema } from 'mongoose';
 
@@ -17,11 +16,11 @@ export class OutboxService {
     protected readonly objectService: ObjectService
   ) { }
 
-  public async create<T extends APActivity = APActivity>(dto: T) {
+  public async create<T extends Activity = Activity>(dto: T) {
     return dto;
   }
 
-  public async createActivityFromObject<T extends ASObject = ASObject>(serviceDomain: string, user: JwtUser, dto: T): Promise<APActivity> {
+  public async createActivityFromObject<T extends ASObject = ASObject>(domain: string, user: JwtUser, dto: T): Promise<Activity> {
     const id = this.objectService.id();
     const idType = typeof dto.type === 'string' && dto.type ? (dto.type as string).toLowerCase() : 'object';
 
@@ -29,7 +28,7 @@ export class OutboxService {
       ...dto as ObjectDto,
       '@context': 'https://www.w3.org/ns/activitystreams',
       id: `${user.actor.id}/posts/${id.toString()}`,
-      _domain: serviceDomain,
+      _domain: domain,
       _outbox: new Schema.Types.ObjectId(user._id.toString()),
       _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public',
       _local: true
@@ -50,7 +49,7 @@ export class OutboxService {
       type: 'Create',
       actor: Array.isArray(dto.attributedTo) ? dto.attributedTo[0] as string : dto.attributedTo as string,
       object: instanceToPlain(obj),
-      _domain: serviceDomain,
+      _domain: domain,
       // _path: `${actor._path}/${actor._pathId}/activities`,
       // _pathId: activityId.toString(),
       _local: true

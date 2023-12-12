@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Schema, Types } from 'mongoose';
+import { Model, Schema } from 'mongoose';
 import { UserCreateDto } from './dto/user-create.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
@@ -9,10 +9,7 @@ import { MongoServerError } from 'mongodb';
 import { generateKeyPairSync } from "crypto";
 import { PersonDto } from 'src/common/dto/object/person.dto';
 import { validate } from 'class-validator';
-import { PersonDocument, PersonRecordDto } from '../object/schema/person.schema';
 import { UserActorDocument, UserActorRecordDto } from './schemas/user-actor.schema';
-
-// import { Person, PersonDocument } from '../activity-pub/schema/person.schema';
 
 @Injectable()
 export class UserService {
@@ -108,8 +105,8 @@ export class UserService {
    * @param username 
    * @returns 
    */
-  public async findOne(serviceId: string, username: string): Promise<UserDocument | null> {
-    return await this.userModel.findOne({serviceId, username: {'$eq': username}});
+  public async findOne(serviceDomain: string, username: string): Promise<UserDocument | null> {
+    return await this.userModel.findOne({domain: serviceDomain, username: {'$eq': username}});
   }
 
   public async findPerson(serviceId: string, username: string): Promise<any | undefined> {

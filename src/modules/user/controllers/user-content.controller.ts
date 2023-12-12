@@ -52,23 +52,23 @@ export class UserContentController {
   })
   @Get()
   public async getContent(
-    @ServiceDomain() _serviceId: string,
+    @ServiceDomain() domain: string,
     @Param() params: UserParamsDto,
     @Query('contentQuery') contentQuery: UserContentQueryOptionsDto):
   Promise<OrderedCollectionPageDto> {
     const collectionPage = new OrderedCollectionPageDto();
-    const userId = `https://${_serviceId}/users/${params.username}`;
+    const userId = `https://${domain}/users/${params.username}`;
 
-    const user = await this.userService.findOne(_serviceId, params.username);
+    const user = await this.userService.findOne(domain, params.username);
 
-    this.logger.log(`getContent(): User: ${params.username}`);
+    this.logger.debug(`getContent() for user ${params.username}@${domain}`);
 
     if (!user) {
-      this.logger.log(`getContent(): User not found: ${params.username}`);
+      this.logger.error(`getContent() user not found ${params.username}@${domain}`);
       throw new NotFoundException();
     }
 
-    const queryParams = {_serviceId, attributedTo: userId, type: contentQuery.type};
+    const queryParams = {domain, attributedTo: userId, type: contentQuery.type};
 
     collectionPage.id = `${userId}/content`;
     collectionPage.items = (await this.objectService.find(queryParams, contentQuery))
