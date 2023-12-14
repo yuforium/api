@@ -42,7 +42,7 @@ export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TB
 
     /**
      * Specifies an actor or list of actors for where the object was received 
-     * via the inbox.
+     * via the inbox. (local actors only)
      *  
      * This is based on the to/cc/bcc field. 
      */

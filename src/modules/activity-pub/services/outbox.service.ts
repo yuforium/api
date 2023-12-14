@@ -27,17 +27,13 @@ export class OutboxService {
 
     const recordDto: ObjectRecordDto = {
       ...dto,
-      '@context': 'https://www.w3.org/ns/activitystreams',
+      '@context': 'https://www.w3.org/ns/activitystreams', // note that direct assignment like dto['@context'] = '...' doesn't work
       id: `${user.actor.id}/posts/${id.toString()}`,
       _domain: domain,
       _outbox: new Types.ObjectId(user._id.toString()),
       _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public',
       _local: true
     };
-
-    // first line fails, second line works, note that Object.assign works above
-    // dto['@context'] = 'https://www.w3.org/ns/activitystreams';
-    // dto['context'] = 'wtf';
 
     const obj = await this.objectService.create(recordDto);
 
@@ -49,8 +45,6 @@ export class OutboxService {
       actor: Array.isArray(dto.attributedTo) ? dto.attributedTo[0] as string : dto.attributedTo as string,
       object: instanceToPlain(obj),
       _domain: domain,
-      // _path: `${actor._path}/${actor._pathId}/activities`,
-      // _pathId: activityId.toString(),
       _local: true
     }
 

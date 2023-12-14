@@ -11,7 +11,7 @@ import { ObjectService } from '../../object/object.service';
 import { UserParamsDto } from '../dto/user-params.dto';
 import { Request } from 'express';
 import { User } from '../../../common/decorators/user.decorator';
-import { DispatchService } from '../../activity-pub/services/dispatch.service';
+import { SyncDispatchService } from '../../activity-pub/services/sync-dispatch.service';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
 import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';

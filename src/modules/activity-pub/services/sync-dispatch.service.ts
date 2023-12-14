@@ -10,12 +10,13 @@ import { Request } from 'express';
 import { PersonDto } from '../../../common/dto/object/person.dto';
 import { UserService } from '../../user/user.service';
 import * as crypto from 'crypto';
-import { JwtUser } from 'src/modules/auth/auth.service';
-import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
 
+/**
+ * A synchronous dispatch service with no queueing.  This is used for testing and development purposes only.
+ */
 @Injectable({scope: Scope.REQUEST})
-export class DispatchService {
-  protected logger = new Logger(DispatchService.name);
+export class SyncDispatchService {
+  protected logger = new Logger(SyncDispatchService.name);
 
   constructor(
     protected readonly activityService: ActivityService,
@@ -27,29 +28,8 @@ export class DispatchService {
   ) { }
 
   /**
-   * Create a new Object, and dispatches it to the appropriate recipients
-   * @param actor Actor who created the object
-   * @param dto Object to be created
-   * @returns
-   */
-  async createActivityFromObject<T extends ObjectCreateDto = ObjectCreateDto>(serviceDomain: string, user: JwtUser, dto: T): Promise<any> {
-    dto = Object.assign({}, dto);
-
-    const activity = await this.processor.createActivityFromObject<T>(serviceDomain, user, dto);
-
-    // const object = await this.objectService.create(dto);
-    // const {activity} = await this.activityService.create('Create', actorId, object);
-
-    await this.dispatch(activity);
-
-    // return {activity, object};
-
-    return activity;
-  }
-
-  // @todo handle cc/bcc fields as well
-  /**
    * Extract dispatch targets from an activity.  These targets still need to be resolved (i.e. if the target is a collection like a followers collection).
+   * @todo handle cc/bcc fields as well
    * @param activity 
    * @returns 
    */
@@ -90,6 +70,10 @@ export class DispatchService {
     return to;
   }
 
+  /**
+   * Dispatch an activity to its targets.
+   * @param activity 
+   */
   protected async dispatch(activity: Activity) {
     let dispatchTo = await this.getDispatchTargets(activity);
     
@@ -100,15 +84,13 @@ export class DispatchService {
   }
 
   protected async getInboxUrl(address: string): Promise<string> {
-    // this.logger.debug(`getInboxUrl(): Getting inbox url for ${address}`);
-
     const actor = (await fetch(address, {headers: {'Accept': 'application/activity+json'}}).then(res => res.json()));
 
     return (actor as any).inbox;
   }
 
   /**
-   * @todo for a production system, this would need to resolved targets (i.e. if the target was a followers collection).  this would/should be done with queueing.
+   * @todo for a production system, this would need to resolve targets (i.e. if the target was a followers collection).  this would/should be done with queueing.
    * @param url 
    * @param activity 
    * @returns 
