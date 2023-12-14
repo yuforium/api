@@ -2,17 +2,10 @@ import { BadRequestException, Injectable, Logger, NotImplementedException } from
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { parse, verify, VerifyOptions } from '@yuforium/http-signature';
-import { APActivity, APActor, OutboxDispatchService } from './outbox-dispatch.service';
+import { DispatchService } from './dispatch.service';
 import { InboxProcessorService } from './inbox-processor.service';
 import { ActivityPubService } from './activity-pub.service';
 import * as psl from 'psl';
-
-type ProcessorFunction = (activity: APActivity, actor: APActor) => Promise<APActivity | null>;
-
-export interface APInboxProcessor {
-  create: ProcessorFunction;
-  follow: ProcessorFunction;
-}
 
 export interface AcceptOptions {
   requestSignature?: {
@@ -33,13 +26,13 @@ export class InboxService {
     protected readonly activityService: ActivityService,
     protected readonly processor: InboxProcessorService,
     protected readonly activityPubService: ActivityPubService,
-    protected readonly outboxService: OutboxDispatchService
+    protected readonly outboxService: DispatchService
   ) { }
 
   /**
    * Accept an incoming activity.  This is the entry point for all incoming activities.
    */
-  public async accept<T extends APActivity>(activity: T, options?: AcceptOptions) {
+  public async accept<T extends ActivityDto>(activity: T, options?: AcceptOptions) {
     // if requestSignature is provided, verify the signature.  If we don't have a public key for the user, we can't verify the signature, and we
     // should queue processing of the activity for later.
     const {requestSignature} = options || {};

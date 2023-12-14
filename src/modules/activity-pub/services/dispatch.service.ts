@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, NotImplementedException, Scope } from '@nes
 import { ActivityService } from '../../activity/services/activity.service';
 import { ObjectService } from '../../object/object.service';
 import { ActivityPubService } from './activity-pub.service';
-import { Activity, Actor, ASObject, ASObjectOrLink } from '@yuforium/activity-streams';
+import { Activity, ASObject } from '@yuforium/activity-streams';
 import { OutboxService } from './outbox.service';
 import { sign } from '@yuforium/http-signature';
 import { REQUEST } from '@nestjs/core';
@@ -11,45 +11,11 @@ import { PersonDto } from '../../../common/dto/object/person.dto';
 import { UserService } from '../../user/user.service';
 import * as crypto from 'crypto';
 import { JwtUser } from 'src/modules/auth/auth.service';
-
-export interface APObject extends ASObject {
-  [k: string]: any;
-}
-
-export interface APActivity extends Activity {
-  id: string;
-  type: string;
-  actor: string;
-  object: ASObjectOrLink;
-  [k: string]: any;
-}
-
-export interface APActor extends Actor {
-  id: string;
-  inbox: string;
-  [k: string]: any;
-}
-
-export interface APOutboxProcessor {
-  create(activity: APActivity): Promise<APActivity>;
-  createObject(object: APObject, actor: APActor): Promise<APObject>;
-}
-
-export interface APService {
-  toPlain(object: APObject): APObject;
-}
-
-export interface APActivityService {
-  create(dto: APActivity): Promise<APActivity>;
-}
-
-export interface APObjectService {
-  create(actorId: string, dto: APObject): Promise<{object: APObject}>;
-}
+import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
 
 @Injectable({scope: Scope.REQUEST})
-export class OutboxDispatchService {
-  protected logger = new Logger(OutboxDispatchService.name);
+export class DispatchService {
+  protected logger = new Logger(DispatchService.name);
 
   constructor(
     protected readonly activityService: ActivityService,
@@ -58,22 +24,15 @@ export class OutboxDispatchService {
     protected readonly processor: OutboxService,
     protected readonly userService: UserService,
     @Inject(REQUEST) protected readonly request: Request
-  ) {}
+  ) { }
 
-  public async create<T extends APActivity = APActivity>(dto: T) {
-    const activity = await this.processor.create(dto);
-
-    // await this.activityPubService.dispatch(activity);
-  }
-
-  // the signature for this should be createObject(actor: Actor, dto: ASObject) - what to do with serviceId? It can be appended to the dto since that's a type
   /**
    * Create a new Object, and dispatches it to the appropriate recipients
    * @param actor Actor who created the object
    * @param dto Object to be created
    * @returns
    */
-  async createActivityFromObject<T extends APObject = APObject>(serviceDomain: string, user: JwtUser, dto: T): Promise<any> {
+  async createActivityFromObject<T extends ObjectCreateDto = ObjectCreateDto>(serviceDomain: string, user: JwtUser, dto: T): Promise<any> {
     dto = Object.assign({}, dto);
 
     const activity = await this.processor.createActivityFromObject<T>(serviceDomain, user, dto);
@@ -94,7 +53,7 @@ export class OutboxDispatchService {
    * @param activity 
    * @returns 
    */
-  protected async getDispatchTargets(activity: APActivity): Promise<string[]> {
+  protected async getDispatchTargets(activity: Activity): Promise<string[]> {
     let to = [];
 
     if (typeof activity.object !== 'object' || activity.object.type === 'Link') {
@@ -131,7 +90,7 @@ export class OutboxDispatchService {
     return to;
   }
 
-  protected async dispatch(activity: APActivity) {
+  protected async dispatch(activity: Activity) {
     let dispatchTo = await this.getDispatchTargets(activity);
     
     dispatchTo.forEach(async to => {
@@ -154,7 +113,7 @@ export class OutboxDispatchService {
    * @param activity 
    * @returns 
    */
-  protected async send(url: string, activity: APActivity): Promise<any> {
+  protected async send(url: string, activity: Activity): Promise<any> {
     const parsedUrl = new URL(url);
 
     const actor = (this.request.user as any)?.actor as PersonDto;

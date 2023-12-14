@@ -54,7 +54,7 @@ export class ForumOutboxController {
   @Post()
   public async postOutbox(
     @Param() params: ForumParams,
-    @ServiceDomain() serviceDomain: string,
+    @ServiceDomain() domain: string,
     @User() user: JwtUser,
     @Req() req: Request,
     @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ASObject
@@ -63,7 +63,7 @@ export class ForumOutboxController {
       throw new NotImplementedException('Activity objects are not supported at this time.');
     }
 
-    const forumId = `https://${serviceDomain}/forums/${params.pathId}`;
+    const forumId = `https://${domain}/forums/${params.pathId}`;
     const forum = await this.objectService.get(forumId) || Object.assign(new ObjectDto(), {
       id: forumId,
     });
@@ -81,13 +81,13 @@ export class ForumOutboxController {
     // @todo document how and why to/cc are set for various targets
     // see also https://github.com/mastodon/mastodon/issues/8067 and https://github.com/mastodon/mastodon/pull/3844#issuecomment-314897285
     Object.assign(dto, {
-      attributedTo: [user.actor.id, `https://${serviceDomain}/forums/${params.pathId}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
+      attributedTo: [user.actor.id, `https://${domain}/forums/${params.pathId}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
       published: new Date().toISOString(),
       to: ['https://www.w3.org/ns/activitystreams#Public'],
       cc: [`${params.pathId}/followers`], // @todo consider 
     });
 
-    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(serviceDomain, user, {...dto as ObjectCreateDto, serviceId: serviceDomain});
+    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(domain, user, {...dto as ObjectCreateDto, serviceId: domain});
 
     return activity;
   }

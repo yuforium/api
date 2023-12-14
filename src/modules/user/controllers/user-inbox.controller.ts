@@ -28,8 +28,8 @@ export class UserInboxController {
   @ApiParam({name: 'username', required: true, type: String, 'description': 'The username of the user to get the inbox for.'})
   @Get()
   @UseGuards(AuthGuard(['jwt', 'anonymous']))
-  public async getInbox(@Req() req: Request, @ServiceDomain() serviceId: string, @Param() params: any) {
-    const queryParams = {to: `https://${serviceId}/user/${params.username}`};
+  public async getInbox(@ServiceDomain() domain: string, @Param() params: any) {
+    const queryParams = {to: `https://${domain}/user/${params.username}`};
     const content = await this.objectService.find(queryParams);
     const response = content.map((item: ObjectDocument) => plainToClass(Note, item, {excludeExtraneousValues: true}));
 

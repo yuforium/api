@@ -1,23 +1,18 @@
 import { Prop } from "@nestjs/mongoose";
 import { Exclude, Transform } from "class-transformer";
 import { ObjectDto } from "src/common/dto/object/object.dto";
-import * as mongoose from "mongoose";
-import { Schema } from "mongoose";
+import { Types } from "mongoose";
 
-const { Mixed } = mongoose.Schema.Types;
-
-type Constructor = new (...args: any[]) => {};
 export type GConstructor<T = {}> = new (...args: any[]) => T
-type ObjectRecordConstructor = GConstructor<ObjectDto>;
 
 type BaseObjectRecord = {
-  _id?: string | Schema.Types.ObjectId;
+  _id?: string | Types.ObjectId;
   _domain: string;
   _public: boolean;
   _local: boolean;
-  _inbox?: mongoose.Types.ObjectId[];
-  _outbox?: Schema.Types.ObjectId;
-  _destination?: mongoose.Types.ObjectId[];
+  _inbox?: Types.ObjectId[];
+  _outbox?: Types.ObjectId;
+  _destination?: Types.ObjectId[];
 }
 
 /**
@@ -36,7 +31,7 @@ export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TB
      * The database ID of the object.
      */
     @Exclude()
-    public _id!: Schema.Types.ObjectId;
+    public _id!: Types.ObjectId;
 
     /**
      * The domain of the object.  This is used for querying content.
@@ -51,25 +46,25 @@ export function BaseObjectSchema<TBase extends GConstructor<ObjectDto>>(Base: TB
      *  
      * This is based on the to/cc/bcc field. 
      */
-    @Prop({type: [mongoose.Types.ObjectId], required: true})
+    @Prop({type: [Types.ObjectId], required: true})
     @Exclude()
-    public _inbox?: mongoose.Types.ObjectId[] = [];
+    public _inbox?: Types.ObjectId[] = [];
 
     /**
      * Actor who created the object.  This is used to determine the outbox from 
      * which the object originated.
      */
-    @Prop({type: mongoose.Types.ObjectId, required: false})
+    @Prop({type: Types.ObjectId, required: false})
     @Exclude()
-    public _outbox?: Schema.Types.ObjectId;
+    public _outbox?: Types.ObjectId;
 
     /**
      * Combined _inbox and _outbox.  This is used for querying content, only 
      * differs from _inbox because it includes the _outbox.
      */
-    @Prop({type: [mongoose.Types.ObjectId], required: true})
+    @Prop({type: [Types.ObjectId], required: true})
     @Exclude()
-    public _destination: mongoose.Types.ObjectId[] = [];
+    public _destination: Types.ObjectId[] = [];
 
     /**
      * Specifies if this is a public object.  Used for querying content.

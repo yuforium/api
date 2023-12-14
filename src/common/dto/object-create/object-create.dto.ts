@@ -8,7 +8,7 @@ import { ObjectDto } from "../object/object.dto";
  * API server by the user.  This is a generic class that should be extended 
  * by more specific object types.
  */
-export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'type', 'to']) {
+export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'type', 'to', 'attributedTo']) {
   @ApiProperty({required: false})
   @IsString()
   @MaxLength(255)
@@ -30,4 +30,8 @@ export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'ty
   @IsNotEmptyArray()
   @IsString({each: true})
   public to!: string | string[];
+
+  @ApiProperty({required: true})
+  @IsString({each: true})
+  public attributedTo!: string | undefined;
 }

@@ -7,7 +7,8 @@ import { ObjectService } from '../../object/object.service';
 import { ObjectDocument, ObjectRecordDto } from '../../object/schema/object.schema';
 import { ASObject, Activity } from '@yuforium/activity-streams';
 import { JwtUser } from 'src/modules/auth/auth.service';
-import { Schema } from 'mongoose';
+import { Mongoose, Types, Schema } from 'mongoose';
+import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
 
 @Injectable()
 export class OutboxService {
@@ -20,21 +21,19 @@ export class OutboxService {
     return dto;
   }
 
-  public async createActivityFromObject<T extends ASObject = ASObject>(domain: string, user: JwtUser, dto: T): Promise<Activity> {
+  public async createActivityFromObject<T extends ObjectCreateDto = ObjectCreateDto>(domain: string, user: JwtUser, dto: T): Promise<Activity> {
     const id = this.objectService.id();
     const idType = typeof dto.type === 'string' && dto.type ? (dto.type as string).toLowerCase() : 'object';
 
     const recordDto: ObjectRecordDto = {
-      ...dto as ObjectDto,
+      ...dto,
       '@context': 'https://www.w3.org/ns/activitystreams',
       id: `${user.actor.id}/posts/${id.toString()}`,
       _domain: domain,
-      _outbox: new Schema.Types.ObjectId(user._id.toString()),
+      _outbox: new Types.ObjectId(user._id.toString()),
       _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public',
       _local: true
     };
-
-    console.log('the record dto is', recordDto);
 
     // first line fails, second line works, note that Object.assign works above
     // dto['@context'] = 'https://www.w3.org/ns/activitystreams';
@@ -55,7 +54,7 @@ export class OutboxService {
       _local: true
     }
 
-    const activity = await this.activityService.create(activityDto)
+    const activity = await this.activityService.create(activityDto);
 
     return activity;
   }

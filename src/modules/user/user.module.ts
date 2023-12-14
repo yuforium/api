@@ -11,7 +11,7 @@ import { UserContentController } from './controllers/user-content.controller';
 import { ActivityStreamModule } from '../activity-stream/activity-stream.module';
 import { ActivityPubModule } from '../activity-pub/activity-pub.module';
 import { PersonRecordDto, PersonSchema } from '../object/schema/person.schema';
-import { OutboxDispatchService } from '../activity-pub/services/outbox-dispatch.service';
+import { DispatchService } from '../activity-pub/services/dispatch.service';
 import { UserActorRecordDto, UserActorSchema } from './schemas/user-actor.schema';
 
 @Module({

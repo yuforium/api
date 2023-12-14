@@ -11,19 +11,14 @@ import { ObjectService } from '../../object/object.service';
 import { UserParamsDto } from '../dto/user-params.dto';
 import { Request } from 'express';
 import { User } from '../../../common/decorators/user.decorator';
-import { OutboxDispatchService } from '../../activity-pub/services/outbox-dispatch.service';
+import { DispatchService } from '../../activity-pub/services/dispatch.service';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
 import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
 import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
 import { JwtUser } from '../../../modules/auth/auth.service';
-
-type AllowedCreate = ObjectCreateDto | NoteCreateDto
-
-interface OutboxObjectCreateDto extends ObjectCreateDto {
-  serviceId: string;
-  _originPath: string;
-}
+import { OutboxService } from 'src/modules/activity-pub/services/outbox.service';
+import { ArticleCreateDto } from 'src/common/dto/object-create/article-create.dto';
 
 @Controller('users/:username/outbox')
 @ApiTags('activity-pub')
@@ -34,7 +29,7 @@ export class UserOutboxController {
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService,
     protected readonly activityStreamService: SyncActivityStreamService,
-    protected readonly outboxService: OutboxDispatchService
+    protected readonly outboxService: OutboxService
   ) { }
 
   @ApiBearerAuth()
@@ -48,7 +43,7 @@ export class UserOutboxController {
     @ServiceDomain() domain: string,
     @User() user: JwtUser,
     @Req() req: Request,
-    @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ASObject
+    @Body(new ActivityStreamsPipe<ObjectCreateDto>(ObjectCreateTransformer)) dto: ObjectCreateDto | NoteCreateDto | ArticleCreateDto
   ) {
     if (dto instanceof ActivityDto) {
       throw new NotImplementedException('Activity objects are not supported at this time.');
@@ -57,7 +52,7 @@ export class UserOutboxController {
     const userId = `https://${domain}/users/${params.username}`;
     const actorRecord = await this.objectService.get(user.actor.id);
 
-    console.log('actorRecord', actorRecord);
+    console.log(user.actor.id);
 
     // @todo - auth should be done via decorator on the class method
     if (!actorRecord || actorRecord.type === 'Tombstone' || userId !== user.actor.id) {
@@ -73,9 +68,7 @@ export class UserOutboxController {
       to: Array.isArray(dto.to) ? dto.to : [dto.to as string]
     });
 
-    const _originPath = `users/${params.username}`;
-
-    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(domain, user, {...dto as ObjectCreateDto, serviceId: domain, _originPath});
+    const activity = this.outboxService.createActivityFromObject(domain, user, dto);
 
     return activity;
   }

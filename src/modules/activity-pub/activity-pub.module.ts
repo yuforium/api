@@ -7,11 +7,11 @@ import { ActivityPubService } from './services/activity-pub.service';
 import { InboxProcessorService } from './services/inbox-processor.service';
 import { InboxService } from './services/inbox.service';
 import { OutboxService } from './services/outbox.service';
-import { OutboxDispatchService } from './services/outbox-dispatch.service';
+import { DispatchService } from './services/dispatch.service';
 
 @Module({
-  providers: [InboxService, OutboxService, ActivityPubService, InboxProcessorService, OutboxService, OutboxDispatchService],
-  exports: [InboxService, OutboxService, OutboxDispatchService],
+  providers: [InboxService, OutboxService, ActivityPubService, InboxProcessorService, OutboxService, DispatchService],
+  exports: [InboxService, OutboxService, DispatchService],
   imports: [
     ActivityModule,
     ObjectModule,
