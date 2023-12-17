@@ -1,7 +1,7 @@
 import { Body, Controller, Get, NotImplementedException, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
-import { ApiTags, ApiHeader, ApiProduces } from '@nestjs/swagger';
+import { ApiTags, ApiProduces } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { ServiceDomain } from './common/decorators/service-domain.decorator';
@@ -13,7 +13,6 @@ import { ForumCreateDto } from './common/dto/forum-create.dto';
 export class AppController {
   constructor(
     protected readonly appService: AppService,
-    // protected readonly objectService: ObjectService,
     config: ConfigService
   ) { }
 
