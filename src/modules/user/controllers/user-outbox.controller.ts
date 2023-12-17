@@ -52,8 +52,6 @@ export class UserOutboxController {
     const userId = `https://${domain}/users/${params.username}`;
     const actorRecord = await this.objectService.get(user.actor.id);
 
-    console.log(user.actor.id);
-
     // @todo - auth should be done via decorator on the class method
     if (!actorRecord || actorRecord.type === 'Tombstone' || userId !== user.actor.id) {
       this.logger.error(`Unauthorized access to outbox for ${userId} by ${user.actor.id}`);

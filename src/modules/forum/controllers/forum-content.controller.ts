@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
 /**
  * Structure for the forum content controller response.
@@ -17,4 +17,19 @@ import { Controller } from '@nestjs/common';
  * }
  */
 @Controller('forum-content')
-export class ForumContentController {}
+export class ForumContentController {
+  @Get()
+  public async getForumContent() {
+    return {
+      id: 'https://example.com/forums/1/content?page=1',
+      type: 'OrderedCollectionPage',
+      items: [
+        {
+          url: [
+            'https://example.com/forums/1/content/1',
+          ],
+        },
+      ],
+    };
+  }
+}

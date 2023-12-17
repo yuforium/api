@@ -11,14 +11,15 @@ export class WebfingerController {
   constructor(protected readonly webfingerService: WebfingerService) {}
 
   @Get()
-  public async webfinger(@ServiceDomain() serviceId: string, @Query('resource') resource: string): Promise<any> {
+  public async webfinger(@ServiceDomain() domain: string, @Query('resource') resource: string): Promise<any> {
+    this.logger.debug(`webfinger: ${resource}`);
     const [, username, parsedServiceId] = /^acct:([A-Za-z0-9_]*)@(.*)$/i.exec(resource) || [];
 
     if (!username || !parsedServiceId) {
       throw new NotFoundException();
     }
 
-    const response = this.webfingerService.getAccount(serviceId, username);
+    const response = this.webfingerService.getAccount(domain, username);
 
     return plainToInstance(WebfingerDto, response);
   }

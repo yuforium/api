@@ -39,17 +39,9 @@ export class ForumOutboxController {
   ) { }
 
   @ApiBearerAuth()
-  @ApiOperation({operationId: 'postOutbox', summary: 'Post to a forum outbox'})
+  @ApiBody({schema: {oneOf: [{$ref: getSchemaPath(NoteCreateDto)}]}})
   @ApiExtraModels(NoteCreateDto)
-  @ApiBody({
-    schema: {
-      oneOf: [
-        {
-          $ref: getSchemaPath(NoteCreateDto)
-        }
-      ]
-    }
-  })
+  @ApiOperation({operationId: 'postOutbox', summary: 'Post to a forum outbox'})
   @UseGuards(AuthGuard('jwt'))
   @Post()
   public async postOutbox(
@@ -57,7 +49,7 @@ export class ForumOutboxController {
     @ServiceDomain() domain: string,
     @User() user: JwtUser,
     @Req() req: Request,
-    @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ASObject
+    @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ObjectCreateDto | NoteCreateDto
   ) {
     if (dto instanceof ActivityDto) {
       throw new NotImplementedException('Activity objects are not supported at this time.');
@@ -87,7 +79,7 @@ export class ForumOutboxController {
       cc: [`${params.pathId}/followers`], // @todo consider 
     });
 
-    const activity = await this.outboxService.createActivityFromObject<OutboxObjectCreateDto>(domain, user, {...dto as ObjectCreateDto, serviceId: domain});
+    const activity = await this.outboxService.createActivityFromObject(domain, user, dto);
 
     return activity;
   }
