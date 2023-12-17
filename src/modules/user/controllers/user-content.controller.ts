@@ -35,7 +35,7 @@ export class UserContentController {
    * @param options
    * @returns
    */
-  @ApiOperation({operationId: 'getContent'})
+  @ApiOperation({operationId: 'getContent', summary: 'Get user content'})
   @ApiParam({name: 'username', type: String, required: true, example: 'chris'})
   @ApiExtraModels(UserContentQueryOptionsDto)
   @ApiQuery({

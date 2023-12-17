@@ -6,7 +6,7 @@ import { ForumParams } from '../dto/forum-params.dto';
 import { Request } from 'express';
 
 @ApiTags('forum')
-@Controller('forum/:pathId/inbox')
+@Controller('forums/:pathId/inbox')
 export class ForumInboxController {
   protected logger = new Logger(ForumInboxController.name);
 

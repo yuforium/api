@@ -5,7 +5,7 @@ import { parse, verify, VerifyOptions } from '@yuforium/http-signature';
 import { SyncDispatchService } from './sync-dispatch.service';
 import { InboxProcessorService } from './inbox-processor.service';
 import { ActivityPubService } from './activity-pub.service';
-import * as psl from 'psl';
+import { resolve } from 'path';
 
 export interface AcceptOptions {
   requestSignature?: {
@@ -40,9 +40,9 @@ export class InboxService {
     // @todo domain checking can be moved into activity dto validation
     const parsedUrl = new URL(activity.actor);
     
-    if (!psl.isValid(parsedUrl.hostname) && (parsedUrl.hostname.substring(parsedUrl.hostname.length -6) !== '.local')) {
-      throw new TypeError('Invalid URL');
-    }
+    // if (!psl.isValid(parsedUrl.hostname) && (parsedUrl.hostname.substring(parsedUrl.hostname.length -6) !== '.local')) {
+    //   throw new TypeError('Invalid URL');
+    // }
 
     const response = await fetch(activity.actor, {headers: {'Accept': 'application/activity+json'}});
     const actor = await response.json();

@@ -11,14 +11,14 @@ import { ForumCreateDto } from '../../../common/dto/forum-create.dto';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';
 
 @ApiTags('forum')
-@Controller('forum')
+@Controller('forums')
 export class ForumController {
   constructor(
     protected readonly forumService: ForumService,
     protected readonly objectService: ObjectService
   ) { }
 
-  @ApiOperation({operationId: 'findForums'})
+  @ApiOperation({operationId: 'findForums', summary: 'Find forums'})
   @Get()
   @Header('Content-Type', 'application/activity+json')
   public async findForums() {
@@ -29,7 +29,7 @@ export class ForumController {
     return collection;
   }
 
-  // @ApiOperation({operationId: 'create'})
+  @ApiOperation({operationId: 'createForum', summary: 'Create a forum'})
   @Post()
   @Header('Content-Type', 'application/activity+json')
   public async create(@ServiceDomain() serviceId: string, @Body() forumCreateDto: ForumCreateDto) {

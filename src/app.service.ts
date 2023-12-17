@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import * as psl from 'psl';
+import { resolve } from 'path';
+import { resolveDomain } from './common/decorators/service-domain.decorator';
 
 @Injectable()
 export class AppService {
@@ -30,13 +31,7 @@ export class AppService {
   }
 
   public async getDomain(hostname: string) {
-    const domain = psl.get(hostname) || psl.get(process.env.DEFAULT_DOMAIN as string);
-
-    if (typeof domain !== 'string') {
-      throw new Error('not a valid name');
-    }
-
-    return domain;
+    return resolveDomain(hostname);
   }
 
   /**

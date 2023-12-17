@@ -3,13 +3,9 @@ import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
 import { ApiTags, ApiHeader, ApiProduces } from '@nestjs/swagger';
 import { Request } from 'express';
-import * as psl from 'psl';
 import { AuthGuard } from '@nestjs/passport';
 import { ServiceDomain } from './common/decorators/service-domain.decorator';
 import { ForumCreateDto } from './common/dto/forum-create.dto';
-import { ActivityStreams } from '@yuforium/activity-streams';
-import { ObjectService } from './modules/object/object.service';
-import { plainToClass } from 'class-transformer';
 
 @ApiProduces("application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", "application/activity+json")
 @ApiTags('app')
@@ -22,8 +18,15 @@ export class AppController {
   ) { }
 
   @Get()
-  public async getService(@Req() request: Request, @ServiceDomain() serviceId: string) {
+  public async getService(@ServiceDomain() serviceId: string) {
     return this.appService.get(serviceId);
+  }
+
+  @Get('healthz')
+  public async getHealthCheck() {
+    return {
+      status: "ok"
+    }
   }
 
   /**
