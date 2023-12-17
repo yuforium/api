@@ -3,20 +3,21 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ObjectDocument, ObjectRecordDto, ObjectSchema } from './schema/object.schema';
 import { Model, Types, Schema, Connection } from 'mongoose';
 import { ActivityService } from '../activity/services/activity.service';
-import { ActivityDocument } from '../activity/schema/activity.schema';
-import { MongoServerError } from 'mongodb';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
-import { ActivityDto } from '../activity/dto/activity.dto';
-import { ServiceId } from 'src/common/types/service-id.type';
+import { plainToInstance } from 'class-transformer';
 import { ObjectDto } from '../../common/dto/object/object.dto';
-import { Actor, ASObject } from '@yuforium/activity-streams';
-import { APObject, APObjectService } from '../activity-pub/services/outbox.service';
-import { PersonDto } from 'src/common/dto/object/person.dto';
-import { RelationshipDocument, RelationshipRecordDto, RelationshipSchema } from './schema/relationship.schema';
-import { RelationshipDto } from 'src/common/dto/object/relationship.dto';
-import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
+import { RelationshipDocument, RelationshipRecordDto } from './schema/relationship.schema';
 import { ConfigService } from '@nestjs/config';
 
+
+/**
+ * Object Service
+ * The purpose of the Object Service is to provide a common interface for interacting with Object records.
+ * 
+ * @todo - Design considerations:
+ * ObjectRecordService vs ObjectService
+ * Anything that would interact with the DB and be provided solely for managing DB records could be considered the ObjectRecordService.
+ * ObjectService *could* return or transform the DB records into class instances, thus providing helper methods for interacting with the records.
+ */
 @Injectable()
 export class ObjectService {
   protected readonly logger = new Logger(ObjectService.name);

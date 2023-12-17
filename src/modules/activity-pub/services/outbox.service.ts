@@ -1,216 +1,64 @@
-import { Inject, Injectable, Logger, NotImplementedException, Scope } from '@nestjs/common';
-import { ActivityService } from '../../../modules/activity/services/activity.service';
-import { ObjectService } from '../../../modules/object/object.service';
-import { ActivityPubService } from './activity-pub.service';
-import { Activity, Actor, ASObject, ASObjectOrLink } from '@yuforium/activity-streams';
-import { OutboxProcessorService } from './outbox-processor.service';
-import { sign } from '@yuforium/http-signature';
-import { REQUEST } from '@nestjs/core';
-import { Request } from 'express';
-import { PersonDto } from '../../../common/dto/object/person.dto';
-import { UserService } from '../../../modules/user/user.service';
-import * as crypto from 'crypto';
+import { Injectable } from '@nestjs/common';
+import { instanceToPlain } from 'class-transformer';
+import { ObjectDto } from '../../../common/dto/object';
+import { ActivityRecordDto } from '../../activity/schema/activity.schema';
+import { ActivityService } from '../../activity/services/activity.service';
+import { ObjectService } from '../../object/object.service';
+import { ObjectDocument, ObjectRecordDto } from '../../object/schema/object.schema';
+import { ASObject, Activity } from '@yuforium/activity-streams';
+import { JwtUser } from 'src/modules/auth/auth.service';
+import { Mongoose, Types, Schema } from 'mongoose';
+import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
 
-export interface APObject extends ASObject {
-  [k: string]: any;
-}
-
-export interface APActivity extends Activity {
-  id: string;
-  type: string;
-  actor: string;
-  object: ASObjectOrLink;
-  [k: string]: any;
-}
-
-export interface APActor extends Actor {
-  id: string;
-  inbox: string;
-  [k: string]: any;
-}
-
-export interface APOutboxProcessor {
-  create(activity: APActivity): Promise<APActivity>;
-  createObject(object: APObject, actor: APActor): Promise<APObject>;
-}
-
-export interface APService {
-  toPlain(object: APObject): APObject;
-}
-
-export interface APActivityService {
-  create(dto: APActivity): Promise<APActivity>;
-}
-
-export interface APObjectService {
-  create(actorId: string, dto: APObject): Promise<{object: APObject}>;
-}
-
-@Injectable({scope: Scope.REQUEST})
+@Injectable()
 export class OutboxService {
-  protected logger = new Logger(OutboxService.name);
-
   constructor(
-    protected readonly activityService: ActivityService,
-    protected readonly objectService: ObjectService,
-    protected readonly activityPubService: ActivityPubService,
-    protected readonly processor: OutboxProcessorService,
-    protected readonly userService: UserService,
-    @Inject(REQUEST) protected readonly request: Request
-  ) {}
+    protected readonly activityService: ActivityService, 
+    protected readonly objectService: ObjectService
+  ) { }
 
-  public async find() {
-
+  public async create<T extends Activity = Activity>(dto: T) {
+    return dto;
   }
 
-  public async create<T extends APActivity = APActivity>(dto: T) {
-    const activity = await this.processor.create(dto);
+  public async createActivityFromObject<T extends ObjectCreateDto = ObjectCreateDto>(domain: string, user: JwtUser, dto: T): Promise<Activity> {
+    const id = this.objectService.id();
+    const idType = typeof dto.type === 'string' && dto.type ? (dto.type as string).toLowerCase() : 'object';
 
-    // await this.activityPubService.dispatch(activity);
-  }
+    const recordDto: ObjectRecordDto = {
+      ...dto,
+      '@context': 'https://www.w3.org/ns/activitystreams', // note that direct assignment like dto['@context'] = '...' doesn't work
+      id: `${user.actor.id}/posts/${id.toString()}`,
+      _domain: domain,
+      _outbox: new Types.ObjectId(user._id.toString()),
+      _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public',
+      _local: true
+    };
 
-  // the signature for this should be createObject(actor: Actor, dto: ASObject) - what to do with serviceId? It can be appended to the dto since that's a type
-  /**
-   * Create a new Object, and dispatches it to the appropriate recipients
-   * @param actor Actor who created the object
-   * @param dto Object to be created
-   * @returns
-   */
-  async createActivityFromObject<T extends APObject = APObject>(actorId: string, dto: T): Promise<any> {
-    dto = Object.assign({}, dto);
+    const obj = await this.objectService.create(recordDto);
 
-    const activity = await this.processor.createActivityFromObject<T>(dto);
+    const activityId = this.activityService.id();
 
-    // const object = await this.objectService.create(dto);
-    // const {activity} = await this.activityService.create('Create', actorId, object);
+    const activityDto: ActivityRecordDto = {
+      id: `${dto.attributedTo}/activities/${activityId.toString()}`,
+      type: 'Create',
+      actor: Array.isArray(dto.attributedTo) ? dto.attributedTo[0] as string : dto.attributedTo as string,
+      object: instanceToPlain(obj),
+      _domain: domain,
+      _local: true
+    }
 
-    await this.dispatch(activity);
-
-    // return {activity, object};
+    const activity = await this.activityService.create(activityDto);
 
     return activity;
   }
 
-  // @todo handle cc/bcc fields as well
   /**
-   * Extract dispatch targets from an activity.  These targets still need to be resolved (i.e. if the target is a collection like a followers collection).
-   * @param activity 
+   * Return an object that is associated with this instance.
+   * @param id 
    * @returns 
    */
-  protected async getDispatchTargets(activity: APActivity): Promise<string[]> {
-    let to = [];
-
-    if (typeof activity.object !== 'object' || activity.object.type === 'Link') {
-      throw new NotImplementedException('link resolution is not supported');
-    }
-
-    const obj = activity.object as ASObject;
-    
-    if (Array.isArray(obj.to)) {
-      to.push(...obj.to);
-    }
-    else if (typeof obj.to === 'string' && obj.to) {
-      to.push(obj.to);
-    }
-
-    const filterPredicate = async (id: any) => {
-      if (id === 'https://www.w3.org/ns/activitystreams#Public') {
-        return false;
-      }
-      
-      // don't bother with local users
-      if (await this.processor.getLocalObject(id.toString())) {
-        return false;
-      }
-
-      return true;
-    };
-
-    const filterVals = await Promise.all(to.map(val => filterPredicate(val)));
-
-    to = to.filter((v, i) => filterVals[i]).map(v => v.toString());
-    to = await Promise.all(to.map(v => this.getInboxUrl(v)));
-
-    return to;
-  }
-
-  protected async dispatch(activity: APActivity) {
-    let dispatchTo = await this.getDispatchTargets(activity);
-    
-    dispatchTo.forEach(async to => {
-      const response = await this.send(to, activity);
-      return response;
-    });
-  }
-
-  protected async getInboxUrl(address: string): Promise<string> {
-    // this.logger.debug(`getInboxUrl(): Getting inbox url for ${address}`);
-
-    const actor = (await fetch(address, {headers: {'Accept': 'application/activity+json'}}).then(res => res.json()));
-
-    return (actor as any).inbox;
-  }
-
-  /**
-   * @todo for a production system, this would need to resolved targets (i.e. if the target was a followers collection).  this would/should be done with queueing.
-   * @param url 
-   * @param activity 
-   * @returns 
-   */
-  protected async send(url: string, activity: APActivity): Promise<any> {
-    const parsedUrl = new URL(url);
-
-    const actor = (this.request.user as any)?.actor as PersonDto;
-    const username = (this.request.user as any)?.username as string;
-    const user = await this.userService.findOne('yuforium.dev', username);
-    const now = new Date();
-    const created = Math.floor(now.getTime() / 1000);
-    const privateKey = crypto.createPrivateKey({key: user?.privateKey as string, passphrase: ''});
-    const body = JSON.stringify(activity);
-    const signer = crypto.createSign('RSA-SHA256');
-    signer.update(body);
-    // const digest = signer.sign(privateKey, 'hex');
-    const digest = 'SHA-256=' + crypto.createHash('sha256').update(body).digest('base64');
-  
-    const opts = sign({
-      requestPath: parsedUrl.pathname,
-      method: 'post',
-      keyId: actor.publicKey?.id as string,
-      algorithm: 'rsa-sha256',
-      privateKey,
-      created,
-      expires: created + 300,
-      headers: ['(request-target)', 'host', 'date', 'digest'],
-      headerValues: {
-        host: parsedUrl.host,
-        date: now.toUTCString(),
-        digest
-      }
-    });
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/activity+json',
-          'accept': 'application/activity+json',
-          'digest': digest,
-          'signature': `keyId="http://yuforium.dev/user/chris#main-key",headers="${opts.headers?.join(" ")}",signature="${opts.signature}"`,
-          'date': now.toUTCString()
-        },
-        body: JSON.stringify(activity),
-      });
-      if (response.ok) {
-        this.logger.log(`send(): ${response.status} code received sending ${activity.id} to ${url}`);
-      }
-      else {
-        this.logger.error(`send(): ${response.status} code received sending ${activity.id} to ${url} with response "${await response.text()}"`);
-      }
-      return response;
-    }
-    catch (err) {
-      this.logger.error(`send(): failed delivery to ${url}`);
-      throw err;
-    }
+  public async getLocalObject(id: string): Promise<ObjectDocument | null> {
+    return this.objectService.findOne({id, _serviceId: {$ne: null}});
   }
 }

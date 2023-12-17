@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "doc": "compodoc -p tsconfig.json -s"
+    "doc": "compodoc -p tsconfig.json -s -w"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.0",
@@ -44,7 +44,8 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.0",
     "rxjs": "^7.4.0",
-    "swagger-ui-express": "^4.1.2"
+    "swagger-ui-express": "^4.1.2",
+    "tldts": "^6.0.22"
   },
   "devDependencies": {
     "@compodoc/compodoc": "^1.1.21",

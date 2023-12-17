@@ -54,40 +54,4 @@ export class PersonDto extends ObjectRecordDto {
     owner: string;
     publicKeyPem: string;
   }
-
-  @ApiProperty({type: 'string', format: 'uri'})
-  @Transform(sslToPlain, {groups: ['sslToPlain']})
-  @Expose()
-  get following() {
-    return `${this.id}/following`;
-  }
-
-  @Transform(sslToPlain, {groups: ['sslToPlain']})
-  @Expose()
-  get followers() {
-    return `${this.id}/followers`;
-  }
-
-  @Transform(sslToPlain, {groups: ['sslToPlain']})
-  @Expose()
-  get inbox() {
-    return `${this.id}/inbox`;
-  }
-
-  @Transform(sslToPlain, {groups: ['sslToPlain']})
-  @Expose()
-  get outbox() {
-    return `${this.id}/outbox`;
-  }
-
-  @Expose()
-  get streams() {
-    return [
-      {
-        type: 'Link',
-        href: `${this.id}/content`,
-        name: `Content posted by this user`
-      }
-    ];
-  }
 }

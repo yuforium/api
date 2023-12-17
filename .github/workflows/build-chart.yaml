@@ -1,0 +1,27 @@
+name: Build Helm Chart
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - chart/**
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - id: auth
+      name: Auth to GCloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: '${{ secrets.GCLOUD_AUTH }}'
+        token_format: access_token
+    - uses: docker/login-action@v1
+      with:
+        registry: us-central1-docker.pkg.dev
+        username: oauth2accesstoken
+        password: ${{ steps.auth.outputs.access_token }}
+    - run: |
+        export CHART_VERSION=$(helm show chart chart | yq e '.version')
+        helm package chart
+        helm push api-$CHART_VERSION.tgz oci://us-central1-docker.pkg.dev/yuforium/api

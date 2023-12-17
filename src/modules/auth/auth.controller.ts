@@ -1,12 +1,15 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
+import { AuthService, JwtUser } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LocalAuthGuard } from './local-auth.guard';
 import { Request } from 'express';
 import { UserDocument } from '../user/schemas/user.schema';
+import { plainToInstance } from 'class-transformer';
+import { PersonRecordDto } from '../object/schema/person.schema';
+import { User } from 'src/common/decorators/user.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -25,7 +28,7 @@ export class AuthController {
   @ApiOperation({operationId: 'profile'})
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
-  async me(@Req() req: Request) {
-    return (req.user as any).actor;
+  async profile(@User() user: JwtUser) {
+    return plainToInstance(PersonRecordDto, user.actor);
   }
 }

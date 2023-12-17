@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OutboxService } from './outbox.service';
 
-describe('OutboxService', () => {
+describe('OutboxProcessorService', () => {
   let service: OutboxService;
 
   beforeEach(async () => {

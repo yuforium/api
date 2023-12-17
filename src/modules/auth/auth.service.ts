@@ -3,20 +3,14 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UserDocument } from '../user/schemas/user.schema';
-import { plainToClass } from 'class-transformer';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PersonDto } from '../../common/dto/object/person.dto';
 import { ObjectService } from '../object/object.service';
-import { Actor } from '@yuforium/activity-streams';
+import { UserActorDto } from '../user/dto/user-actor.dto';
 
-export interface UserPayload {
+export interface JwtUser {
   _id: string;
-  username: string;
-  actor: UserActor;
-}
-
-export interface UserActor extends Actor {
-  id: string;
-  preferredUsername: string;
+  actor: PersonDto;
 }
 
 @Injectable()
@@ -28,27 +22,29 @@ export class AuthService {
     protected objectService: ObjectService
   ) { }
 
-  public async validateUser(serviceId: string, username: string, password: string): Promise<any> {
-    const user = await this.userService.findOne(serviceId, username);
+  public async validateUser(serviceDomain: string, username: string, password: string): Promise<any> {
+    const user = await this.userService.findOne(serviceDomain, username);
 
-    this.logger.debug(`Validating user "${username}@${serviceId}"`);
+    console.log('user', user)
+
+    this.logger.debug(`Validating user "${username}@${serviceDomain}"`);
 
     if (user) {
-      this.logger.verbose(`User "${username}@${serviceId}" found`);
+      this.logger.verbose(`User "${username}@${serviceDomain}" found`);
 
       if (user.password === undefined) {
         throw new UnauthorizedException();
       }
 
       if (await await bcrypt.compare(password, user.password)) {
-        this.logger.debug(`User "${username}@${serviceId}" password matches, validation succeeded`);
+        this.logger.debug(`User "${username}@${serviceDomain}" password matches, validation succeeded`);
         return user;
       }
 
-      this.logger.debug(`User "${username}@${serviceId}" password does not match, validation failed`);
+      this.logger.debug(`User "${username}@${serviceDomain}" password does not match, validation failed`);
     }
     else {
-      this.logger.debug(`User "${username}@${serviceId}" not found, validation failed`);
+      this.logger.debug(`User "${username}@${serviceDomain}" not found, validation failed`);
     }
 
     return undefined;
@@ -63,16 +59,18 @@ export class AuthService {
       throw new Error('User has no assigned username');
     }
 
-    const actor = await this.objectService.findOne(user.defaultIdentity);
+    const actorRecord = await this.userService.findPersonById(user.defaultIdentity);
 
-    if (actor === null) {
+    if (actorRecord === null) {
       throw new Error('User\'s default identity not found');
     }
 
-    const payload: UserPayload = {
+    const actor = plainToInstance(UserActorDto, actorRecord, {excludeExtraneousValues: true});
+    actor.preferredUsername = user.username;
+
+    const payload: JwtUser = {
       _id: user._id.toString(),
-      username: user.username,
-      actor: {...plainToClass(PersonDto, actor), preferredUsername: user.username}
+      actor: instanceToPlain(actor) as UserActorDto
     };
 
     return {

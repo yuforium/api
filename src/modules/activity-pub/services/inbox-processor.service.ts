@@ -6,23 +6,22 @@ import { ActivityService } from '../../../modules/activity/services/activity.ser
 import { ObjectService } from '../../../modules/object/object.service';
 import { RelationshipRecordDto } from '../../../modules/object/schema/relationship.schema';
 import { ActivityPubService } from './activity-pub.service';
-import { APInboxProcessor } from './inbox.service';
-import { APActivity, APActor } from './outbox.service';
-
+import { Activity, Actor } from '@yuforium/activity-streams';
+import { UserActorDto } from 'src/modules/user/dto/user-actor.dto';
 
 @Injectable()
-export class InboxProcessorService implements APInboxProcessor {
+export class InboxProcessorService {
   protected readonly logger = new Logger(InboxProcessorService.name);
   constructor(
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService,
     protected readonly activityPubSerice: ActivityPubService) { }
 
-  public async create(activity: APActivity, actor: APActor): Promise<APActivity> {
+  public async create(activity: Activity, actor: Actor): Promise<Activity> {
     throw new Error('Method not implemented.');
   }
 
-  public async follow(activityDto: APActivity, actor: APActor): Promise<APActivity | null> {
+  public async follow(activityDto: ActivityDto, actor: UserActorDto): Promise<Activity | null> {
     this.logger.log(`follow(): ${activityDto.id}`);
 
     if (!activityDto.id) {
@@ -53,9 +52,9 @@ export class InboxProcessorService implements APInboxProcessor {
 
     const activityRecordDto = {
       ...activityDto,
-      _hostname: followee._hostname,
-      _path: `${followee._path}/${followee._pathId}/activities/${activityDto.id}`,
-      _pathId: activityDto.id,
+      _domain: followee._domain,
+      // _path: `${followee._path}/${followee._pathId}/activities/${activityDto.id}`,
+      // _pathId: activityDto.id,
       _local: false
     };
 
@@ -68,7 +67,6 @@ export class InboxProcessorService implements APInboxProcessor {
     const _id = this.objectService.id().toString();
 
     const relationshipDto: RelationshipRecordDto = {
-      _id,
       id: `${followee.id}/relationship/${_id.toString()}`,
       type: 'Relationship',
       summary: 'Follows',
@@ -76,11 +74,12 @@ export class InboxProcessorService implements APInboxProcessor {
       _relationship: 'followerOf',
       subject: activity.actor,
       object: activity.object as string,
-      _hostname: followee._hostname,
-      _path: `${followee._path}/${followee._pathId}/relationships/${_id.toString()}`,
-      _pathId: _id.toString(),
+      _domain: followee._domain,
+      // _path: `${followee._path}/${followee._pathId}/relationships/${_id.toString()}`,
+      // _pathId: _id.toString(),
       _public: true,
-      _local: true
+      _local: true,
+      to: []
     };
 
     const relationship = await this.objectService.createRelationship(relationshipDto);
@@ -90,9 +89,9 @@ export class InboxProcessorService implements APInboxProcessor {
     const _acceptId = this.activityService.id().toString();
     const acceptActivityDto: ActivityRecordDto = {
       _id: _acceptId,
-      _hostname: relationship._hostname,
-      _path: `${followee._path}/${followee._pathId}/activities`,
-      _pathId: _acceptId,
+      _domain: relationship._domain,
+      // _path: `${followee._path}/${followee._pathId}/activities`,
+      // _pathId: _acceptId,
       _local: true,
       id: `${followee.id}/activities/${_acceptId}`,
       type: 'Accept',
@@ -117,14 +116,14 @@ export class InboxProcessorService implements APInboxProcessor {
     return acceptActivityDto;
   }
 
-  public async undo(activity: APActivity, actor: APActor) {
-    const obj = await this.getObjectFromActivity(activity);
+  public async undo(activity: Activity, actor: Actor) {
+    // const obj = await this.getObjectFromActivity(activity);
 
-    const activityId = typeof activity.object === 'string' ? activity.object : activity.object.id;
+    // const activityId = typeof activity.object === 'string' ? activity.object : activity.object.id;
 
-    if (!activityId) {
-      throw new Error('Activity does not have an object');
-    }
+    // if (!activityId) {
+    //   throw new Error('Activity does not have an object');
+    // }
 
     // const obj = await this.objectService.get(activityId);
     
@@ -137,7 +136,7 @@ export class InboxProcessorService implements APInboxProcessor {
     this.logger.log(`undoFollow(): ${object.id}`);
   }
 
-  protected getObjectFromActivity(activity: APActivity) {
+  protected getObjectFromActivity(activity: Activity) {
     if (!activity.object) {
       throw new Error('Activity does not have an object');
     }

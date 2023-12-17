@@ -1,9 +1,7 @@
 import { Expose } from "class-transformer";
+import { ObjectDto } from "../../../common/dto/object";
 
-export class ForumDto {
-  @Expose()
-  id: string | undefined;
-
+export class ForumDto extends ObjectDto {
   @Expose()
   name: string | undefined;
 

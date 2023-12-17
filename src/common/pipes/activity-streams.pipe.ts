@@ -5,7 +5,7 @@ import { validate, ValidationError } from 'class-validator';
 import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
 
 @Injectable()
-export class ActivityStreamsPipe implements PipeTransform {
+export class ActivityStreamsPipe<T> implements PipeTransform {
   protected allowedTypes: string[] = [];
   // protected transformer: Function;
 
@@ -15,7 +15,7 @@ export class ActivityStreamsPipe implements PipeTransform {
     }
   }
 
-  async transform(value: any, metadata: ArgumentMetadata) {
+  async transform(value: any, metadata: ArgumentMetadata): Promise<T> {
     const obj = this.transformer.transform({value});
 
     if (!obj) {

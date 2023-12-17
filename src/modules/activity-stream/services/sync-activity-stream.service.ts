@@ -6,7 +6,7 @@ import { StreamProcessor } from '../interfaces/stream-processor.interface';
 import { Connection, Types } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 import { AxiosResponse } from 'axios';
-import { ServiceId } from 'src/common/types/service-id.type';
+import { ServiceDomain } from 'src/common/types/service-domain.type';
 import { ActivityService } from '../../activity/services/activity.service';
 import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
 
@@ -47,26 +47,26 @@ export class SyncActivityStreamService implements StreamProcessor, ActivityStrea
   /**
    * Produce an activity from a known service
    * @param activity
-   * @param serviceId
+   * @param serviceDomain
    */
-  public async produce(activity: ActivityDto, serviceId: ServiceId) {
+  public async produce(activity: ActivityDto, serviceDomain: ServiceDomain) {
     throw new NotImplementedException('This stream processor does not support this activity type');
   }
 
   /**
    *
    * @param activityDto
-   * @param serviceId
+   * @param serviceDomain
    * @returns The newly created activity
    */
-  protected async create(activityDto: ActivityDto, serviceId?: ServiceId): Promise<boolean> {
-    if (serviceId === undefined) {
-      throw new Error('serviceId is undefined');
+  protected async create(activityDto: ActivityDto, serviceDomain?: ServiceDomain): Promise<boolean> {
+    if (serviceDomain === undefined) {
+      throw new Error('serviceDomain is undefined');
     }
     const activityId = await this.id();
     const activityParams = {
       ...activityDto,
-      _serviceId: serviceId,
+      _serviceId: serviceDomain,
       _id: activityId,
       id: `${activityDto.actor}/activity/${activityId}`
     };
