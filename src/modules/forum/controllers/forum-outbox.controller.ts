@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, NotImplementedException, Param, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Logger, NotImplementedException, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { OutboxService } from '../../activity-pub/services/outbox.service';
 import { SyncActivityStreamService } from '../../../modules/activity-stream/services/sync-activity-stream.service';
@@ -8,7 +8,6 @@ import { ForumParams } from '../dto/forum-params.dto';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { User } from '../../../common/decorators/user.decorator';
 import { JwtUser } from '../../../modules/auth/auth.service';
-import { ASObject } from '@yuforium/activity-streams';
 import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
 import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
@@ -48,7 +47,6 @@ export class ForumOutboxController {
     @Param() params: ForumParams,
     @ServiceDomain() domain: string,
     @User() user: JwtUser,
-    @Req() req: Request,
     @Body(new ActivityStreamsPipe(ObjectCreateTransformer)) dto: ObjectCreateDto | NoteCreateDto
   ) {
     if (dto instanceof ActivityDto) {
