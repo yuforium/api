@@ -36,7 +36,7 @@ async function bootstrap () {
   }
 
   app.useGlobalPipes(new ValidationPipe({transform: true, whitelist: true}));
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), {excludeExtraneousValues: true, groups: ['sslToPlain']}));
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector), {excludeExtraneousValues: true}));
 
   await app.listen(parseInt(process.env.PORT || '3000', 10));
 }

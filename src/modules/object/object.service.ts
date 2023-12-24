@@ -23,8 +23,8 @@ export class ObjectService {
   protected readonly logger = new Logger(ObjectService.name);
 
   constructor(
-    @InjectModel('Object') protected objectModel: Model<ObjectDocument>,
-    @InjectModel('Relationship') protected relationshipModel: Model<RelationshipDocument>,
+    @InjectModel(ObjectRecordDto.name) protected objectModel: Model<ObjectDocument>,
+    @InjectModel(RelationshipRecordDto.name) protected relationshipModel: Model<RelationshipDocument>,
     @InjectConnection() protected connection: Connection,
     protected configService: ConfigService,
     protected activityService: ActivityService

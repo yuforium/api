@@ -2,7 +2,8 @@ import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
 import mongoose from "mongoose";
 import { ObjectDto } from "../../../common/dto/object";
 import { RelationshipDto } from "../../../common/dto/object/relationship.dto";
-import { BaseObjectSchema, GConstructor } from "./base-object.schema";
+import { BaseObjectSchema } from "./base-object.schema";
+import { GConstructor } from "./base.schema";
 
 export type RelationshipDocument = RelationshipRecordDto & mongoose.Document;
 

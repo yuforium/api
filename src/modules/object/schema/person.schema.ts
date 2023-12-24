@@ -1,8 +1,9 @@
 import * as mongoose from "mongoose";
 import { Schema, SchemaFactory } from "@nestjs/mongoose";
-import { BaseObjectSchema, GConstructor } from "./base-object.schema";
+import { BaseObjectSchema } from "./base-object.schema";
 import { PersonDto } from "src/common/dto/object/person.dto";
 import { Exclude } from "class-transformer";
+import { GConstructor } from "./base.schema";
 
 export type PersonDocument = PersonRecordDto & mongoose.Document;
 

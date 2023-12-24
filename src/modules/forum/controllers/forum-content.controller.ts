@@ -2,6 +2,7 @@ import { Controller, Get, Logger } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { OrderedCollectionPage } from '@yuforium/activity-streams';
 import { ServiceDomain } from 'src/common/decorators/service-domain.decorator';
+import { ObjectService } from 'src/modules/object/object.service';
 
 /**
  * Structure for the forum content controller response.
@@ -24,6 +25,10 @@ import { ServiceDomain } from 'src/common/decorators/service-domain.decorator';
 export class ForumContentController {
   protected readonly logger: Logger = new Logger(this.constructor.name);
 
+  constructor(
+    protected readonly objectService: ObjectService,
+  ) { }
+
   @ApiOperation({operationId: 'getForumContent', summary: 'Get forum content'})
   @ApiParam({name: 'pathId', type: String, required: true, example: '1'})
   @Get()
@@ -31,6 +36,8 @@ export class ForumContentController {
     @ServiceDomain() domain: string
   ) {
     this.logger.debug('get forum content');
+
+    const posts = this.objectService.find({_destination: `https://${domain}/forums/1`});
 
     const page = new OrderedCollectionPage();
     return {
@@ -42,6 +49,11 @@ export class ForumContentController {
             'https://example.com/forums/1/content/1',
           ],
         },
+        {
+          url: [
+            'https://example.com/forums/1/content/2',
+          ],
+        }
       ],
     };
   }

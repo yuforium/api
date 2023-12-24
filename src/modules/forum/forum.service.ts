@@ -8,8 +8,17 @@ export class ForumService {
     protected readonly objectService: ObjectService
   ) { }
 
-  public async create(_serviceId: string, forumCreateDto: ForumCreateDto) {
-    const dto = {...forumCreateDto, _serviceId, id: 'https://${_serviceId}/forum/${forumCreateDto.pathId}', type: 'Forum'};
-    // const forum = await this.objectService.create(dto);
+  public async create(_domain: string, forumCreateDto: ForumCreateDto) {
+    const dto = {
+      ...forumCreateDto, 
+      _domain, 
+      id: 'https://${_serviceId}/forum/${forumCreateDto.pathId}', 
+      type: ['Service', 'Forum'],
+      to: [],
+      _public: true,
+      _local: true
+    };
+
+    const forum = await this.objectService.create(dto);
   }
 }

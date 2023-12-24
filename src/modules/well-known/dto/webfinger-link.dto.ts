@@ -1,5 +1,4 @@
 import { Expose, Transform } from "class-transformer";
-import { sslToPlain } from "../../../common/dto/util/ssl-to-plain";
 
 export class WebfingerLinkDto {
     @Expose()
@@ -9,6 +8,5 @@ export class WebfingerLinkDto {
     public type!: string;
 
     @Expose()
-    @Transform(sslToPlain, {groups: ['sslToPlain']})
     public href!: string;
 }

@@ -9,7 +9,8 @@ import { MongoServerError } from 'mongodb';
 import { generateKeyPairSync } from "crypto";
 import { PersonDto } from 'src/common/dto/object/person.dto';
 import { validate } from 'class-validator';
-import { UserActorDocument, UserActorRecordDto } from './schemas/user-actor.schema';
+import { ActorDocument, ActorRecord } from '../object/schema/actor.schema';
+import { ActorDto } from 'src/common/dto/actor/actor.dto';
 
 @Injectable()
 export class UserService {
@@ -18,7 +19,7 @@ export class UserService {
   constructor(
     protected readonly objectService: ObjectService,
     @InjectModel(User.name) protected userModel: Model<UserDocument>,
-    @InjectModel(UserActorRecordDto.name) protected userActorModel: Model<UserActorRecordDto>,
+    @InjectModel(ActorRecord.name) protected actorModel: Model<ActorDocument>,
   ) { }
 
   public async create(_domain: string, userDto: UserCreateDto): Promise<any> {
@@ -52,21 +53,18 @@ export class UserService {
       const _pathId = userDto.username;
 
       this.logger.debug(`Creating person object for user "${userDto.username}"`);
-      const personDtoParams = {
+
+      const personDtoParams: ActorRecord = {
         '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
         type: 'Person',
         id: `https://${_domain}/${_path}/${_pathId}`,
         attributedTo: `https://${_domain}/${_path}/${_pathId}`, // assume the user is creating themselves for now
-        name: userDto.name,
+        name: userDto.name || user.username,
         preferredUsername: user.username,
         summary: userDto.summary,
         _domain,
-        to: [],
         _local: true,
         _public: true,
-        _outbox: undefined,
-        _inbox: [],
-        _destination: [],
         publicKey: {
           id: `https://${_domain}/${_path}/${_pathId}#main-key`,
           owner: `https://${_domain}/${_path}/${_pathId}`,
@@ -78,7 +76,7 @@ export class UserService {
       await validate(personDto);
       
       // effectively the person is creating themselves
-      const {record} = await this.objectService.createActor(personDto);
+      const record = await this.actorModel.create(personDto);
 
       // @todo - a Create activity should be associated with the person object, attributed to the user, and to any other related information (such as IP address)
 
@@ -203,7 +201,7 @@ public async resetPassword(serviceId: string, username: string, hashedPassword: 
     }
   }
 
-  public async findPersonById(_id: string | Schema.Types.ObjectId): Promise<UserActorDocument | null> {
-    return this.userActorModel.findOne({_id, type: 'Person'});
+  public async findPersonById(_id: string | Schema.Types.ObjectId): Promise<ActorDocument | null> {
+    return this.actorModel.findOne({_id, type: 'Person'});
   }
 }

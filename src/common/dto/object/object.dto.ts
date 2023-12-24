@@ -1,10 +1,8 @@
 import { Prop } from "@nestjs/mongoose";
-import { ApiHideProperty, ApiProperty, OmitType, PartialType, PickType } from "@nestjs/swagger";
-import { ActivityStreams, ASObject, ASObjectOrLink, Collection, IsRequired } from "@yuforium/activity-streams";
-import { Exclude, Expose, Transform } from "class-transformer";
-import { validateHeaderValue } from "http";
+import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
+import { ActivityStreams, ASObjectOrLink, Collection, IsRequired } from "@yuforium/activity-streams";
+import { Expose, Transform } from "class-transformer";
 import * as mongoose from "mongoose";
-import { sslToPlain } from "../util/ssl-to-plain";
 
 const { Mixed } = mongoose.Schema.Types;
 
@@ -24,16 +22,18 @@ export class ObjectDto extends ActivityStreams.object('Object') {
   @Expose()
   public '@context'?: string | string[] = 'https://www.w3.org/ns/activitystreams';
 
-  @ApiProperty({type: String})
-  @Transform(sslToPlain, {groups: ['sslToPlain']})
+  @ApiProperty({required: true, type: 'string'})
   @Prop({type: String, required: true})
   @Expose()
   public id!: string;
 
+  /**
+   * @todo for validation, the first type should be a string of any supported type
+   */
   @ApiProperty({type: 'string', required: true})
-  @Prop({type: String, required: true})
+  @Prop({type: Mixed, required: true})
   @Expose()
-  public type!: string;
+  public type!: string | string[];
 
   @ApiProperty({type: String})
   @Prop({type: Mixed})
@@ -41,6 +41,7 @@ export class ObjectDto extends ActivityStreams.object('Object') {
   public attributedTo?: string;
 
   @ApiProperty({
+    type: String,
     required: true, 
     oneOf: [
       {type: 'string'},

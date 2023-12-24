@@ -32,8 +32,8 @@ export class ForumController {
   @ApiOperation({operationId: 'createForum', summary: 'Create a forum'})
   @Post()
   @Header('Content-Type', 'application/activity+json')
-  public async create(@ServiceDomain() serviceId: string, @Body() forumCreateDto: ForumCreateDto) {
-    return plainToInstance(ForumDto, this.forumService.create(serviceId, forumCreateDto));
+  public async create(@ServiceDomain() domain: string, @Body() forumCreateDto: ForumCreateDto) {
+    return plainToInstance(ForumDto, this.forumService.create(domain, forumCreateDto));
   }
 
   @ApiOperation({operationId: 'getForum'})
@@ -44,11 +44,13 @@ export class ForumController {
     const forum = await this.objectService.get(`https://${serviceId}/forum/${params.pathId}`);
 
     if (!forum) {
-      const tempForum = new ForumDto();
-      tempForum.id = `https://${serviceId}/forum/${params.pathId}`;
-      tempForum.name = `${params.pathId}`;
-      tempForum.summary = 'This forum has not been allocated yet.';
-      return tempForum;
+      throw new NotFoundException(`Forum ${params.pathId} not found.`);
+      // @todo consider autocreating a forum if it doesn't exist
+      // const tempForum = new ForumDto();
+      // tempForum.id = `https://${serviceId}/forum/${params.pathId}`;
+      // tempForum.name = `${params.pathId}`;
+      // tempForum.summary = 'This forum has not been allocated yet.';
+      // return tempForum;
     }
 
     return plainToClass(ForumDto, forum);

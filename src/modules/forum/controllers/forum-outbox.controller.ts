@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, NotImplementedException, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Logger, NotFoundException, NotImplementedException, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { OutboxService } from '../../activity-pub/services/outbox.service';
 import { SyncActivityStreamService } from '../../../modules/activity-stream/services/sync-activity-stream.service';
@@ -15,10 +15,6 @@ import { ObjectCreateDto } from '../../../common/dto/object-create/object-create
 import { NoteCreateDto } from '../../../common/dto/object-create/note-create.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ObjectDto } from '../../../common/dto/object';
-
-interface OutboxObjectCreateDto extends ObjectCreateDto {
-  serviceId: string;
-}
 
 /**
  * Forum Outbox Controller
@@ -54,9 +50,11 @@ export class ForumOutboxController {
     }
 
     const forumId = `https://${domain}/forums/${params.pathId}`;
-    const forum = await this.objectService.get(forumId) || Object.assign(new ObjectDto(), {
-      id: forumId,
-    });
+    const forum = await this.objectService.get(forumId);
+
+    if (!forum) {
+      throw new NotFoundException(`Forum ${forumId} not found.`);
+    }
 
     const actorRecord = await this.objectService.get(user.actor.id);
 

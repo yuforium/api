@@ -11,16 +11,13 @@ import { UserContentController } from './controllers/user-content.controller';
 import { ActivityStreamModule } from '../activity-stream/activity-stream.module';
 import { ActivityPubModule } from '../activity-pub/activity-pub.module';
 import { PersonRecordDto, PersonSchema } from '../object/schema/person.schema';
-import { SyncDispatchService } from '../activity-pub/services/sync-dispatch.service';
-import { UserActorRecordDto, UserActorSchema } from './schemas/user-actor.schema';
+import { ActorRecord, ActorSchema } from '../object/schema/actor.schema';
 
 @Module({
   providers: [UserService],
   exports: [UserService],
   imports: [
     MongooseModule.forFeature([{name: User.name, schema: UserSchema}]),
-    MongooseModule.forFeature([{name: PersonRecordDto.name, schema: PersonSchema}]),
-    MongooseModule.forFeature([{name: UserActorRecordDto.name, schema: UserActorSchema}]),
     ObjectModule,
     ActivityModule,
     ActivityStreamModule,
