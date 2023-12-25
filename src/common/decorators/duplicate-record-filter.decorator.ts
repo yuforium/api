@@ -1,5 +1,5 @@
-import { ArgumentsHost, Catch, ExceptionFilter } from "@nestjs/common";
-import { DuplicateRecordException } from "../exceptions/duplicate-record.exception";
+import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
+import { DuplicateRecordException } from '../exceptions/duplicate-record.exception';
 
 @Catch(DuplicateRecordException)
 export class DuplicateRecordFilter implements ExceptionFilter {

@@ -1,8 +1,7 @@
-import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards, Logger, BadRequestException } from '@nestjs/common';
+import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards, Logger } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { ASObject, OrderedCollection, OrderedCollectionPage } from '@yuforium/activity-streams';
-import { plainToClass } from 'class-transformer';
+import { OrderedCollection } from '@yuforium/activity-streams';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { SyncActivityStreamService } from '../../../modules/activity-stream/services/sync-activity-stream.service';
 import { NoteCreateDto } from '../../../common/dto/object-create/note-create.dto';
@@ -11,7 +10,6 @@ import { ObjectService } from '../../object/object.service';
 import { UserParamsDto } from '../dto/user-params.dto';
 import { Request } from 'express';
 import { User } from '../../../common/decorators/user.decorator';
-import { SyncDispatchService } from '../../activity-pub/services/sync-dispatch.service';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
 import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
@@ -58,7 +56,7 @@ export class UserOutboxController {
       throw new UnauthorizedException('You are not authorized to post to this outbox.');
     }
 
-    this.logger.debug(`postOutbox(): ${params.username} creating a ${dto.type}`)
+    this.logger.debug(`postOutbox(): ${params.username} creating a ${dto.type}`);
 
     Object.assign(dto, {
       attributedTo: (req.user as any).actor.id,
@@ -82,7 +80,7 @@ export class UserOutboxController {
   @ApiParam({name: 'username', type: 'string', required: true})
   @UseGuards(AuthGuard(['anonymous', 'jwt']))
   @Get()
-  public async getOutbox(@ServiceDomain() serviceId: string, @Param() params: UserParamsDto, @Req() req: Request): Promise<OrderedCollection> {
+  public async getOutbox(@ServiceDomain() serviceId: string, @Param() params: UserParamsDto): Promise<OrderedCollection> {
     const collection = new OrderedCollection();
     const actor = `https://${serviceId}/user/${params.username}`;
     const filter: any = {actor, 'object.to': 'https://www.w3.org/ns/activitystreams#Public'};
@@ -102,22 +100,17 @@ export class UserOutboxController {
    * @param req
    * @returns
    */
-  @ApiOperation({operationId: 'getUserOutboxPage'})
-  @ApiParam({name: 'username', type: 'string'})
-  @ApiParam({name: 'page'})
-  @UseGuards(AuthGuard(['anonymous', 'jwt']))
-  @Get('page/:page')
-  public async getOutboxPage(
-    @ServiceDomain() serviceId: string,
-    @Param() params: UserParamsDto,
-    @Param('page') page: number,
-    @Req() req: Request):
-  Promise<OrderedCollectionPage> {
-    const collectionPage = new OrderedCollectionPage();
-    const actor = `https://${serviceId}/user/${params.username}`;
-    const filter: any = {actor, 'object.to': 'https://www.w3.org/ns/activitystreams#Public'};
-
-    // collectionPage.orderedItems = await this.activityService.find(filter);
-    return collectionPage;
-  }
+  // @ApiOperation({operationId: 'getUserOutboxPage'})
+  // @ApiParam({name: 'username', type: 'string'})
+  // @ApiParam({name: 'page'})
+  // @UseGuards(AuthGuard(['anonymous', 'jwt']))
+  // @Get('page/:page')
+  // public async getOutboxPage(
+  //   @ServiceDomain() serviceId: string,
+  //   @Param() params: UserParamsDto):
+  // Promise<OrderedCollectionPage> {
+  //   const collectionPage = new OrderedCollectionPage();
+  //   const actor = `https://${serviceId}/user/${params.username}`;
+  //   return collectionPage;
+  // }
 }

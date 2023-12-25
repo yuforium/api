@@ -1,7 +1,7 @@
-import { ApiProperty, OmitType, PartialType, PickType } from "@nestjs/swagger";
-import { IsNotEmptyArray, IsRequired } from "@yuforium/activity-streams";
-import { Equals, IsEnum, IsIn, IsString, MaxLength } from "class-validator";
-import { ObjectDto } from "../object/object.dto";
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { IsNotEmptyArray, IsRequired } from '@yuforium/activity-streams';
+import { Equals, IsString, MaxLength } from 'class-validator';
+import { ObjectDto } from '../object/object.dto';
 
 /**
  * Basic requirements class for all objects submitted for *creation* to the 
@@ -31,7 +31,7 @@ export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'ty
   @IsString({each: true})
   public to!: string | string[];
 
-  @ApiProperty({required: true})
+  @ApiProperty({required: false})
   @IsString({each: true})
-  public attributedTo!: string | undefined;
+  public attributedTo?: string | string[];
 }

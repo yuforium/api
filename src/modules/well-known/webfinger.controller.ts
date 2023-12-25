@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Logger, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, Logger, NotFoundException, Query } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ServiceDomain } from '../../common/decorators/service-domain.decorator';
 import { WebfingerDto } from './dto/webfinger.dto';
@@ -11,7 +11,7 @@ export class WebfingerController {
   constructor(protected readonly webfingerService: WebfingerService) {}
 
   @Get()
-  public async webfinger(@ServiceDomain() domain: string, @Query('resource') resource: string): Promise<any> {
+  public async webfinger(@ServiceDomain() domain: string, @Query('resource') resource: string): Promise<WebfingerDto> {
     this.logger.debug(`webfinger: ${resource}`);
     const [, username, parsedServiceId] = /^acct:([A-Za-z0-9_]*)@(.*)$/i.exec(resource) || [];
 

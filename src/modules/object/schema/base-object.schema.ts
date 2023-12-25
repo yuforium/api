@@ -1,9 +1,8 @@
-import { Prop } from "@nestjs/mongoose";
-import { Exclude } from "class-transformer";
-import { ObjectDto } from "src/common/dto/object/object.dto";
-import { Types } from "mongoose";
-import { BaseRecord, BaseSchema, GConstructor } from "./base.schema";
-import { ASObject } from "@yuforium/activity-streams";
+import { Prop } from '@nestjs/mongoose';
+import { Exclude } from 'class-transformer';
+import { Types } from 'mongoose';
+import { BaseRecord, BaseSchema, GConstructor } from './base.schema';
+import { ASObject } from '@yuforium/activity-streams';
 
 /**
  * Mixin type that defines common fields that are used for all stored objects.
@@ -30,7 +29,18 @@ export function BaseObjectSchema<TBase extends GConstructor<ASObject & {id: stri
      * Specifies an actor or list of actors for where the object was received 
      * via the inbox. (local actors only)
      *  
-     * This is based on the to/cc/bcc field. 
+     * This is based on the to/cc/bcc field.
+     * 
+     * @todo this can be expanded upon.  Instead of a simple actor reference,
+     * we can store more descriptive information about the recipient, such as 
+     * the to/cc/bcc field, and the actor's role in the message.  For example:
+     * 
+     * ```json
+     * [
+     *  {rel: "self", actor: "https://example.com/actors/1", _id: "<mongo object id>"},
+     *  {rel: "to", actor: "https://example.com/actors/2", _id: "<mongo object id>"},
+     * ]
+     * ```
      */
     @Prop({type: [Types.ObjectId], required: true})
     @Exclude()

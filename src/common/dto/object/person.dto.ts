@@ -1,7 +1,6 @@
-import { ApiProperty, ApiPropertyOptions } from "@nestjs/swagger";
-import { ASObjectOrLink, Person } from "@yuforium/activity-streams";
-import { Exclude, Expose, Transform, Type } from "class-transformer";
-import { ObjectRecordDto } from "../../../modules/object/schema/object.schema";
+import { ApiProperty } from '@nestjs/swagger';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { ObjectRecordDto } from '../../../modules/object/schema/object.schema';
 
 export class PublicKey {
   @Expose()
@@ -16,7 +15,7 @@ export class PublicKey {
 
 @Exclude()
 export class PersonDto extends ObjectRecordDto {
-  static type: 'Person' = 'Person';
+  static type = 'Person' as const;
 
   @Expose()
   '@context': string | string[] = 'https://www.w3.org/ns/activitystreams';
@@ -48,5 +47,5 @@ export class PersonDto extends ObjectRecordDto {
     id: string;
     owner: string;
     publicKeyPem: string;
-  }
+  };
 }

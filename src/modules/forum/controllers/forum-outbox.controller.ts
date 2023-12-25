@@ -14,7 +14,6 @@ import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
 import { NoteCreateDto } from '../../../common/dto/object-create/note-create.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ObjectDto } from '../../../common/dto/object';
 
 /**
  * Forum Outbox Controller
@@ -69,7 +68,7 @@ export class ForumOutboxController {
     // @todo document how and why to/cc are set for various targets
     // see also https://github.com/mastodon/mastodon/issues/8067 and https://github.com/mastodon/mastodon/pull/3844#issuecomment-314897285
     Object.assign(dto, {
-      attributedTo: [user.actor.id, `https://${domain}/forums/${params.pathId}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
+      attributedTo: [`https://${domain}/forums/${params.pathId}`, user.actor.id], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
       published: new Date().toISOString(),
       to: ['https://www.w3.org/ns/activitystreams#Public'],
       cc: [`${params.pathId}/followers`], // @todo consider 

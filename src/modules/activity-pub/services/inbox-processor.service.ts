@@ -1,4 +1,4 @@
-import { Injectable, Logger, LoggerService } from '@nestjs/common';
+import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ActivityRecordDto } from 'src/modules/activity/schema/activity.schema';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
@@ -6,7 +6,7 @@ import { ActivityService } from '../../../modules/activity/services/activity.ser
 import { ObjectService } from '../../../modules/object/object.service';
 import { RelationshipRecordDto } from '../../../modules/object/schema/relationship.schema';
 import { ActivityPubService } from './activity-pub.service';
-import { Activity, Actor } from '@yuforium/activity-streams';
+import { Activity } from '@yuforium/activity-streams';
 import { UserActorDto } from 'src/modules/user/dto/user-actor.dto';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class InboxProcessorService {
     protected readonly objectService: ObjectService,
     protected readonly activityPubSerice: ActivityPubService) { }
 
-  public async create(activity: Activity, actor: Actor): Promise<Activity> {
+  public async create(): Promise<Activity> {
     throw new Error('Method not implemented.');
   }
 
@@ -116,7 +116,8 @@ export class InboxProcessorService {
     return acceptActivityDto;
   }
 
-  public async undo(activity: Activity, actor: Actor) {
+  public async undo() {
+    throw new NotImplementedException();
     // const obj = await this.getObjectFromActivity(activity);
 
     // const activityId = typeof activity.object === 'string' ? activity.object : activity.object.id;
@@ -129,7 +130,7 @@ export class InboxProcessorService {
     
     // if (activityId) {
     //   return this.undoFollow(activityId);
-    // }
+  // }
   }
 
   protected async undoFollow(object: RelationshipRecordDto) {

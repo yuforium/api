@@ -10,8 +10,6 @@ import { ObjectModule } from '../object/object.module';
 import { UserContentController } from './controllers/user-content.controller';
 import { ActivityStreamModule } from '../activity-stream/activity-stream.module';
 import { ActivityPubModule } from '../activity-pub/activity-pub.module';
-import { PersonRecordDto, PersonSchema } from '../object/schema/person.schema';
-import { ActorRecord, ActorSchema } from '../object/schema/actor.schema';
 
 @Module({
   providers: [UserService],

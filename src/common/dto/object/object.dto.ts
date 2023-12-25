@@ -1,8 +1,8 @@
-import { Prop } from "@nestjs/mongoose";
-import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
-import { ActivityStreams, ASObjectOrLink, Collection, IsRequired } from "@yuforium/activity-streams";
-import { Expose, Transform } from "class-transformer";
-import * as mongoose from "mongoose";
+import { Prop } from '@nestjs/mongoose';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { ActivityStreams, ASObjectOrLink, Collection, IsRequired } from '@yuforium/activity-streams';
+import { Expose } from 'class-transformer';
+import * as mongoose from 'mongoose';
 
 const { Mixed } = mongoose.Schema.Types;
 
@@ -38,7 +38,7 @@ export class ObjectDto extends ActivityStreams.object('Object') {
   @ApiProperty({type: String})
   @Prop({type: Mixed})
   @Expose()
-  public attributedTo?: string;
+  public attributedTo?: string | string[];
 
   @ApiProperty({
     type: String,
@@ -104,7 +104,7 @@ export class ObjectDto extends ActivityStreams.object('Object') {
     id: string;
     owner: string;
     publicKeyPem: string;
-  }
+  };
 
   /**
    * Take a single ASObjectOrLink or an array of ASObjectOrLink and return ids

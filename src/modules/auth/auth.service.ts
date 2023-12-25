@@ -25,8 +25,6 @@ export class AuthService {
   public async validateUser(serviceDomain: string, username: string, password: string): Promise<any> {
     const user = await this.userService.findOne(serviceDomain, username);
 
-    console.log('user', user)
-
     this.logger.debug(`Validating user "${username}@${serviceDomain}"`);
 
     if (user) {

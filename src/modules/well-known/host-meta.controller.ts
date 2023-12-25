@@ -8,6 +8,6 @@ export class HostMetaController {
     return `<?xml version="1.0" encoding="UTF-8"?>
   <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
     <Link rel="lrdd" template="http://mastodon.local:3000/.well-known/webfinger?resource={uri}"/>
-  </XRD>`
+  </XRD>`;
   }
 }

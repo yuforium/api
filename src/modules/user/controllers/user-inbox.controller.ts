@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Logger, NotImplementedException, Param, Post, RawBodyRequest, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Note } from '@yuforium/activity-streams';
@@ -10,7 +10,6 @@ import { Request } from 'express';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';
 import { InboxService } from '../../../modules/activity-pub/services/inbox.service';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
-import { ObjectDto } from 'src/common/dto/object/object.dto';
 
 @ApiTags('user')
 @Controller('users/:username/inbox')
@@ -46,7 +45,7 @@ export class UserInboxController {
   public async postInbox(
     @ServiceDomain() serviceId: string, @Req() req: Request, @Body() activity: any, @Param('username') username: string
   ) {
-    const signature = req.header('Signature');
+    // const signature = req.header('Signature');
     const targetUserId = `https://${serviceId}/user/${username}`;
 
     // if (typeof activity.object.to === 'string' && activity.object.to !== targetUserId) {
@@ -67,10 +66,11 @@ export class UserInboxController {
     }
 
     this.logger.debug(`postInbox(): Activity "${activity.type}" for ${targetUserId} from ${req.socket.remoteAddress} was accepted`);
+    
     return {
       'status': 'Accepted',
       'id': activity.id,
-    }
+    };
     // const receipt = await this.activityService.process(activity);
     // return {
     //   status: 'accepted',

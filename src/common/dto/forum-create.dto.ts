@@ -1,9 +1,8 @@
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsString, MaxLength } from 'class-validator';
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
 import { IsRequired, Service } from '@yuforium/activity-streams';
 
-export class ForumCreateDto extends PartialType(
-  PickType(Service, ['name', 'summary', 'type'])
+export class ForumCreateDto extends PartialType(PickType(Service, ['name', 'summary', 'type'])
 ) {
   @ApiProperty()
   @IsString()

@@ -1,12 +1,11 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
-import { ASActivity, ASObject, Create } from '@yuforium/activity-streams';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { ASActivity, ASObject } from '@yuforium/activity-streams';
+import { instanceToPlain } from 'class-transformer';
 import { StreamProcessor } from '../interfaces/stream-processor.interface';
 import { Connection, Types } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 import { AxiosResponse } from 'axios';
-import { ServiceDomain } from 'src/common/types/service-domain.type';
 import { ActivityService } from '../../activity/services/activity.service';
 import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
 
@@ -14,7 +13,7 @@ interface ActivityStreamService {
   accept(activity: ActivityDto, serviceId?: string): Promise<boolean>;
 }
 
-type allowed = 'create' | 'update' | 'delete';
+// type allowed = 'create' | 'update' | 'delete';
 
 /**
  * Synchronous activity stream service
@@ -40,7 +39,7 @@ export class SyncActivityStreamService implements StreamProcessor, ActivityStrea
    */
   public async accept(activity: ActivityDto) {
     this.logger.debug(`Ingesting ${activity.type} activity with id ${activity.id}`);
-    this[activity.type as allowed](activity);
+    // this[activity.type as allowed](activity);
     return true;
   }
 
@@ -49,7 +48,7 @@ export class SyncActivityStreamService implements StreamProcessor, ActivityStrea
    * @param activity
    * @param serviceDomain
    */
-  public async produce(activity: ActivityDto, serviceDomain: ServiceDomain) {
+  public async produce() {
     throw new NotImplementedException('This stream processor does not support this activity type');
   }
 
@@ -59,38 +58,15 @@ export class SyncActivityStreamService implements StreamProcessor, ActivityStrea
    * @param serviceDomain
    * @returns The newly created activity
    */
-  protected async create(activityDto: ActivityDto, serviceDomain?: ServiceDomain): Promise<boolean> {
-    if (serviceDomain === undefined) {
-      throw new Error('serviceDomain is undefined');
-    }
-    const activityId = await this.id();
-    const activityParams = {
-      ...activityDto,
-      _serviceId: serviceDomain,
-      _id: activityId,
-      id: `${activityDto.actor}/activity/${activityId}`
-    };
-
-    const session = await this.connection.startSession();
-
-    session.startTransaction();
-
-    try {
-      // this.activityService.create('someprefix', activityParams);
-      await session.commitTransaction();
-    }
-    catch (error: unknown) {
-      await session.abortTransaction();
-    }
-
-    return true;
+  protected async create(): Promise<boolean> {
+    throw new NotImplementedException();
   }
 
-  public async update(activity: ActivityDto) {
+  public async update() {
 
   }
 
-  public async delete(activity: ActivityDto) {
+  public async delete() {
 
   }
 
@@ -108,7 +84,7 @@ export class SyncActivityStreamService implements StreamProcessor, ActivityStrea
       .replace('https://yuforia.com', 'http://dev.yuforia.com:3000')
       .replace('https://yuforium.com', 'http://dev.yuforium.com:3000');
 
-      return this.httpService.post<string>(url, instanceToPlain(activity))
+    return this.httpService.post<string>(url, instanceToPlain(activity))
       .toPromise()
       .then((response: AxiosResponse | undefined) => {
         if (response !== undefined) {
@@ -160,14 +136,14 @@ export class SyncActivityStreamService implements StreamProcessor, ActivityStrea
 
           try {
             // @todo - is this one of ours? if so we can skip it, no need to replicate it to our own database
-            const inbox = await this.getInboxUrl(to);
-            const response = await this.send(inbox, instanceToPlain(activity));
+            // const inbox = await this.getInboxUrl(to);
+            // const response = await this.send(inbox, instanceToPlain(activity));
           }
           catch (error: unknown) {
             this.logger.error(`dispatch(): "${String(error)}" while sending ${activity.type} activity with id ${activity.id} to ${to}`);
           }
         }
-      })
+      });
     }
     else {
       throw new NotImplementedException('This stream processor does not support this activity type');

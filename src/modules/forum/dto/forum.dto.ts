@@ -1,5 +1,5 @@
-import { Expose } from "class-transformer";
-import { ObjectDto } from "../../../common/dto/object";
+import { Expose } from 'class-transformer';
+import { ObjectDto } from '../../../common/dto/object';
 
 export class ForumDto extends ObjectDto {
   @Expose()

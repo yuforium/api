@@ -1,8 +1,6 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Logger, NotImplementedException, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Logger, NotImplementedException, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
-import { ForumParams } from '../dto/forum-params.dto';
 import { Request } from 'express';
 
 @ApiTags('forum')
@@ -14,7 +12,7 @@ export class ForumInboxController {
 
   @ApiOperation({operationId: 'getForumInbox'})
   @Get()
-  public async getForumInbox(@ServiceDomain() serviceId: string, @Param() params: ForumParams) {
+  public async getForumInbox() {
     throw new NotImplementedException();
   }
 
@@ -23,8 +21,7 @@ export class ForumInboxController {
   @HttpCode(HttpStatus.ACCEPTED)
   public async postForumInbox(
     @Req() request: Request,
-    @Body() activity: any,
-    @Param() params: ForumParams
+    @Body() activity: any
   ) {
     this.logger.debug(`Received "${activity.type}" activity from ${request.connection.remoteAddress}`);
     const receipt = await this.activityService.process(activity);
@@ -33,6 +30,6 @@ export class ForumInboxController {
       status: 'accepted',
       message: 'The activity was queued for processing.',
       receipt
-    }
+    };
   }
 }

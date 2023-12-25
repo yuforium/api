@@ -1,9 +1,8 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService, JwtUser } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { JwtAuthGuard } from './jwt-auth.guard';
 import { LocalAuthGuard } from './local-auth.guard';
 import { Request } from 'express';
 import { UserDocument } from '../user/schemas/user.schema';
@@ -20,7 +19,7 @@ export class AuthController {
   @ApiOperation({operationId: 'login'})
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Req() req: Request, @Body() body: LoginDto) {
+  async login(@Req() req: Request) {
     return {...await this.authService.login(req.user as UserDocument)};
   }
 

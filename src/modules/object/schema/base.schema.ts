@@ -2,7 +2,7 @@ import { Prop } from '@nestjs/mongoose';
 import { Exclude } from 'class-transformer';
 import { Types } from 'mongoose';
 
-export type GConstructor<T = {}> = new (...args: any[]) => T;
+export type GConstructor<T = object> = new (...args: any[]) => T;
 
 /**
  * Minimum type requirements to store a record.
@@ -24,6 +24,12 @@ export type BaseRecord = {
 
 export function BaseSchema<SourceDtoType extends GConstructor<BaseDto> = GConstructor<BaseDto>>(SourceDto: SourceDtoType): SourceDtoType & GConstructor<BaseRecord> {
   class BaseSchema extends SourceDto implements BaseRecord {
+    /**
+     * The ID of the object, override @Prop to force requirements + uniqueness.
+     */
+    @Prop({type: String, required: true, unique: true})
+    public id!: string;
+
     /**
      * The database ID of the object.
      */

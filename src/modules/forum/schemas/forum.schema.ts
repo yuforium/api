@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose';
-import { Expose } from 'class-transformer';
 
 export interface Forum extends mongoose.Document {
   id: string;

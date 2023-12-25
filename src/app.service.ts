@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { resolve } from 'path';
 import { resolveDomain } from './common/decorators/service-domain.decorator';
 
 @Injectable()
@@ -26,10 +25,6 @@ export class AppService {
     };
   }
 
-  public async createDomain(domainName: string) {
-
-  }
-
   public async getDomain(hostname: string) {
     return resolveDomain(hostname);
   }
@@ -38,7 +33,7 @@ export class AppService {
    * Send a follow request to another domain
    * @param domain Domain to follow
    */
-  public async follow(domain: string) {
+  public async follow() {
 
   }
 }

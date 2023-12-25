@@ -1,16 +1,16 @@
-import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
-import mongoose from "mongoose";
-import { ObjectDto } from "../../../common/dto/object";
-import { RelationshipDto } from "../../../common/dto/object/relationship.dto";
-import { BaseObjectSchema } from "./base-object.schema";
-import { GConstructor } from "./base.schema";
+import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
+import { ObjectDto } from '../../../common/dto/object';
+import { RelationshipDto } from '../../../common/dto/object/relationship.dto';
+import { BaseObjectSchema } from './base-object.schema';
+import { GConstructor } from './base.schema';
 
 export type RelationshipDocument = RelationshipRecordDto & mongoose.Document;
 
 @Schema({collection: 'objects', autoIndex: true})
 export class RelationshipRecordDto extends BaseObjectSchema<GConstructor<RelationshipDto>>(RelationshipDto) implements ObjectDto {
   @Prop({type: String, required: true})
-  _relationship!: 'followerOf'
+  _relationship!: 'followerOf';
 }
 
 export const RelationshipSchema = SchemaFactory.createForClass(RelationshipRecordDto);

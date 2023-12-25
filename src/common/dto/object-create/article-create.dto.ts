@@ -1,6 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Equals, MaxLength } from "class-validator";
-import { ObjectCreateDto } from "./object-create.dto";
+import { ApiProperty } from '@nestjs/swagger';
+import { Equals } from 'class-validator';
+import { ObjectCreateDto } from './object-create.dto';
 
 export class ArticleCreateDto extends ObjectCreateDto {
   static type = 'Article';

@@ -1,11 +1,10 @@
-import { BadRequestException, Injectable, Logger, NotImplementedException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { parse, verify, VerifyOptions } from '@yuforium/http-signature';
 import { SyncDispatchService } from './sync-dispatch.service';
 import { InboxProcessorService } from './inbox-processor.service';
 import { ActivityPubService } from './activity-pub.service';
-import { resolve } from 'path';
 
 export interface AcceptOptions {
   requestSignature?: {
@@ -35,10 +34,10 @@ export class InboxService {
   public async accept<T extends ActivityDto>(activity: T, options?: AcceptOptions) {
     // if requestSignature is provided, verify the signature.  If we don't have a public key for the user, we can't verify the signature, and we
     // should queue processing of the activity for later.
-    const {requestSignature} = options || {};
+    // const {requestSignature} = options || {};
 
     // @todo domain checking can be moved into activity dto validation
-    const parsedUrl = new URL(activity.actor);
+    // const parsedUrl = new URL(activity.actor);
     
     // if (!psl.isValid(parsedUrl.hostname) && (parsedUrl.hostname.substring(parsedUrl.hostname.length -6) !== '.local')) {
     //   throw new TypeError('Invalid URL');
@@ -70,7 +69,7 @@ export class InboxService {
         signature,
         publicKey: publicKey.publicKeyPem,
         headerValues: headers
-      }
+      };
 
       const verified = verify(verifyOptions);
 
@@ -104,18 +103,9 @@ export class InboxService {
     }
   }
 
-  protected async undo(activity: ActivityDto): Promise<ActivityDto | null> {
-    return null;
-  }
-
-  protected async follow(activity: ActivityDto): Promise<ActivityDto | null> {
-    // console.log('follow is null for now');
-    return null;
-  }
-
   protected async create(activity: ActivityDto): Promise<ActivityDto | null> {
     if (await this.activityService.find({id: activity.id})) {
-      this.logger.debug(`acceptCreate(): activity already exists`);
+      this.logger.debug('acceptCreate(): activity already exists');
       return null;
     }
 

@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional, ApiQuery } from "@nestjs/swagger";
-import { Transform } from "class-transformer";
-import { IsInt, IsOptional } from "class-validator";
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsInt, IsOptional } from 'class-validator';
 
 export class UserContentQueryOptionsDto {
   @ApiPropertyOptional({

@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, Header, Logger, NotFoundException, Param, Post, Query, Req, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Header, Logger, NotFoundException, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
@@ -111,13 +111,13 @@ export class UserController {
   //     throw new UnauthorizedException();
   //   }
 
-    // const message = await this.activityPubService.createObject(body);
-    // const activity = await this.activityPubService.createActivity({
-    //   type: 'Create',
-    //   object: message._id
-    // });
+  // const message = await this.activityPubService.createObject(body);
+  // const activity = await this.activityPubService.createActivity({
+  //   type: 'Create',
+  //   object: message._id
+  // });
 
-    // return message.toObject();
+  // return message.toObject();
   //   return request.user;
   // }
 }

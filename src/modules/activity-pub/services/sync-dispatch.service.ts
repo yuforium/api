@@ -75,7 +75,7 @@ export class SyncDispatchService {
    * @param activity 
    */
   protected async dispatch(activity: Activity) {
-    let dispatchTo = await this.getDispatchTargets(activity);
+    const dispatchTo = await this.getDispatchTargets(activity);
     
     dispatchTo.forEach(async to => {
       const response = await this.send(to, activity);
@@ -133,7 +133,7 @@ export class SyncDispatchService {
           'content-type': 'application/activity+json',
           'accept': 'application/activity+json',
           'digest': digest,
-          'signature': `keyId="http://yuforium.dev/user/chris#main-key",headers="${opts.headers?.join(" ")}",signature="${opts.signature}"`,
+          'signature': `keyId="http://yuforium.dev/user/chris#main-key",headers="${opts.headers?.join(' ')}",signature="${opts.signature}"`,
           'date': now.toUTCString()
         },
         body: JSON.stringify(activity),

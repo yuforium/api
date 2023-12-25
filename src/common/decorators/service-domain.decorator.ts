@@ -1,7 +1,7 @@
 // @todo switch to parse-domain package, it should be faster since it uses a trie to match the domain
 // @todo consider renaming `serviceId` to `serviceDomain`
 
-import { createParamDecorator, ExecutionContext, Logger } from "@nestjs/common";
+import { createParamDecorator, ExecutionContext, Logger } from '@nestjs/common';
 import { ServiceDomain as ServiceDomainType } from '../types/service-domain.type';
 import { parse } from 'tldts';
 
@@ -17,7 +17,7 @@ export const ServiceDomain = createParamDecorator(
 
 export function resolveDomain(hostname: string) {
   logger.debug(`Processing hostname ${hostname}`);
-  let domain = parse(hostname);
+  const domain = parse(hostname);
 
   if (domain.hostname === 'localhost' && process.env.NODE_ENV === 'development') {
     return 'localhost';

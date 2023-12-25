@@ -1,4 +1,4 @@
-import { ClassSerializerInterceptor, Controller, Get, Param, SerializeOptions, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ServiceDomain } from '../../common/decorators/service-domain.decorator';
 import { ObjectService } from './object.service';
 

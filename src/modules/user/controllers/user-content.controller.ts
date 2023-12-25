@@ -1,6 +1,5 @@
-import { Controller, Get, Logger, NotFoundException, Param, Query, ValidationPipe } from '@nestjs/common';
-import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger';
-import { ActivityStreams, OrderedCollectionPage } from '@yuforium/activity-streams';
+import { Controller, Get, Logger, NotFoundException, Param, Query } from '@nestjs/common';
+import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ObjectService } from '../../../modules/object/object.service';
@@ -25,7 +24,7 @@ export class UserContentController {
   @ApiParam({name: 'pageNumber', type: Number, required: true, example: 1})
   @Get('page/:pageNumber')
   public async getContentPage(@Query('pageNumber') pageNumber: number) {
-    // console.log(pageNumber);
+    console.log(pageNumber);
   }
 
   /**

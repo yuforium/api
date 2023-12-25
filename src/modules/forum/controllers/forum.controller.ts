@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseInterceptors, ClassSerializerInterceptor, NotFoundException, SerializeOptions, Header, Post, NotImplementedException, Body } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException, Header, Post, Body } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { ObjectService } from '../../object/object.service';
@@ -9,6 +9,7 @@ import { ForumParams } from '../dto/forum-params.dto';
 import { ForumService } from '../forum.service';
 import { ForumCreateDto } from '../../../common/dto/forum-create.dto';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';
+import { ActorDto } from 'src/common/dto/actor/actor.dto';
 
 @ApiTags('forum')
 @Controller('forums')
@@ -32,16 +33,16 @@ export class ForumController {
   @ApiOperation({operationId: 'createForum', summary: 'Create a forum'})
   @Post()
   @Header('Content-Type', 'application/activity+json')
-  public async create(@ServiceDomain() domain: string, @Body() forumCreateDto: ForumCreateDto) {
-    return plainToInstance(ForumDto, this.forumService.create(domain, forumCreateDto));
+  public async create(@ServiceDomain() domain: string, @Body() forumCreateDto: ForumCreateDto): Promise<ActorDto> {
+    return plainToInstance(ActorDto, this.forumService.create(domain, forumCreateDto));
   }
 
   @ApiOperation({operationId: 'getForum'})
-  @ApiResponse({status: 200, description: "Successful response", type: ForumDto})
-  @ApiResponse({status: 404, description: "Forum does not exist"})
+  @ApiResponse({status: 200, description: 'Successful response', type: ActorDto})
+  @ApiResponse({status: 404, description: 'Forum does not exist'})
   @Get(':pathId')
-  public async findOne(@ServiceDomain() serviceId: string, @Param() params: ForumParams): Promise<ForumDto> {
-    const forum = await this.objectService.get(`https://${serviceId}/forum/${params.pathId}`);
+  public async findOne(@ServiceDomain() domainId: string, @Param() params: ForumParams): Promise<ActorDto> {
+    const forum = await this.forumService.get(domainId, params.pathId);
 
     if (!forum) {
       throw new NotFoundException(`Forum ${params.pathId} not found.`);
@@ -53,6 +54,6 @@ export class ForumController {
       // return tempForum;
     }
 
-    return plainToClass(ForumDto, forum);
+    return plainToClass(ActorDto, forum);
   }
 }

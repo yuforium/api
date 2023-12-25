@@ -1,5 +1,5 @@
-import { Exclude, Expose } from "class-transformer";
-import { PersonDto } from "src/common/dto/object/person.dto";
+import { Exclude, Expose } from 'class-transformer';
+import { PersonDto } from 'src/common/dto/object/person.dto';
 
 export class UserActorDto extends PersonDto {
   @Exclude()

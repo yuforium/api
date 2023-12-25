@@ -1,7 +1,7 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Exclude } from "class-transformer";
-import * as mongoose from "mongoose";
-import { ActivityDto } from "../../../modules/activity/dto/activity.dto";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Exclude } from 'class-transformer';
+import * as mongoose from 'mongoose';
+import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 
 export type ActivityDocument = ActivityRecordDto & mongoose.Document;
 

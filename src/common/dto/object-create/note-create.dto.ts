@@ -1,7 +1,6 @@
-import { ApiProperty, OmitType } from "@nestjs/swagger";
-import { IsNotEmptyArray, IsRequired } from "@yuforium/activity-streams";
-import { Equals, IsOptional, MaxLength } from "class-validator";
-import { ObjectCreateDto } from "../../../common/dto/object-create/object-create.dto";
+import { ApiProperty } from '@nestjs/swagger';
+import { Equals, MaxLength } from 'class-validator';
+import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
 
 export class StringArray extends Array<string> {}
 

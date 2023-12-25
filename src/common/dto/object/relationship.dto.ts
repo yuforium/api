@@ -1,7 +1,7 @@
-import { Prop } from "@nestjs/mongoose";
-import { Exclude } from "class-transformer";
-import { IsString } from "class-validator";
-import { ObjectDto } from "./object.dto";
+import { Prop } from '@nestjs/mongoose';
+import { Exclude } from 'class-transformer';
+import { IsString } from 'class-validator';
+import { ObjectDto } from './object.dto';
 
 @Exclude()
 export class RelationshipDto extends ObjectDto {

@@ -1,8 +1,8 @@
-import { Controller, Get, Logger } from '@nestjs/common';
+import { Controller, Get, Logger, Param } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { OrderedCollectionPage } from '@yuforium/activity-streams';
-import { ServiceDomain } from 'src/common/decorators/service-domain.decorator';
-import { ObjectService } from 'src/modules/object/object.service';
+import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
+import { ForumService } from '../forum.service';
+import { ForumParams } from '../dto/forum-params.dto';
 
 /**
  * Structure for the forum content controller response.
@@ -26,35 +26,24 @@ export class ForumContentController {
   protected readonly logger: Logger = new Logger(this.constructor.name);
 
   constructor(
-    protected readonly objectService: ObjectService,
+    protected readonly forumService: ForumService,
   ) { }
 
   @ApiOperation({operationId: 'getForumContent', summary: 'Get forum content'})
   @ApiParam({name: 'pathId', type: String, required: true, example: '1'})
   @Get()
-  public async getForumContent(
-    @ServiceDomain() domain: string
-  ) {
+  public async getForumContent(@ServiceDomain() domain: string, @Param() params: ForumParams) {
     this.logger.debug('get forum content');
 
-    const posts = this.objectService.find({_destination: `https://${domain}/forums/1`});
+    const posts = await this.forumService.getContent(domain, params.pathId);
 
-    const page = new OrderedCollectionPage();
+    console.log(posts);
+
+    // const page = new OrderedCollectionPage();
     return {
       id: 'https://example.com/forums/1/content?page=1',
       type: 'OrderedCollectionPage',
-      items: [
-        {
-          url: [
-            'https://example.com/forums/1/content/1',
-          ],
-        },
-        {
-          url: [
-            'https://example.com/forums/1/content/2',
-          ],
-        }
-      ],
+      items: posts
     };
   }
 }

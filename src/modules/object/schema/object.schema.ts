@@ -1,8 +1,8 @@
-import { Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { ObjectDto } from "../../../common/dto/object/object.dto";
-import { BaseObjectSchema } from "./base-object.schema";
-import { GConstructor } from "./base.schema";
+import { ObjectDto } from '../../../common/dto/object/object.dto';
+import { BaseObjectSchema } from './base-object.schema';
+import { GConstructor } from './base.schema';
 
 export type ObjectDocument = ObjectRecordDto & mongoose.Document;
 

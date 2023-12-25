@@ -6,11 +6,10 @@ import { User, UserDocument } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { ObjectService } from '../object/object.service';
 import { MongoServerError } from 'mongodb';
-import { generateKeyPairSync } from "crypto";
+import { generateKeyPairSync } from 'crypto';
 import { PersonDto } from 'src/common/dto/object/person.dto';
 import { validate } from 'class-validator';
 import { ActorDocument, ActorRecord } from '../object/schema/actor.schema';
-import { ActorDto } from 'src/common/dto/actor/actor.dto';
 
 @Injectable()
 export class UserService {
@@ -141,35 +140,32 @@ export class UserService {
     return {publicKey, privateKey};
   }
 
-/**
- * Reset a user's password
- * @param serviceId 
- * @param username 
- * @param hashedPassword bcrypt hashed password
- * @returns 
- */
-public async resetPassword(serviceId: string, username: string, hashedPassword: string): Promise<string | undefined> {
-  const user = await this.findOne(serviceId, username);
-
-  if (!user) {
-    this.logger.error(`User "${username}" not found`);
-    return;
-  }
-
-  // const newPassword = Math.random().toString(36).slice(-8); // generate a random 8-character password
-  // const hashedPassword = await bcrypt.hash(newPassword, 10); // hash the password using bcrypt
-
-  user.password = hashedPassword;
-  await user.save(); // save the updated user document
-
-  return hashedPassword;
-}
-  public async resetKey(serviceId: string, username: string): Promise<any> {
+  /**
+   * Reset a user's password
+   * @param serviceId 
+   * @param username 
+   * @param hashedPassword bcrypt hashed password
+   * @returns 
+   */
+  public async resetPassword(serviceId: string, username: string, hashedPassword: string): Promise<string | undefined> {
     const user = await this.findOne(serviceId, username);
 
-    if (user) {
-      const other = await this.objectService.findOne({_id: user.defaultIdentity});
+    if (!user) {
+      this.logger.error(`User "${username}" not found`);
+      return;
     }
+
+    // const newPassword = Math.random().toString(36).slice(-8); // generate a random 8-character password
+    // const hashedPassword = await bcrypt.hash(newPassword, 10); // hash the password using bcrypt
+
+    user.password = hashedPassword;
+    await user.save(); // save the updated user document
+
+    return hashedPassword;
+  }
+
+  public async resetKey(serviceId: string, username: string): Promise<any> {
+    const user = await this.findOne(serviceId, username);
 
     if (!user) {
       this.logger.error(`User "${username}" not found`);
@@ -186,7 +182,7 @@ public async resetPassword(serviceId: string, username: string, hashedPassword: 
         'id': `${person.id}#main-key`,
         'owner': person.id,
         'publicKeyPem': publicKey.toString()
-      }
+      };
 
       user.privateKey = privateKey.toString();
 

@@ -1,8 +1,6 @@
-import { ArgumentMetadata, BadRequestException, Injectable, Optional, PipeTransform } from '@nestjs/common';
+import { BadRequestException, Injectable, Optional, PipeTransform } from '@nestjs/common';
 import { ActivityStreams } from '@yuforium/activity-streams';
-import { Constructor } from '@yuforium/activity-streams/dist/util/constructor';
 import { validate, ValidationError } from 'class-validator';
-import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
 
 @Injectable()
 export class ActivityStreamsPipe<T> implements PipeTransform {
@@ -15,7 +13,7 @@ export class ActivityStreamsPipe<T> implements PipeTransform {
     }
   }
 
-  async transform(value: any, metadata: ArgumentMetadata): Promise<T> {
+  async transform(value: any): Promise<T> {
     const obj = this.transformer.transform({value});
 
     if (!obj) {

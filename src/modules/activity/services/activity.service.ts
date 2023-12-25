@@ -1,11 +1,9 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActivityDocument, ActivityRecordDto } from '../schema/activity.schema';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { Model, Types } from 'mongoose';
 import { ActivityDto } from '../dto/activity.dto';
-import { Actor } from '@yuforium/activity-streams';
-import { ObjectDocument, ObjectRecordDto } from 'src/modules/object/schema/object.schema';
 
 @Injectable()
 export class ActivityService {

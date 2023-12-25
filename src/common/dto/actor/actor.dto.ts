@@ -1,6 +1,6 @@
-import { Prop } from "@nestjs/mongoose";
-import { ActivityStreams } from "@yuforium/activity-streams";
-import { Schema } from "mongoose";
+import { Prop } from '@nestjs/mongoose';
+import { ActivityStreams } from '@yuforium/activity-streams';
+import { Schema } from 'mongoose';
 
 /**
  * Yuforium's base Actor type diverges from its base Object type in that it 
@@ -19,12 +19,15 @@ export class ActorDto extends ActivityStreams.object('Actor') {
   @Prop({type: String, required: true})
   public name!: string;
 
+  @Prop({type: String, required: false})
+  public summary?: string;
+
   @Prop({type: String, required: true})
   public preferredUsername!: string;
 
   @Prop({type: String, required: true})
   public id!: string;
 
-  @Prop({type: Schema.Types.Mixed, required: true})
+  @Prop({type: Schema.Types.Mixed, required: false})
   public publicKey!: {id: string, owner: string, publicKeyPem: string};
 }

@@ -1,11 +1,10 @@
-import { Prop } from "@nestjs/mongoose";
-import { PartialType, PickType } from "@nestjs/swagger";
-import { ActivityStreams, IsRequired } from "@yuforium/activity-streams";
-import { Expose, Transform, Type } from "class-transformer";
-import { IsOptional, ValidateNested } from "class-validator";
-import * as mongoose from "mongoose";
-import { NoteDto, ArticleDto } from "../../../common/dto/object";
-import { LinkDto } from "src/modules/link/dto/link.dto";
+import { Prop } from '@nestjs/mongoose';
+import { ActivityStreams, IsRequired } from '@yuforium/activity-streams';
+import { Expose, Transform } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
+import * as mongoose from 'mongoose';
+import { NoteDto, ArticleDto } from '../../../common/dto/object';
+import { LinkDto } from 'src/modules/link/dto/link.dto';
 
 const { Mixed } = mongoose.Schema.Types;
 

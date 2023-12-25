@@ -1,6 +1,6 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { ObjectDocument, ObjectRecordDto, ObjectSchema } from './schema/object.schema';
+import { ObjectDocument, ObjectRecordDto } from './schema/object.schema';
 import { Model, Types, Schema, Connection } from 'mongoose';
 import { ActivityService } from '../activity/services/activity.service';
 import { plainToInstance } from 'class-transformer';
@@ -48,7 +48,7 @@ export class ObjectService {
       return plainToInstance(ObjectDto, obj);
     }
     catch (err) {
-      this.logger.error(`create(): ${(err as Error).message}`)
+      this.logger.error(`create(): ${(err as Error).message}`);
       throw err;
     }
     // return await this.createObject(dto, options);
@@ -85,8 +85,7 @@ export class ObjectService {
     // }
   }
 
-  protected applyDefaultParams(dto: ObjectDto) {
-
+  protected applyDefaultParams() {
   }
 
   public async createRelationship(dto: RelationshipRecordDto): Promise<RelationshipDocument> {
@@ -111,7 +110,7 @@ export class ObjectService {
     return this.objectModel.findById(id);
   }
 
-  public async find(params: any = {}, options: any = {}): Promise<any> {
+  public async find(params: any = {}, options: any = {}): Promise<ObjectDocument[]> {
     this.logger.debug(`find(): params: ${JSON.stringify(params)}`);
     return this.objectModel.find(params, {}, options);
   }
