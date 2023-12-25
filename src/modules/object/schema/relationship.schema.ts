@@ -10,7 +10,7 @@ export type RelationshipDocument = RelationshipRecordDto & mongoose.Document;
 @Schema({collection: 'objects', autoIndex: true})
 export class RelationshipRecordDto extends BaseObjectSchema<GConstructor<RelationshipDto>>(RelationshipDto) implements ObjectDto {
   @Prop({type: String, required: true})
-  _relationship!: 'followerOf';
+    _relationship!: 'followerOf';
 }
 
 export const RelationshipSchema = SchemaFactory.createForClass(RelationshipRecordDto);

@@ -13,7 +13,7 @@ export type PersonDocument = PersonRecordDto & mongoose.Document;
 @Schema({collection: 'objects', autoIndex: true})
 export class PersonRecordDto extends BaseObjectSchema<GConstructor<PersonDto>>(PersonDto) {
   @Exclude()
-  to!: string | string[];
+    to!: string | string[];
 }
 
 export const PersonSchema = SchemaFactory.createForClass(PersonRecordDto);

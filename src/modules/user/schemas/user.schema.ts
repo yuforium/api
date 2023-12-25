@@ -7,28 +7,28 @@ export type UserDocument = User & mongoose.Document;
 @Schema({collection: 'users', autoIndex: true})
 export class User {
   @Prop({type: String, required: true})
-  domain!: string;
+    domain!: string;
 
   @Prop({type: String, required: true, lowercase: true})
-  username!: string;
+    username!: string;
 
   @Prop({type: String, required: true})
-  password!: string | undefined;
+    password!: string | undefined;
 
   @Prop({type: String})
-  type: string | undefined;
+    type: string | undefined;
 
   @Prop({type: Array})
-  identities: any[] = [];
+    identities: any[] = [];
 
   @Prop({type: mongoose.Schema.Types.ObjectId})
-  defaultIdentity!: mongoose.Schema.Types.ObjectId;
+    defaultIdentity!: mongoose.Schema.Types.ObjectId;
 
   @Prop({type: String, required: true})
-  email!: string;
+    email!: string;
 
   @Prop({type: String})
-  privateKey: string | undefined;
+    privateKey: string | undefined;
 
   actor!: Actor;
 }

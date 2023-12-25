@@ -3,10 +3,10 @@ import { Expose } from 'class-transformer';
 
 export class LinkDto extends ActivityStreams.link('Link') implements ASLink {
   @Expose()
-  type = 'Link';
+    type = 'Link';
 
   @Expose()
-  href!: string;
+    href!: string;
 
   toValue() {
     return this.href;

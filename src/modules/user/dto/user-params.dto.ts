@@ -6,5 +6,5 @@ export class UserParamsDto {
   @Matches(/^[a-z](?:-?[a-z0-9]+){3,255}$/i)
   @IsString()
   @IsNotEmpty()
-  username!: string;
+    username!: string;
 }

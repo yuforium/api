@@ -9,31 +9,31 @@ export class UserCreateDto {
   @IsAlphanumeric()
   @MinLength(5)
   @MaxLength(64)
-  username!: string;
+    username!: string;
 
   @ApiProperty()
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
   @MaxLength(256)
-  name?: string;
+    name?: string;
 
   @ApiProperty()
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
   @MaxLength(256)
-  summary?: string;
+    summary?: string;
 
   @Exclude()
-  __v: number | undefined;
+    __v: number | undefined;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @MinLength(6)
   @MaxLength(64)
-  password!: string;
+    password!: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -41,5 +41,5 @@ export class UserCreateDto {
   @MinLength(3)
   @MaxLength(128)
   @IsEmail()
-  email!: string;
+    email!: string;
 }

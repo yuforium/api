@@ -3,7 +3,7 @@ import { PersonDto } from 'src/common/dto/object/person.dto';
 
 export class UserActorDto extends PersonDto {
   @Exclude()
-  to!: string | string[];
+    to!: string | string[];
   
   @Expose()
   get inbox(): string {
@@ -16,5 +16,5 @@ export class UserActorDto extends PersonDto {
   }
 
   @Expose()
-  preferredUsername!: string;
+    preferredUsername!: string;
 }

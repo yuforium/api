@@ -9,13 +9,13 @@ export class RelationshipDto extends ObjectDto {
 
   @Prop({type: String, required: true})
   @IsString()
-  subject!: string;
+    subject!: string;
 
   @Prop({type: String, required: true})
   @IsString()
-  object!: string;
+    object!: string;
 
   @Prop({type: String, required: true})
   @IsString()
-  relationship!: string;
+    relationship!: string;
 }

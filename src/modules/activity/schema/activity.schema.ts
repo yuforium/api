@@ -12,15 +12,15 @@ export class ActivityRecordDto extends ActivityDto {
 
   @Exclude()
   @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'objects'})
-  _object?: mongoose.Schema.Types.ObjectId;
+    _object?: mongoose.Schema.Types.ObjectId;
 
   @Exclude()
   @Prop({type: String, required: true})
-  _domain!: string;
+    _domain!: string;
 
   @Exclude()
   @Prop({type: Boolean, default: false})
-  _local!: boolean;
+    _local!: boolean;
 }
 
 export const ActivitySchema = SchemaFactory.createForClass(ActivityRecordDto);

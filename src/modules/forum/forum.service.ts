@@ -7,6 +7,11 @@ import { Model } from 'mongoose';
 import { ObjectDocument, ObjectRecordDto } from '../object/schema/object.schema';
 import { plainToInstance } from 'class-transformer';
 
+export type ForumQueryOpts = {
+  skip?: number;
+  limit?: number;
+}
+
 @Injectable()
 export class ForumService {
   constructor(
@@ -44,14 +49,22 @@ export class ForumService {
     return forum;
   }
 
-  public async getContent(_domain: string, forumname: string): Promise<ObjectRecordDto[]> {
+  public async getContent(_domain: string, forumname: string, opts: ForumQueryOpts = {}): Promise<ObjectRecordDto[]> {
     const forum = await this.get(_domain, forumname);
 
     if (!forum) {
       throw new NotFoundException(`Forum "${forumname}" not found.`);
     }
 
-    const posts = (await this.objectService.find({_destination: forum._id})).map((post: ObjectDocument) => plainToInstance(ObjectRecordDto, post));
+    const params = {
+      _destination: forum._id,
+    };
+
+    console.log('opts', opts);
+    
+
+    const posts = (await this.objectService.find(params, opts))
+      .map((post: ObjectDocument) => plainToInstance(ObjectRecordDto, post));
 
     return posts;
   }

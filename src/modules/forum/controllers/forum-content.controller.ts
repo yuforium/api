@@ -1,8 +1,10 @@
-import { Controller, Get, Logger, Param } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
+import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ForumService } from '../forum.service';
 import { ForumParams } from '../dto/forum-params.dto';
+import { ContentQueryOptionsDto } from 'src/common/dto/query/content-query-options.dto';
+import { OrderedCollectionPageDto } from 'src/common/dto/collection/ordered-collection-page.dto';
 
 /**
  * Structure for the forum content controller response.
@@ -21,7 +23,7 @@ import { ForumParams } from '../dto/forum-params.dto';
  * }
  */
 @ApiTags('forum')
-@Controller('forums/:pathId/content')
+@Controller('forums/:forumname/content')
 export class ForumContentController {
   protected readonly logger: Logger = new Logger(this.constructor.name);
 
@@ -30,20 +32,45 @@ export class ForumContentController {
   ) { }
 
   @ApiOperation({operationId: 'getForumContent', summary: 'Get forum content'})
-  @ApiParam({name: 'pathId', type: String, required: true, example: '1'})
+  @ApiParam({name: 'forumname', type: String, required: true, example: 'test-forum'})
+  @ApiExtraModels(ContentQueryOptionsDto)
+  @ApiQuery({
+    name: 'contentQuery',
+    required: false,
+    type: 'ContentQueryOptionsDto',
+    style: 'deepObject',
+    schema: {
+      $ref: '#/components/schemas/ContentQueryOptionsDto'
+    }
+  })
+  @ApiOkResponse({description: 'Forum content', type: OrderedCollectionPageDto})
   @Get()
-  public async getForumContent(@ServiceDomain() domain: string, @Param() params: ForumParams) {
+  public async getForumContent(
+    @ServiceDomain() domain: string, 
+    @Param() params: ForumParams,
+    @Query('contentQuery') query: ContentQueryOptionsDto
+  ) {
     this.logger.debug('get forum content');
 
-    const posts = await this.forumService.getContent(domain, params.pathId);
-
-    console.log(posts);
-
-    // const page = new OrderedCollectionPage();
-    return {
-      id: 'https://example.com/forums/1/content?page=1',
-      type: 'OrderedCollectionPage',
-      items: posts
+    const opts = {
+      skip: query.skip, 
+      limit: query.limit,
+      sort: query.sort,
     };
+    const posts = await this.forumService.getContent(domain, params.forumname, opts);
+
+    /**
+     * @todo it is questionable whether or not we should allow a page size 
+     * param, because it affects the pagination of the forum content, and 
+     * therefore the ID that would be returned by this endpoint.  That 
+     * being said, if the `size` param matches the default page size, 
+     * return a URL that would match the default page size.
+     */
+    const page = Object.assign(new OrderedCollectionPageDto(), {
+      id: `https://${domain}/forums/${params.forumname}/content/page/1`,
+      items: posts
+    });
+
+    return page;
   }
 }

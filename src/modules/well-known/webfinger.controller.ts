@@ -19,6 +19,10 @@ export class WebfingerController {
       throw new NotFoundException();
     }
 
+    if (parsedServiceId !== domain) {
+      throw new NotFoundException();
+    }
+
     const response = this.webfingerService.getAccount(domain, username);
 
     return plainToInstance(WebfingerDto, response);

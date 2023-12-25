@@ -48,7 +48,7 @@ export class ForumOutboxController {
       throw new NotImplementedException('Activity objects are not supported at this time.');
     }
 
-    const forumId = `https://${domain}/forums/${params.pathId}`;
+    const forumId = `https://${domain}/forums/${params.forumname}`;
     const forum = await this.objectService.get(forumId);
 
     if (!forum) {
@@ -63,15 +63,15 @@ export class ForumOutboxController {
       throw new UnauthorizedException('You are not authorized to post to this outbox.');
     }
 
-    this.logger.debug(`postOutbox(): ${user.actor.preferredUsername} is posting to ${params.pathId}'s outbox`);
+    this.logger.debug(`postOutbox(): ${user.actor.preferredUsername} is posting to ${params.forumname}'s outbox`);
 
     // @todo document how and why to/cc are set for various targets
     // see also https://github.com/mastodon/mastodon/issues/8067 and https://github.com/mastodon/mastodon/pull/3844#issuecomment-314897285
     Object.assign(dto, {
-      attributedTo: [`https://${domain}/forums/${params.pathId}`, user.actor.id], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
+      attributedTo: [`https://${domain}/forums/${params.forumname}`, user.actor.id], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
       published: new Date().toISOString(),
       to: ['https://www.w3.org/ns/activitystreams#Public'],
-      cc: [`${params.pathId}/followers`], // @todo consider 
+      cc: [`${params.forumname}/followers`], // @todo consider 
     });
 
     const activity = await this.outboxService.createActivityFromObject(domain, user, dto);

@@ -7,5 +7,5 @@ export class ForumCollectionDto extends ActivityStreams.collection('OrderedColle
 
   @Expose({name: 'items'})
   @Type(() => ForumDto)
-  items: ASObject[] = [];
+    items: ASObject[] = [];
 }

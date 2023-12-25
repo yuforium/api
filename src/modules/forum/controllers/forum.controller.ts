@@ -40,12 +40,12 @@ export class ForumController {
   @ApiOperation({operationId: 'getForum'})
   @ApiResponse({status: 200, description: 'Successful response', type: ActorDto})
   @ApiResponse({status: 404, description: 'Forum does not exist'})
-  @Get(':pathId')
+  @Get(':forumname')
   public async findOne(@ServiceDomain() domainId: string, @Param() params: ForumParams): Promise<ActorDto> {
-    const forum = await this.forumService.get(domainId, params.pathId);
+    const forum = await this.forumService.get(domainId, params.forumname);
 
     if (!forum) {
-      throw new NotFoundException(`Forum ${params.pathId} not found.`);
+      throw new NotFoundException(`Forum ${params.forumname} not found.`);
       // @todo consider autocreating a forum if it doesn't exist
       // const tempForum = new ForumDto();
       // tempForum.id = `https://${serviceId}/forum/${params.pathId}`;

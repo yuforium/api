@@ -6,5 +6,5 @@ export class OrderedCollectionPageDto extends ActivityStreams.collectionPage('Or
   static type = 'OrderedCollectionPage';
 
   @ApiProperty({type: [ObjectDto]})
-  items!: (string | ASObject | ASLink)[];
+    items!: (string | ASObject | ASLink)[];
 }

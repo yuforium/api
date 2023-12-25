@@ -3,10 +3,10 @@ import { ObjectDto } from '../../../common/dto/object';
 
 export class ForumDto extends ObjectDto {
   @Expose()
-  name: string | undefined;
+    name: string | undefined;
 
   @Expose()
-  summary: string | undefined;
+    summary: string | undefined;
 
   @Expose({name: 'inbox'})
   getInbox(): string {

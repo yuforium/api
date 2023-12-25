@@ -27,10 +27,13 @@
             2,
             {
                 "MemberExpression": 1,
+                // not having these rules means properties need to be indented 
+                // from their decorators, which at first glance doesn't seem 
+                // completely horrible
                 "ignoredNodes": [
-                    "FunctionExpression > .params[decorators.length > 0]",
-                    "FunctionExpression > .params > :matches(Decorator, :not(:first-child))",
-                    "ClassBody.body > PropertyDefinition[decorators.length > 0] > .key"
+                    // "FunctionExpression > .params[decorators.length > 0]",
+                    // "FunctionExpression > .params > :matches(Decorator, :not(:first-child))",
+                    // "ClassBody.body > PropertyDefinition[decorators.length > 0] > .key"
                 ]
             }
         ],
