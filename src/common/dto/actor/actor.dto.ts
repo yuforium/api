@@ -14,6 +14,9 @@ import { Schema } from 'mongoose';
  */
 export class ActorDto extends ActivityStreams.object('Actor') {
   @Prop({type: Schema.Types.Mixed, required: true})
+  public '@context': string | string[] = 'https://www.w3.org/ns/activitystreams';
+
+  @Prop({type: Schema.Types.Mixed, required: true})
   public type!: string | string[];
 
   @Prop({type: String, required: true})

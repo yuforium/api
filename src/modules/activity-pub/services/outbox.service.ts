@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { instanceToPlain } from 'class-transformer';
-import { ActivityRecordDto } from '../../activity/schema/activity.schema';
+import { ActivityRecord } from '../../activity/schema/activity.schema';
 import { ActivityService } from '../../activity/services/activity.service';
 import { ObjectService } from '../../object/object.service';
-import { ObjectDocument, ObjectRecordDto } from '../../object/schema/object.schema';
+import { ObjectDocument, ObjectRecord } from '../../object/schema/object.schema';
 import { Activity } from '@yuforium/activity-streams';
 import { JwtUser } from 'src/modules/auth/auth.service';
 import { Model, Query } from 'mongoose';
@@ -23,7 +23,16 @@ export class OutboxService {
     return dto;
   }
 
-  public async createActivityFromObject<T extends ObjectCreateDto = ObjectCreateDto>(domain: string, user: JwtUser, dto: T): Promise<Activity> {
+  /**
+   * Create an activity from an object DTO.  This is a convenience method that creates the object and activity in one call.
+   * It's assumed that the DTO has been sanitized and validated before calling this method.
+   * @param domain Service domain name
+   * @param user User who originated the activity (should always resolve to a person)
+   * @param outboxActorId Actor ID of the outbox to which this was posted (for example, in a forum this would be the forum's id)
+   * @param dto Object DTO
+   * @returns 
+   */
+  public async createActivityFromObject<T extends ObjectCreateDto = ObjectCreateDto>(domain: string, user: JwtUser, outboxActorId: string, dto: T): Promise<Activity> {
     const id = this.objectService.id();
 
     const lookups: Query<ActorDocument | null, ActorDocument>[] = [];
@@ -37,17 +46,23 @@ export class OutboxService {
       throw new Error('attributedTo must be a string or an array of strings.');
     }
 
+    const outboxActor = await this.actorModel.findOne({id: outboxActorId}).select(['_id', 'id']);
+
+    if (outboxActor === null) {
+      throw new Error(`Outbox actor not found for ${outboxActorId}.`);
+    }
+
     // lookups.forEach(lookup => lookup = lookup.select('_id'));
 
-    const outboxIds = (await Promise.all(lookups)).map(doc => doc?._id).filter(id => id !== null);
+    const _attribution = (await Promise.all(lookups)).map(doc => doc?._id).filter(id => id !== null);
 
-    const recordDto: ObjectRecordDto = {
+    const recordDto: ObjectRecord = {
       ...dto,
       '@context': 'https://www.w3.org/ns/activitystreams', // note that direct assignment like dto['@context'] = '...' doesn't work
-      id: `${user.actor.id}/posts/${id.toString()}`,
+      id: `${outboxActor.id}/posts/${id.toString()}`,
       _domain: domain,
-      _outbox: outboxIds[0],
-      _destination: outboxIds,
+      _outbox: outboxActor._id,
+      _attribution,
       _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public',
       _local: true
     };
@@ -56,8 +71,8 @@ export class OutboxService {
 
     const activityId = this.activityService.id();
 
-    const activityDto: ActivityRecordDto = {
-      id: `${dto.attributedTo}/activities/${activityId.toString()}`,
+    const activityDto: ActivityRecord = {
+      id: `${outboxActor.id}/activities/${activityId.toString()}`,
       type: 'Create',
       actor: Array.isArray(dto.attributedTo) ? dto.attributedTo[0] as string : dto.attributedTo as string,
       object: instanceToPlain(obj),

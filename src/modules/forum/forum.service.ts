@@ -4,7 +4,7 @@ import { ObjectService } from '../object/object.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActorDocument, ActorRecord } from '../object/schema/actor.schema';
 import { Model } from 'mongoose';
-import { ObjectDocument, ObjectRecordDto } from '../object/schema/object.schema';
+import { ObjectDocument, ObjectRecord } from '../object/schema/object.schema';
 import { plainToInstance } from 'class-transformer';
 
 export type ForumQueryOpts = {
@@ -21,12 +21,13 @@ export class ForumService {
 
   public async create(_domain: string, forumCreateDto: ForumCreateDto): Promise<ActorRecord> {
     const dto = {
+      '@context': 'https://www.w3.org/ns/activitystreams',
       id: `https://${_domain}/forums/${forumCreateDto.pathId}`, 
       preferredUsername: forumCreateDto.pathId,
       name: forumCreateDto.name,
       summary: forumCreateDto.summary,
       _domain, 
-      type: ['Service', 'Forum'],
+      type: ['Service'],
       _public: true,
       _local: true
     };
@@ -44,12 +45,12 @@ export class ForumService {
     }
   }
 
-  public async get(_domain: string, pathId: string): Promise<ActorDocument | null> {
-    const forum = await this.actorModel.findOne({id: `https://${_domain}/forums/${pathId}`});
+  public async get(_domain: string, forumname: string): Promise<ActorDocument | null> {
+    const forum = await this.actorModel.findOne({id: `https://${_domain}/forums/${forumname}`});
     return forum;
   }
 
-  public async getContent(_domain: string, forumname: string, opts: ForumQueryOpts = {}): Promise<ObjectRecordDto[]> {
+  public async getContent(_domain: string, forumname: string, opts: ForumQueryOpts = {}): Promise<ObjectRecord[]> {
     const forum = await this.get(_domain, forumname);
 
     if (!forum) {
@@ -60,11 +61,8 @@ export class ForumService {
       _destination: forum._id,
     };
 
-    console.log('opts', opts);
-    
-
     const posts = (await this.objectService.find(params, opts))
-      .map((post: ObjectDocument) => plainToInstance(ObjectRecordDto, post));
+      .map((post: ObjectDocument) => plainToInstance(ObjectRecord, post));
 
     return posts;
   }

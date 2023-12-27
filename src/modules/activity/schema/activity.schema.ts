@@ -1,26 +1,12 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Exclude } from 'class-transformer';
+import { Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
+import { BaseActivitySchema } from './base-activity.schema';
+import { GConstructor } from 'src/common/schema/base.schema';
 
-export type ActivityDocument = ActivityRecordDto & mongoose.Document;
+export type ActivityDocument = ActivityRecord & mongoose.Document;
 
 @Schema({collection: 'activities'})
-export class ActivityRecordDto extends ActivityDto {
-  @Exclude()
-  public _id?: string;
+export class ActivityRecord extends BaseActivitySchema<GConstructor<ActivityDto>>(ActivityDto) { }
 
-  @Exclude()
-  @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'objects'})
-    _object?: mongoose.Schema.Types.ObjectId;
-
-  @Exclude()
-  @Prop({type: String, required: true})
-    _domain!: string;
-
-  @Exclude()
-  @Prop({type: Boolean, default: false})
-    _local!: boolean;
-}
-
-export const ActivitySchema = SchemaFactory.createForClass(ActivityRecordDto);
+export const ActivitySchema = SchemaFactory.createForClass(ActivityRecord);

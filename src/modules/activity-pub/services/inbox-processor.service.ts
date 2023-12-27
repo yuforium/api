@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { ActivityRecordDto } from 'src/modules/activity/schema/activity.schema';
+import { ActivityRecord } from 'src/modules/activity/schema/activity.schema';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { ObjectService } from '../../../modules/object/object.service';
@@ -87,7 +87,7 @@ export class InboxProcessorService {
 
     // @todo - if auto accept, accept the follow request, accept it anyway for now
     const _acceptId = this.activityService.id().toString();
-    const acceptActivityDto: ActivityRecordDto = {
+    const acceptActivityDto: ActivityRecord = {
       _id: _acceptId,
       _domain: relationship._domain,
       // _path: `${followee._path}/${followee._pathId}/activities`,

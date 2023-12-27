@@ -64,7 +64,7 @@ export class UserOutboxController {
       to: Array.isArray(dto.to) ? dto.to : [dto.to as string]
     });
 
-    const activity = this.outboxService.createActivityFromObject(domain, user, dto);
+    const activity = this.outboxService.createActivityFromObject(domain, user, userId, dto);
 
     return activity;
   }

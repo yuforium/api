@@ -1,5 +1,5 @@
 import { Prop } from '@nestjs/mongoose';
-import { ActivityStreams, IsRequired } from '@yuforium/activity-streams';
+import { Activity, ActivityStreams, IsRequired } from '@yuforium/activity-streams';
 import { Expose, Transform } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 import * as mongoose from 'mongoose';
@@ -13,7 +13,7 @@ export type ActivityDtoObjectTypes = NoteDto | LinkDto;
 const transformer = new ActivityStreams.Transformer();
 transformer.add(NoteDto, ArticleDto);
 
-export class ActivityDto extends ActivityStreams.activity('Activity') {
+export class ActivityDto extends Activity {
   @Prop({type: String, required: true})
   @IsRequired()
   @Expose()

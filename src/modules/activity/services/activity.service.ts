@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ActivityDocument, ActivityRecordDto } from '../schema/activity.schema';
+import { ActivityDocument, ActivityRecord } from '../schema/activity.schema';
 import { plainToInstance } from 'class-transformer';
 import { Model, Types } from 'mongoose';
 import { ActivityDto } from '../dto/activity.dto';
@@ -31,7 +31,7 @@ export class ActivityService {
     return activity;
   }
 
-  public async createActivity(activity: ActivityRecordDto): Promise<ActivityDto> {
+  public async createActivity(activity: ActivityRecord): Promise<ActivityDto> {
     const activityRecord = await this.activityModel.create(activity);
     return plainToInstance(ActivityDto, activityRecord, {excludeExtraneousValues: true});
   }
@@ -42,7 +42,7 @@ export class ActivityService {
    * @param dto
    * @returns
    */
-  public async create(dto: ActivityRecordDto): Promise<ActivityDto> {
+  public async create(dto: ActivityRecord): Promise<ActivityDto> {
     // const _id = new Types.ObjectId();
 
     // const dto = Object.assign(new ActivityRecordDto(), {

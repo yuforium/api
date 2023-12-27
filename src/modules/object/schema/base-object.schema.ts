@@ -1,7 +1,7 @@
 import { Prop } from '@nestjs/mongoose';
 import { Exclude } from 'class-transformer';
 import { Types } from 'mongoose';
-import { BaseRecord, BaseSchema, GConstructor } from './base.schema';
+import { BaseRecord, BaseSchema, GConstructor } from '../../../common/schema/base.schema';
 import { ASObject } from '@yuforium/activity-streams';
 
 /**
@@ -23,7 +23,7 @@ type BaseObjectRecord = BaseRecord & {
  * @param Base 
  * @returns GConstructor<BaseObjectRecord & ObjectDto>
  */
-export function BaseObjectSchema<TBase extends GConstructor<ASObject & {id: string}>>(Base: TBase): TBase & GConstructor<BaseObjectRecord>{
+export function BaseObjectSchema<TBase extends GConstructor<ASObject & {id: string}>>(Base: TBase): TBase & GConstructor<BaseObjectRecord> {
   class BaseObjectSchema extends BaseSchema<TBase>(Base) implements BaseObjectRecord {
     /**
      * Specifies an actor or list of actors for where the object was received 
@@ -55,12 +55,13 @@ export function BaseObjectSchema<TBase extends GConstructor<ASObject & {id: stri
     public _outbox?: Types.ObjectId;
 
     /**
-     * Combined _inbox and _outbox.  This is used for querying content, only 
-     * differs from _inbox because it includes the _outbox.
+     * Essentially, a combined _inbox and _outbox, attribution is used for querying content, only 
+     * differs from _inbox because it includes the _outbox or IDs of any *local* actor whose feed
+     * might contain this object.
      */
     @Prop({type: [Types.ObjectId], required: true})
     @Exclude()
-    public _destination: Types.ObjectId[] = [];
+    public _attribution: Types.ObjectId[] = [];
   }
 
   return BaseObjectSchema;

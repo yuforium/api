@@ -20,7 +20,7 @@ import { AuthGuard } from '@nestjs/passport';
  * Note that this controller has a lot of overlap to the UserOutboxController.  This functionality can probably be merged into a 
  * parent class.
  */
-@Controller('forums/:pathId/outbox')
+@Controller('forums/:forumname/outbox')
 @ApiTags('forum')
 export class ForumOutboxController {
   protected readonly logger = new Logger(ForumOutboxController.name);
@@ -68,13 +68,13 @@ export class ForumOutboxController {
     // @todo document how and why to/cc are set for various targets
     // see also https://github.com/mastodon/mastodon/issues/8067 and https://github.com/mastodon/mastodon/pull/3844#issuecomment-314897285
     Object.assign(dto, {
-      attributedTo: [`https://${domain}/forums/${params.forumname}`, user.actor.id], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
+      attributedTo: [user.actor.id, `https://${domain}/forums/${params.forumname}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
       published: new Date().toISOString(),
       to: ['https://www.w3.org/ns/activitystreams#Public'],
       cc: [`${params.forumname}/followers`], // @todo consider 
     });
 
-    const activity = await this.outboxService.createActivityFromObject(domain, user, dto);
+    const activity = await this.outboxService.createActivityFromObject(domain, user, forumId, dto);
 
     return activity;
   }

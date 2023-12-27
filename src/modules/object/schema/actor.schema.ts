@@ -1,5 +1,5 @@
 import { Schema, SchemaFactory } from '@nestjs/mongoose';
-import { BaseSchema, GConstructor } from './base.schema';
+import { BaseSchema, GConstructor } from '../../../common/schema/base.schema';
 import { ActorDto } from '../../../common/dto/actor/actor.dto';
 import mongoose from 'mongoose';
 

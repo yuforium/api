@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { ObjectDto } from '../../../common/dto/object';
 import { RelationshipDto } from '../../../common/dto/object/relationship.dto';
 import { BaseObjectSchema } from './base-object.schema';
-import { GConstructor } from './base.schema';
+import { GConstructor } from '../../../common/schema/base.schema';
 
 export type RelationshipDocument = RelationshipRecordDto & mongoose.Document;
 

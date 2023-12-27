@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { ObjectRecordDto } from '../../../modules/object/schema/object.schema';
+import { ObjectRecord } from '../../../modules/object/schema/object.schema';
 
 export class PublicKey {
   @Expose()
@@ -14,36 +14,34 @@ export class PublicKey {
 }
 
 @Exclude()
-export class PersonDto extends ObjectRecordDto {
+export class PersonDto extends ObjectRecord {
   static type = 'Person' as const;
 
   @Expose()
-    '@context': string | string[] = 'https://www.w3.org/ns/activitystreams';
+  public '@context': string | string[] = 'https://www.w3.org/ns/activitystreams';
 
   @ApiProperty({type: 'string', format: 'uri', description: 'The ID of the user'})
   @Expose()
-    id!: string;
+  public id!: string;
 
   @ApiProperty({type: 'string', description: 'The name of the user'})
-    name: string | undefined;
-
-  attributedTo?: string | undefined;
+  public name: string | undefined;
 
   @ApiProperty({type: 'string'})
   @Expose()
-    summary?: string;
+  public summary?: string;
 
   @ApiProperty({type: 'string'})
   @Expose()
-    type: string = 'Person';
+  public type: string = 'Person';
 
   @ApiProperty({type: 'string'})
   @Expose()
-    preferredUsername: string | undefined;
+  public preferredUsername: string | undefined;
 
   @Expose()
   @Type(() => PublicKey)
-    publicKey?: {
+  public publicKey?: {
       id: string;
       owner: string;
       publicKeyPem: string;

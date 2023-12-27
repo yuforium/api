@@ -41,7 +41,10 @@ export class ForumController {
   @ApiResponse({status: 200, description: 'Successful response', type: ActorDto})
   @ApiResponse({status: 404, description: 'Forum does not exist'})
   @Get(':forumname')
-  public async findOne(@ServiceDomain() domainId: string, @Param() params: ForumParams): Promise<ActorDto> {
+  public async findOne(
+    @ServiceDomain() domainId: string, 
+    @Param() params: ForumParams
+  ): Promise<ActorDto> {
     const forum = await this.forumService.get(domainId, params.forumname);
 
     if (!forum) {

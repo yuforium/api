@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { ObjectDocument, ObjectRecordDto } from './schema/object.schema';
+import { ObjectDocument, ObjectRecord } from './schema/object.schema';
 import { Model, Types, Schema, Connection } from 'mongoose';
 import { ActivityService } from '../activity/services/activity.service';
 import { plainToInstance } from 'class-transformer';
@@ -23,7 +23,7 @@ export class ObjectService {
   protected readonly logger = new Logger(ObjectService.name);
 
   constructor(
-    @InjectModel(ObjectRecordDto.name) protected objectModel: Model<ObjectDocument>,
+    @InjectModel(ObjectRecord.name) protected objectModel: Model<ObjectDocument>,
     @InjectModel(RelationshipRecordDto.name) protected relationshipModel: Model<RelationshipDocument>,
     @InjectConnection() protected connection: Connection,
     protected configService: ConfigService,
@@ -42,7 +42,7 @@ export class ObjectService {
     return new Types.ObjectId();
   }
 
-  public async create(dto: ObjectRecordDto): Promise<ObjectDto> {
+  public async create(dto: ObjectRecord): Promise<ObjectDto> {
     try {
       const obj = await this.objectModel.create(dto);
       return plainToInstance(ObjectDto, obj);
@@ -92,14 +92,14 @@ export class ObjectService {
     return this.relationshipModel.create(dto);
   }
 
-  public async createObject(dto: ObjectRecordDto) {
+  public async createObject(dto: ObjectRecord) {
     return this.objectModel.create(dto);
   }
 
   /**
    * Create an Actor object.  The Actor is a first class object in ActivityPub, and is used to represent a user or service.
    */
-  public async createActor(actorDto: ObjectRecordDto) {
+  public async createActor(actorDto: ObjectRecord) {
     this.logger.debug(`Creating Actor with id ${actorDto.id}`);
     const record = await this.objectModel.create(actorDto);
 
