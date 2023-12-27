@@ -55,7 +55,8 @@ export class InboxProcessorService {
       _domain: followee._domain,
       // _path: `${followee._path}/${followee._pathId}/activities/${activityDto.id}`,
       // _pathId: activityDto.id,
-      _local: false
+      _local: false,
+      _public: true
     };
 
     // console.log(activityRecordDto);
@@ -96,7 +97,8 @@ export class InboxProcessorService {
       id: `${followee.id}/activities/${_acceptId}`,
       type: 'Accept',
       actor: followee.id,
-      object: activity.id
+      object: activity.id,
+      _public: true
     };
     
     // Object.assign(new ActivityDto(), {

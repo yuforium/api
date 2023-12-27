@@ -77,7 +77,8 @@ export class OutboxService {
       actor: Array.isArray(dto.attributedTo) ? dto.attributedTo[0] as string : dto.attributedTo as string,
       object: instanceToPlain(obj),
       _domain: domain,
-      _local: true
+      _local: true,
+      _public: recordDto._public
     };
 
     const activity = await this.activityService.create(activityDto);
