@@ -12,6 +12,7 @@ import { WellKnownModule } from './modules/well-known/well-known.module';
 import { ActivityPubModule } from './modules/activity-pub/activity-pub.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { ForumModule } from './modules/forum/forum.module';
+import { TopicModule } from './modules/topic/topic.module';
 
 @Module({
   imports: [
@@ -26,8 +27,8 @@ import { ForumModule } from './modules/forum/forum.module';
     WellKnownModule,
     ActivityPubModule,
     ActivityModule,
-    ForumModule
-    // ObjectModule
+    ForumModule,
+    TopicModule
   ],
   controllers: [AppController],
   providers: [AppService, ConfigService],

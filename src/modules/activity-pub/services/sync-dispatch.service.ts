@@ -3,13 +3,13 @@ import { ActivityService } from '../../activity/services/activity.service';
 import { ObjectService } from '../../object/object.service';
 import { ActivityPubService } from './activity-pub.service';
 import { Activity, ASObject } from '@yuforium/activity-streams';
-import { OutboxService } from './outbox.service';
 import { sign } from '@yuforium/http-signature';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PersonDto } from '../../../common/dto/object/person.dto';
 import { UserService } from '../../user/user.service';
 import * as crypto from 'crypto';
+import { OutboxService } from '../../activity/services/outbox.service';
 
 /**
  * A synchronous dispatch service with no queueing.  This is used for testing and development purposes only.

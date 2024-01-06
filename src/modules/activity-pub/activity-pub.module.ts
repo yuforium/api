@@ -6,12 +6,11 @@ import { UserModule } from '../user/user.module';
 import { ActivityPubService } from './services/activity-pub.service';
 import { InboxProcessorService } from './services/inbox-processor.service';
 import { InboxService } from './services/inbox.service';
-import { OutboxService } from './services/outbox.service';
 import { SyncDispatchService } from './services/sync-dispatch.service';
 
 @Module({
-  providers: [InboxService, OutboxService, ActivityPubService, InboxProcessorService, OutboxService, SyncDispatchService],
-  exports: [InboxService, OutboxService, SyncDispatchService],
+  providers: [InboxService, ActivityPubService, InboxProcessorService, SyncDispatchService],
+  exports: [InboxService, SyncDispatchService],
   imports: [
     ActivityModule,
     ObjectModule,

@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ObjectDocument, ObjectRecord } from './schema/object.schema';
 import { Model, Types, Schema, Connection } from 'mongoose';
-import { ActivityService } from '../activity/services/activity.service';
 import { plainToInstance } from 'class-transformer';
 import { ObjectDto } from '../../common/dto/object/object.dto';
 import { RelationshipDocument, RelationshipRecordDto } from './schema/relationship.schema';
@@ -26,8 +25,7 @@ export class ObjectService {
     @InjectModel(ObjectRecord.name) protected objectModel: Model<ObjectDocument>,
     @InjectModel(RelationshipRecordDto.name) protected relationshipModel: Model<RelationshipDocument>,
     @InjectConnection() protected connection: Connection,
-    protected configService: ConfigService,
-    protected activityService: ActivityService
+    protected configService: ConfigService
   ) { }
 
   public async get(id: string): Promise<ObjectDocument | null> {

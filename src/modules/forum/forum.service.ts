@@ -58,7 +58,7 @@ export class ForumService {
     }
 
     const params = {
-      _destination: forum._id,
+      _attribution: forum._id,
     };
 
     const posts = (await this.objectService.find(params, opts))

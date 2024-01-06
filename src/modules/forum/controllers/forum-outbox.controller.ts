@@ -1,6 +1,5 @@
 import { Body, Controller, Logger, NotFoundException, NotImplementedException, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
-import { OutboxService } from '../../activity-pub/services/outbox.service';
 import { SyncActivityStreamService } from '../../../modules/activity-stream/services/sync-activity-stream.service';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { ObjectService } from '../../../modules/object/object.service';
@@ -14,6 +13,7 @@ import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
 import { NoteCreateDto } from '../../../common/dto/object-create/note-create.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { OutboxService } from '../../activity/services/outbox.service';
 
 /**
  * Forum Outbox Controller
@@ -70,11 +70,12 @@ export class ForumOutboxController {
     Object.assign(dto, {
       attributedTo: [user.actor.id, `https://${domain}/forums/${params.forumname}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
       published: new Date().toISOString(),
+      context: `https://yuforium.com/topics/${params.forumname}`, // @todo this will be a property of the forum that the post will inherit
       to: ['https://www.w3.org/ns/activitystreams#Public'],
       cc: [`${params.forumname}/followers`], // @todo consider 
     });
 
-    const activity = await this.outboxService.createActivityFromObject(domain, user, forumId, dto);
+    const activity = await this.outboxService.createObject(domain, user, forumId, dto);
 
     return activity;
   }

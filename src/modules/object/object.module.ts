@@ -3,7 +3,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ObjectService } from './object.service';
 import { ObjectRecord, ObjectSchema } from './schema/object.schema';
 import { ObjectController } from './object.controller';
-import { ActivityModule } from '../activity/activity.module';
 import { RelationshipRecordDto, RelationshipSchema } from './schema/relationship.schema';
 import { ActorRecord, ActorSchema } from './schema/actor.schema';
 
@@ -14,8 +13,7 @@ import { ActorRecord, ActorSchema } from './schema/actor.schema';
       {name: ObjectRecord.name, schema: ObjectSchema},
       {name: RelationshipRecordDto.name, schema: RelationshipSchema},
       {name: ActorRecord.name, schema: ActorSchema}
-    ]),
-    ActivityModule
+    ])
   ],
   exports: [
     ObjectService,
