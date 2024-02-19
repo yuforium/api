@@ -1,7 +1,7 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { UserDocument } from '../user/schemas/user.schema';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { PersonDto } from '../../common/dto/object/person.dto';

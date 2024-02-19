@@ -9,6 +9,8 @@ import { PersonDto } from '../../../common/dto/object/person.dto';
 import { UserCreateDto } from '../dto/user-create.dto';
 import { UserService } from '../user.service';
 import { UserParamsDto } from '../dto/user-params.dto';
+import { Request } from 'express';
+import { ActorDto } from '../../../common/dto/actor/actor.dto';
 
 @ApiTags('user')
 @Controller('users')
@@ -65,13 +67,12 @@ export class UserController {
   @ApiResponse({status: 404, type: PersonDto})
   @Get(':username')
   @Header('Content-Type', 'application/activity+json')
-  public async findOne(@ServiceDomain() serviceId: string, @Param('username') username: string): Promise<PersonDto> {
-    const person = await this.userService.findPerson(serviceId, username.toLowerCase());
-
+  public async findOne(@Req() req: Request, @ServiceDomain() domain: string, @Param('username') username: string): Promise<ActorDto> {
+    const person = await this.userService.findPerson(domain, username.toLowerCase());
+    console.log(req.headers);
     if (person) {
-      const r = plainToInstance(PersonDto, person);
-      r.preferredUsername = username;
-      return r;
+      this.logger.debug(`Found user ${username}`);
+      return person;
     }
 
     throw new NotFoundException('User does not exist');

@@ -6,54 +6,64 @@ import * as mongoose from 'mongoose';
 
 const { Mixed } = mongoose.Schema.Types;
 
+const OneOfStringOrArray = {
+  required: false,
+  oneOf: [
+    { type: 'string' },
+    { type: 'array', items: { type: 'string' } }
+  ]
+};
+
+const OneOfStringOrArrayRequired = Object.assign({}, OneOfStringOrArray, { required: true });
+
 /**
  * ObjectDto
- * The Object DTO extends the ActivityStreams base object type and adds 
- * decorators for Mongoose and any custom validation overrides, including 
- * what fields are exposed on a response (@Expose()) and OpenAPI response 
+ * The Object DTO extends the ActivityStreams base object type and adds
+ * decorators for Mongoose and any custom validation overrides, including
+ * what fields are exposed on a response (@Expose()) and OpenAPI response
  * decorators.
- * 
- * In addition, the ObjectDto provides some static helper functions to 
+ *
+ * In addition, the ObjectDto provides some static helper functions to
  * do things like normalize IDs or resolve link references to objects.
  */
 export class ObjectDto extends ActivityStreams.object('Object') {
   @ApiHideProperty()
-  @Prop({name: '@context', type: mongoose.Schema.Types.Mixed, required: true})
+  @Prop({ name: '@context', type: mongoose.Schema.Types.Mixed, required: false })
   @Expose()
   public '@context'?: string | string[] = 'https://www.w3.org/ns/activitystreams';
 
-  @ApiProperty({required: true, type: 'string'})
-  @Prop({type: String, required: true})
+  @ApiProperty({ required: true, type: 'string' })
+  @Prop({ type: String, required: true })
   @Expose()
   public id!: string;
 
   /**
    * @todo for validation, the first type should be a string of any supported type
    */
-  @ApiProperty({type: 'string', required: true})
-  @Prop({type: Mixed, required: true})
+  @ApiProperty({ type: 'string', required: true })
+  @Prop({ type: Mixed, required: true })
   @Expose()
   public type!: string | string[];
 
-  @ApiProperty({type: String})
-  @Prop({type: Mixed})
+  @ApiProperty({ type: String })
+  @Prop({ type: Mixed })
   @Expose()
   public attributedTo?: string | string[];
 
   @ApiProperty({
     type: String,
-    required: true, 
+    required: true,
     oneOf: [
-      {type: 'string'},
-      {type: 'array', items: {type: 'string'}}], 
+      { type: 'string' },
+      { type: 'array', items: { type: 'string' } }],
     format: 'uri'
   })
-  @Prop({type: String})
+  @Prop({ type: String })
   @Expose()
   public content?: string;
 
-  @ApiProperty({type: String})
-  @Prop({type: String})
+  @ApiProperty({ type: String })
+  @Prop({ type: String })
   @Expose()
   public context?: string;
 
@@ -61,44 +71,48 @@ export class ObjectDto extends ActivityStreams.object('Object') {
     required: false,
     type: 'string',
     oneOf: [
-      {type: 'string'},
-      {type: 'array', items: {type: 'string'}}
+      { type: 'string' },
+      { type: 'array', items: { type: 'string' } }
     ]
   })
-  @Prop({type: String})
+  @Prop({ type: String })
   @Expose()
   public name?: string;
 
-  @ApiProperty({type: String})
-  @Prop({type: String})
+  @ApiProperty({ type: String })
+  @Prop({ type: String })
   @Expose()
   public published?: string;
 
-  @Prop({type: Mixed})
+  @Prop({ type: Mixed })
   @Expose()
   public replies?: Collection;
 
-  @Prop({type: String})
+  @Prop({ type: String })
   @Expose()
   public inReplyTo?: string;
 
-  @Prop({type: String})
+  @Prop({ type: String })
   @Expose()
   public updated?: string;
 
-  @ApiProperty({
-    required: false,
-    oneOf: [
-      {type: 'string'},
-      {type: 'array', items: {type: 'string'}}
-    ]
-  })
-  @Prop({type: Mixed})
+  @ApiProperty(OneOfStringOrArray)
+  @Prop({ type: Mixed })
   @Expose()
   @IsRequired()
   public to!: string | string[]; // note that the "to" field should always have a value, even if the spec says it's optional
 
-  @Prop({type: Mixed})
+  @ApiProperty(OneOfStringOrArray)
+  @Prop({ type: Mixed })
+  @Expose()
+  public cc?: string | string[];
+
+  @ApiProperty(OneOfStringOrArray)
+  @Prop({ type: Mixed })
+  @Expose()
+  public bcc?: string | string[];
+
+  @Prop({ type: Mixed })
   @Expose()
   public publicKey?: {
     id: string;
@@ -110,7 +124,7 @@ export class ObjectDto extends ActivityStreams.object('Object') {
    * Take a single ASObjectOrLink or an array of ASObjectOrLink and return ids
    * as an array of string values.
    * @todo This should throw an exception if there is no id value for any item
-   * @param value 
+   * @param value
    * @returns Normalized array of string ids
    */
   public static normalizeIds(value: ASObjectOrLink | ASObjectOrLink[]): string[] {

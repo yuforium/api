@@ -5,12 +5,12 @@ import { RelationshipDto } from '../../../common/dto/object/relationship.dto';
 import { BaseObjectSchema } from './base-object.schema';
 import { GConstructor } from '../../../common/schema/base.schema';
 
-export type RelationshipDocument = RelationshipRecordDto & mongoose.Document;
+export type RelationshipDocument = RelationshipRecord & mongoose.Document;
 
-@Schema({collection: 'objects', autoIndex: true})
-export class RelationshipRecordDto extends BaseObjectSchema<GConstructor<RelationshipDto>>(RelationshipDto) implements ObjectDto {
-  @Prop({type: String, required: true})
-    _relationship!: 'followerOf';
+@Schema({ collection: 'objects', autoIndex: true })
+export class RelationshipRecord extends BaseObjectSchema<GConstructor<RelationshipDto>>(RelationshipDto) implements ObjectDto {
+  @Prop({ type: String, required: true })
+  _relationship!: 'followerOf';
 }
 
-export const RelationshipSchema = SchemaFactory.createForClass(RelationshipRecordDto);
+export const RelationshipSchema = SchemaFactory.createForClass(RelationshipRecord);

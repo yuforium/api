@@ -12,10 +12,16 @@ export class WebfingerController {
 
   @Get()
   public async webfinger(@ServiceDomain() domain: string, @Query('resource') resource: string): Promise<WebfingerDto> {
+    if (!resource) {
+      this.logger.error('webfinger: no resource specified');
+      throw new NotFoundException();
+    }
+
     this.logger.debug(`webfinger: ${resource}`);
     const [, username, parsedServiceId] = /^acct:([A-Za-z0-9_]*)@(.*)$/i.exec(resource) || [];
 
     if (!username || !parsedServiceId) {
+      this.logger.error(`webfinger: invalid resource specified: ${resource}`);
       throw new NotFoundException();
     }
 

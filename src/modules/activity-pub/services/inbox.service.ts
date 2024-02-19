@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { parse, verify, VerifyOptions } from '@yuforium/http-signature';
@@ -31,23 +31,23 @@ export class InboxService {
   /**
    * Accept an incoming activity.  This is the entry point for all incoming activities.
    */
-  public async accept<T extends ActivityDto>(activity: T, options?: AcceptOptions) {
+  public async receive<T extends ActivityDto>(activity: T, options?: AcceptOptions) {
     // if requestSignature is provided, verify the signature.  If we don't have a public key for the user, we can't verify the signature, and we
     // should queue processing of the activity for later.
     // const {requestSignature} = options || {};
 
     // @todo domain checking can be moved into activity dto validation
     // const parsedUrl = new URL(activity.actor);
-    
+
     // if (!psl.isValid(parsedUrl.hostname) && (parsedUrl.hostname.substring(parsedUrl.hostname.length -6) !== '.local')) {
     //   throw new TypeError('Invalid URL');
     // }
 
-    const response = await fetch(activity.actor, {headers: {'Accept': 'application/activity+json'}});
+    const response = await fetch(activity.actor, { headers: { 'Accept': 'application/activity+json' } });
     const actor = await response.json();
 
     if (options?.requestSignature) {
-      const {headers} = options.requestSignature;
+      const { headers } = options.requestSignature;
 
       if (typeof headers.signature !== 'string') {
         throw new BadRequestException('Signature header is required');
@@ -55,7 +55,7 @@ export class InboxService {
 
       const signature = parse(headers.signature);
       const publicKey = actor.publicKey;
-      
+
       /**
        * @todo the activity could have its actor in JSON format, which would require comparing against activity.actor.id
        */
@@ -74,28 +74,28 @@ export class InboxService {
       const verified = verify(verifyOptions);
 
       if (!verified) {
-        this.logger.error(`accept(): signature verification failed for ${activity.actor}`);
+        this.logger.error(`receive(): signature verification failed for ${activity.actor}`);
         throw new BadRequestException('Signature verification failed');
       }
     }
 
-    this.logger.debug(`accept(): signature verified for ${activity.id}`);
+    this.logger.debug(`receive(): signature verified for ${activity.id}`);
 
     if (Array.isArray(activity.type)) {
-      throw new Error('Activity type must be a string, multiple values for type are not allowed at this time');
+      throw new BadRequestException('Activity type must be a string, multiple values for type are not allowed at this time');
     }
 
     const type = activity.type.toLowerCase() as 'create' | 'follow' | 'undo';
 
     if (!type || typeof type !== 'string') {
-      throw new Error('Activity type is required');
+      throw new BadRequestException('Activity type is required');
     }
     else if (!['create', 'follow', 'undo'].includes(type)) {
-      throw new Error(`The activity type ${type} is not supported`);
+      throw new BadRequestException(`The activity type ${type} is not supported`);
     }
 
     if (this.processor[type]) {
-      this.logger.debug(`accept(): processing ${type} activity ${activity.id}`);
+      this.logger.debug(`receive(): processing ${type} activity ${activity.id}`);
       await this.processor[type](activity, actor);
     }
     else {
@@ -103,16 +103,15 @@ export class InboxService {
     }
   }
 
-  protected async create(activity: ActivityDto): Promise<ActivityDto | null> {
-    if (await this.activityService.find({id: activity.id})) {
-      this.logger.debug('acceptCreate(): activity already exists');
-      return null;
-    }
+  protected async follow(activity: ActivityDto, actor: any): Promise<ActivityDto | null> {
+    activity;
+    actor;
+    throw new NotImplementedException();
+  }
 
-    // @todo broken for now
-    // const activityDto = plainToInstance(ActivityDto, await this.activityService.create(activity), { excludeExtraneousValues: true });
-
-    // return activityDto;
-    return null;
+  protected async undo(activity: ActivityDto, actor: any): Promise<ActivityDto | null> {
+    activity;
+    actor;
+    throw new NotImplementedException();
   }
 }

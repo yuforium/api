@@ -3,13 +3,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Schema } from 'mongoose';
 import { UserCreateDto } from './dto/user-create.dto';
 import { User, UserDocument } from './schemas/user.schema';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { ObjectService } from '../object/object.service';
 import { MongoServerError } from 'mongodb';
 import { generateKeyPairSync } from 'crypto';
 import { PersonDto } from 'src/common/dto/object/person.dto';
 import { validate } from 'class-validator';
 import { ActorDocument, ActorRecord } from '../object/schema/actor.schema';
+import { ActorDto } from '../../common/dto/actor/actor.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -53,11 +55,16 @@ export class UserService {
 
       this.logger.debug(`Creating person object for user "${userDto.username}"`);
 
-      const personDtoParams: ActorRecord = {
+      const id = `https://${_domain}/${_path}/${_pathId}`;
+      const personDtoParams: ActorRecord = plainToInstance(ActorRecord, {
         '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
         type: 'Person',
-        id: `https://${_domain}/${_path}/${_pathId}`,
-        attributedTo: `https://${_domain}/${_path}/${_pathId}`, // assume the user is creating themselves for now
+        id: id,
+        attributedTo: id, // assume the user is creating themselves for now
+        inbox: `${id}/inbox`,
+        outbox: `${id}/outbox`,
+        following: `${id}/following`,
+        followers: `${id}/followers`,
         name: userDto.name || user.username,
         preferredUsername: user.username,
         summary: userDto.summary,
@@ -69,7 +76,7 @@ export class UserService {
           owner: `https://${_domain}/${_path}/${_pathId}`,
           publicKeyPem: publicKey.toString()
         }
-      };
+      });
 
       const personDto = Object.assign(new PersonDto(), personDtoParams);
       await validate(personDto);
@@ -106,16 +113,24 @@ export class UserService {
     return await this.userModel.findOne({domain: serviceDomain, username: {'$eq': username}});
   }
 
-  public async findPerson(serviceId: string, username: string): Promise<any | undefined> {
+  public async findPerson(_domain: string, username: string): Promise<ActorDto | undefined> {
     this.logger.debug(`findPerson "${username}"`);
 
-    const user = await this.findOne(serviceId, username);
+    const person = await this.actorModel.findOne({
+      id: `https://${_domain}/users/${username}`, 
+      type: 'Person', 
+      preferredUsername: username
+    });
 
-    if (user) {
-      return this.objectService.findOne({_id: user.defaultIdentity});
-    }
+    return plainToInstance(ActorDto, person);
 
-    return undefined;
+    // const user = await this.findOne(serviceId, username);
+
+    // if (user) {
+    //   return this.objectService.findOne({_id: user.defaultIdentity});
+    // }
+
+    // return undefined;
   }
 
   public async find(): Promise<any[]> {
@@ -147,8 +162,8 @@ export class UserService {
    * @param hashedPassword bcrypt hashed password
    * @returns 
    */
-  public async resetPassword(serviceId: string, username: string, hashedPassword: string): Promise<string | undefined> {
-    const user = await this.findOne(serviceId, username);
+  public async resetPassword(domain: string, username: string, hashedPassword: string): Promise<string | undefined> {
+    const user = await this.findOne(domain, username);
 
     if (!user) {
       this.logger.error(`User "${username}" not found`);

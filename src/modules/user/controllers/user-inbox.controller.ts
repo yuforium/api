@@ -58,7 +58,7 @@ export class UserInboxController {
     this.logger.debug(`postInbox(): Received "${activity.type}" activity for ${targetUserId} from ${req.socket.remoteAddress}`);
     
     try {
-      await this.inboxService.accept<ActivityDto>(activity, {requestSignature: {headers: req.headers, path: `/users/${username}/inbox`, method: 'post'}});
+      await this.inboxService.receive<ActivityDto>(activity, {requestSignature: {headers: req.headers, path: `/users/${username}/inbox`, method: 'post'}});
     }
     catch (e: any) {
       this.logger.error(`postInbox(): Activity "${activity.type}" for ${targetUserId} from ${req.socket.remoteAddress} was rejected: ${e.message}`);

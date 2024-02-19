@@ -4,14 +4,16 @@ import { ObjectDocument, ObjectRecord } from './schema/object.schema';
 import { Model, Types, Schema, Connection } from 'mongoose';
 import { plainToInstance } from 'class-transformer';
 import { ObjectDto } from '../../common/dto/object/object.dto';
-import { RelationshipDocument, RelationshipRecordDto } from './schema/relationship.schema';
+import { RelationshipDocument, RelationshipRecord } from './schema/relationship.schema';
 import { ConfigService } from '@nestjs/config';
+import { BaseObjectRecord, Destination, Origination } from './schema/base-object.schema';
+import { resolveDomain } from '../../common/decorators/service-domain.decorator';
 
 
 /**
  * Object Service
  * The purpose of the Object Service is to provide a common interface for interacting with Object records.
- * 
+ *
  * @todo - Design considerations:
  * ObjectRecordService vs ObjectService
  * Anything that would interact with the DB and be provided solely for managing DB records could be considered the ObjectRecordService.
@@ -23,22 +25,107 @@ export class ObjectService {
 
   constructor(
     @InjectModel(ObjectRecord.name) protected objectModel: Model<ObjectDocument>,
-    @InjectModel(RelationshipRecordDto.name) protected relationshipModel: Model<RelationshipDocument>,
+    @InjectModel(RelationshipRecord.name) protected relationshipModel: Model<RelationshipDocument>,
     @InjectConnection() protected connection: Connection,
     protected configService: ConfigService
-  ) { }
+  ) {
+    console.log(configService.get('service.defaultDomain'));
+  }
 
   public async get(id: string): Promise<ObjectDocument | null> {
-    return this.objectModel.findOne({id});
+    return this.objectModel.findOne({ id });
   }
 
   public async getByPath(_serviceId: string, _servicePath: string, _servicePathId: string) {
-    return this.objectModel.findOne({_serviceId, _servicePath, _servicePathId});
+    return this.objectModel.findOne({ _serviceId, _servicePath, _servicePathId });
   }
 
   public id() {
     return new Types.ObjectId();
   }
+
+  protected isPublic(obj: ObjectDto): boolean {
+    const pub = 'https://www.w3.org/ns/activitystreams#Public';
+
+    const isPublic =
+      obj.to === pub || (Array.isArray(obj.to) && obj.to.includes(pub)) ||
+      obj.cc === pub || (Array.isArray(obj.cc) && obj.cc.includes(pub)) ||
+      obj.bcc === pub || (Array.isArray(obj.bcc) && obj.bcc.includes(pub));
+
+    return isPublic;
+  }
+
+  protected isLocal(obj: ObjectDto): boolean {
+    const local = this.configService.get('service.defaultDomain');
+    const url = new URL(obj.id);
+    const domain = resolveDomain(url.hostname);
+
+    return domain === local;
+  }
+
+  /**
+   * Get all metadata for an object.  Metadata is stored in the database and used to assist in making queries, and should be able to be reconstructed from the object.
+   * @param dto
+   * @returns
+   */
+  public async getObjectMetadata(dto: ObjectDto): Promise<BaseObjectRecord> {
+    const url = new URL(dto.id);
+    const _domain = resolveDomain(url.hostname);
+    const _public = this.isPublic(dto);
+    const _local = this.isLocal(dto);
+
+    const destinations = [];
+
+    if (dto.to) {
+
+    }
+    // const to = [].push(
+    // Array.isArray(dto.to) ? dto.to : (dto.to ? [dto.to] : [])
+    // );
+
+    if (dto.bcc) {
+      destinations.push(...(Array.isArray(dto.bcc) ? dto.bcc : [dto.bcc]));
+    }
+    if (dto.cc) {
+      destinations.push(...(Array.isArray(dto.cc) ? dto.cc : [dto.cc]));
+    }
+
+    console.log(dto.cc);
+
+    console.log("TO", destinations);
+
+    const attributedTo = Array.isArray(dto.attributedTo) ? dto.attributedTo : typeof dto.attributedTo === 'string' ? [dto.attributedTo] : [];
+
+    console.log("TO", destinations);
+
+    const _destination: Destination[] = (await Promise.all(destinations.map(t => this.findOne({ id: t, _local: true }))))
+      .filter(o => o !== null)
+      .map((o: any): Destination => ({ rel: 'inbox', _id: o._id as Types.ObjectId }));
+
+    const _origination: Origination[] = (await Promise.all(attributedTo.map(t => this.findOne({ id: t, _local: true }))))
+      .filter(o => o !== null)
+      // @todo attribution needs to be figured out - self is going to be the last entry in the attributedTo array
+      .map((o: any): Origination => ({ rel: 'self', _id: o._id as Types.ObjectId }));
+
+    return {
+      _domain,
+      _public,
+      _local,
+      _origination,
+      _destination
+    };
+  }
+
+  /**
+   * Assign metadata to an object.
+   * @param dto
+   * @returns
+   */
+  public async assignObjectMetadata<T extends ObjectDto = ObjectDto>(dto: T): Promise<T & BaseObjectRecord> {
+    const metadata: BaseObjectRecord = await this.getObjectMetadata(dto);
+    return Object.assign(dto, metadata);
+  }
+
 
   public async create(dto: ObjectRecord): Promise<ObjectDto> {
     try {
@@ -81,12 +168,13 @@ export class ObjectService {
     //   object: plainToInstance(ObjectRecordDto, object, {excludeExtraneousValues: true, exposeUnsetFields: false}),
     //   record: object
     // }
+
   }
 
   protected applyDefaultParams() {
   }
 
-  public async createRelationship(dto: RelationshipRecordDto): Promise<RelationshipDocument> {
+  public async createRelationship(dto: RelationshipRecord): Promise<RelationshipDocument> {
     return this.relationshipModel.create(dto);
   }
 
@@ -101,7 +189,7 @@ export class ObjectService {
     this.logger.debug(`Creating Actor with id ${actorDto.id}`);
     const record = await this.objectModel.create(actorDto);
 
-    return {record};
+    return { record };
   }
 
   public async findById(id: string | Schema.Types.ObjectId): Promise<any> {
@@ -118,6 +206,6 @@ export class ObjectService {
   }
 
   public async getUserOutbox(userId: string): Promise<any> {
-    return this.objectModel.find({attributedTo: userId});
+    return this.objectModel.find({ attributedTo: userId });
   }
 }

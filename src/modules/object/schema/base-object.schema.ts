@@ -4,13 +4,26 @@ import { Types } from 'mongoose';
 import { BaseRecord, BaseSchema, GConstructor } from '../../../common/schema/base.schema';
 import { ASObject } from '@yuforium/activity-streams';
 
+export type Destination = {
+  rel: 'inbox' | 'outbox' | 'followers' | 'following';
+  _id: Types.ObjectId; 
+};
+
+export type Origination = {
+  rel: 'self' | 'attribution';
+  _id: Types.ObjectId;
+}
+
 /**
  * Mixin type that defines common fields that are used for all stored objects.
+ * @todo consider renaming this type to `BaseObjectMetadata` or `BaseObjectFields`
  */
-type BaseObjectRecord = BaseRecord & {
-  _inbox?: Types.ObjectId[];
-  _outbox?: Types.ObjectId;
-  _destination?: Types.ObjectId[];
+export type BaseObjectRecord = BaseRecord & {
+  /**
+   * Only used for local actors, specifies the outbox from which the object originated.
+   */
+  _origination: Origination[];
+  _destination: Destination[];
 }
 
 /**
@@ -44,7 +57,7 @@ export function BaseObjectSchema<TBase extends GConstructor<ASObject & {id: stri
      */
     @Prop({type: [Types.ObjectId], required: true})
     @Exclude()
-    public _inbox?: Types.ObjectId[] = [];
+    public _destination: Destination[] = [];
 
     /**
      * Actor who created the object.  This is used to determine the outbox from 
@@ -52,16 +65,7 @@ export function BaseObjectSchema<TBase extends GConstructor<ASObject & {id: stri
      */
     @Prop({type: [Types.ObjectId], required: false})
     @Exclude()
-    public _outbox?: Types.ObjectId;
-
-    /**
-     * Essentially, a combined _inbox and _outbox, attribution is used for querying content, only 
-     * differs from _inbox because it includes the _outbox or IDs of any *local* actor whose feed
-     * might contain this object.
-     */
-    @Prop({type: [Types.ObjectId], required: true})
-    @Exclude()
-    public _attribution: Types.ObjectId[] = [];
+    public _origination: Origination[] = [];
   }
 
   return BaseObjectSchema;

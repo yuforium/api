@@ -5,7 +5,7 @@ import { VerifyOptions, parse, verify } from '@yuforium/http-signature';
 import { ExternalActorDto } from '../dto/external-actor.dto';
 import { ObjectService } from '../../object/object.service';
 import { ActivityService } from './activity.service';
-import { RelationshipRecordDto } from '../../object/schema/relationship.schema';
+import { RelationshipRecord } from '../../object/schema/relationship.schema';
 import { ActivityRecord } from '../schema/activity.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActorDocument, ActorRecord } from '../../object/schema/actor.schema';
@@ -31,16 +31,16 @@ export class InboxService {
 
     // @todo domain checking can be moved into activity dto validation
     // const parsedUrl = new URL(activity.actor);
-    
+
     // if (!psl.isValid(parsedUrl.hostname) && (parsedUrl.hostname.substring(parsedUrl.hostname.length -6) !== '.local')) {
     //   throw new TypeError('Invalid URL');
     // }
 
-    const response = await fetch(activity.actor, {headers: {'Accept': 'application/activity+json'}});
+    const response = await fetch(activity.actor, { headers: { 'Accept': 'application/activity+json' } });
     const actor = await response.json();
 
     if (options?.requestSignature) {
-      const {headers} = options.requestSignature;
+      const { headers } = options.requestSignature;
 
       if (typeof headers.signature !== 'string') {
         throw new BadRequestException('Signature header is required');
@@ -48,7 +48,7 @@ export class InboxService {
 
       const signature = parse(headers.signature);
       const publicKey = actor.publicKey;
-      
+
       /**
        * @todo the activity could have its actor in JSON format, which would require comparing against activity.actor.id
        */
@@ -88,8 +88,8 @@ export class InboxService {
     }
 
     /**
-     * @todo for now, we will process activities synchronously in this class, in the future we should break this 
-     * functionality out into separate classes that can be injected in the constructor (e.g. an async stream processor for 
+     * @todo for now, we will process activities synchronously in this class, in the future we should break this
+     * functionality out into separate classes that can be injected in the constructor (e.g. an async stream processor for
      * production level loads or sync processor for dev work)
      */
     await this[type](activity, actor);
@@ -146,13 +146,9 @@ export class InboxService {
     const activityRecordDto = {
       ...activityDto,
       _domain: followee._domain,
-      // _path: `${followee._path}/${followee._pathId}/activities/${activityDto.id}`,
-      // _pathId: activityDto.id,
       _local: false,
       _public: true
     };
-
-    // console.log(activityRecordDto);
 
     this.logger.debug(`follow(): creating activity ${activityRecordDto.id}`);
     const activity = await this.activityService.createActivity(activityRecordDto);
@@ -160,7 +156,7 @@ export class InboxService {
 
     const _id = this.objectService.id().toString();
 
-    const relationshipDto: RelationshipRecordDto = {
+    const relationshipDto: RelationshipRecord = await this.objectService.assignObjectMetadata({
       id: `${followee.id}/relationship/${_id.toString()}`,
       type: 'Relationship',
       summary: 'Follows',
@@ -169,12 +165,10 @@ export class InboxService {
       subject: activity.actor,
       object: activity.object as string,
       _domain: followee._domain,
-      // _path: `${followee._path}/${followee._pathId}/relationships/${_id.toString()}`,
-      // _pathId: _id.toString(),
       _public: true,
       _local: true,
       to: []
-    };
+    });
 
     const relationship = await this.objectService.createRelationship(relationshipDto);
     this.logger.debug(`follow(): created relationship ${relationship.id}`);
@@ -184,8 +178,6 @@ export class InboxService {
     const acceptActivityDto: ActivityRecord = {
       _id: _acceptId,
       _domain: relationship._domain,
-      // _path: `${followee._path}/${followee._pathId}/activities`,
-      // _pathId: _acceptId,
       _local: true,
       id: `${followee.id}/activities/${_acceptId}`,
       type: 'Accept',
@@ -193,7 +185,7 @@ export class InboxService {
       object: activity.id,
       _public: true
     };
-    
+
     // Object.assign(new ActivityDto(), {
     //   _id: _acceptId,
     //   _serviceId: relationship._hostname,

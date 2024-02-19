@@ -27,25 +27,25 @@ export class OutboxService {
    * Create a new activity from an object specified by the client
    */
   public async createObject<T extends ObjectCreateDto = ObjectCreateDto>(
-    _domain: string, 
-    user: JwtUser, 
-    outboxActorId: string, 
+    _domain: string,
+    user: JwtUser,
+    outboxActorId: string,
     dto: T
   ) {
     const id = this.objectService.id();
 
     const lookups: Query<ActorDocument | null, ActorDocument>[] = [];
     if (Array.isArray(dto.attributedTo)) {
-      dto.attributedTo.forEach(id => lookups.push(this.actorModel.findOne({id})));
+      dto.attributedTo.forEach(id => lookups.push(this.actorModel.findOne({ id })));
     }
     else if (typeof dto.attributedTo === 'string') {
-      lookups.push(this.actorModel.findOne({id: dto.attributedTo}));
+      lookups.push(this.actorModel.findOne({ id: dto.attributedTo }));
     }
     else {
       throw new Error('attributedTo must be a string or an array of strings.');
     }
 
-    const outboxActor = await this.actorModel.findOne({id: outboxActorId}).select(['_id', 'id']);
+    const outboxActor = await this.actorModel.findOne({ id: outboxActorId }).select(['_id', 'id']);
 
     if (outboxActor === null) {
       throw new Error(`Outbox actor not found for ${outboxActorId}.`);
@@ -55,7 +55,7 @@ export class OutboxService {
 
     const _attribution = (await Promise.all(lookups)).map(doc => doc?._id).filter(id => id !== null);
 
-    const recordDto: ObjectRecord = {
+    const recordDto: ObjectRecord = await this.objectService.assignObjectMetadata({
       ...dto,
       '@context': 'https://www.w3.org/ns/activitystreams', // note that direct assignment like dto['@context'] = '...' doesn't work
       id: `${outboxActor.id}/posts/${id.toString()}`,
@@ -64,7 +64,7 @@ export class OutboxService {
       _attribution,
       _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public',
       _local: true
-    };
+    });
 
     const obj = await this.objectService.create(recordDto);
 
@@ -87,10 +87,10 @@ export class OutboxService {
 
   /**
    * Return an object that is associated with this instance.
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
   public async getLocalObject(id: string): Promise<ObjectDocument | null> {
-    return this.objectService.findOne({id, _serviceId: {$ne: null}});
+    return this.objectService.findOne({ id, _serviceId: { $ne: null } });
   }
 }

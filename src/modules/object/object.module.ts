@@ -3,16 +3,16 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ObjectService } from './object.service';
 import { ObjectRecord, ObjectSchema } from './schema/object.schema';
 import { ObjectController } from './object.controller';
-import { RelationshipRecordDto, RelationshipSchema } from './schema/relationship.schema';
+import { RelationshipRecord, RelationshipSchema } from './schema/relationship.schema';
 import { ActorRecord, ActorSchema } from './schema/actor.schema';
 
 @Module({
   providers: [ObjectService],
   imports: [
     MongooseModule.forFeature([
-      {name: ObjectRecord.name, schema: ObjectSchema},
-      {name: RelationshipRecordDto.name, schema: RelationshipSchema},
-      {name: ActorRecord.name, schema: ActorSchema}
+      { name: ObjectRecord.name, schema: ObjectSchema },
+      { name: RelationshipRecord.name, schema: RelationshipSchema },
+      { name: ActorRecord.name, schema: ActorSchema }
     ])
   ],
   exports: [
@@ -21,4 +21,4 @@ import { ActorRecord, ActorSchema } from './schema/actor.schema';
   ],
   controllers: [ObjectController]
 })
-export class ObjectModule {}
+export class ObjectModule { }
