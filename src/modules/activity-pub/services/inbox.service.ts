@@ -7,6 +7,7 @@ import { InboxProcessorService } from './inbox-processor.service';
 import { ActivityPubService } from './activity-pub.service';
 import { resolveDomain } from 'src/common/decorators/service-domain.decorator';
 import { parse as parseDomain } from 'tldts';
+import { InvalidURLException, validateURL } from 'src/common/util/validate-url';
 
 export interface AcceptOptions {
   requestSignature?: {
@@ -45,23 +46,41 @@ export class InboxService {
     //   throw new TypeError('Invalid URL');
     // }
 
-    const actorURL = new URL(activity.actor);
+    // const actorURL = new URL(activity.actor);
 
-    if (actorURL.protocol !== 'https:') {
-      throw new BadRequestException('Actor URL must be avaiable via https protocol');
+    // if (actorURL.protocol !== 'https:') {
+    //   throw new BadRequestException('Actor URL must be avaiable via https protocol');
+    // }
+
+    // if (actorURL.port !== '') {
+    //   throw new BadRequestException('Actor URL must operate on default port');
+    // }
+
+    // const domain = parseDomain(actorURL.hostname);
+
+    // if (!domain.domain || !domain.isIcann || domain.isPrivate) {
+    //   throw new BadRequestException('Invalid domain');
+    // }
+
+    let actorURL: string;
+
+    try {
+      if (typeof activity.actor === 'string') {
+        actorURL = validateURL(activity.actor);
+      }
+      else {
+        // @todo this should be handled by the activity dto validation, and we should be able to accept an object with an id property
+        throw new BadRequestException('Actor URL is required and must be a string');
+      }
+    }
+    catch (e) {
+      if (e instanceof InvalidURLException) {
+        throw new BadRequestException(`Invalid actor URL "${activity.actor}": ${e.message}`);
+      }
+      throw e;
     }
 
-    if (actorURL.port !== '') {
-      throw new BadRequestException('Actor URL must operate on default port');
-    }
-
-    const domain = parseDomain(actorURL.hostname);
-
-    if (!domain.domain || !domain.isIcann || domain.isPrivate) {
-      throw new BadRequestException('Invalid domain');
-    }
-
-    const response = await fetch(`${actorURL.origin}${actorURL.pathname}`, { headers: { 'Accept': 'application/activity+json' } });
+    const response = await fetch(actorURL, { headers: { 'Accept': 'application/activity+json' } });
     const actor = await response.json();
 
     if (options?.requestSignature) {
