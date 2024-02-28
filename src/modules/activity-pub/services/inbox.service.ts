@@ -46,6 +46,10 @@ export class InboxService {
 
     const url = new URL(activity.actor);
 
+    if (url.protocol !== 'https:') {
+      throw new BadRequestException('Actor URL must be avaiable via https protocol');
+    }
+
     resolveDomain(url.hostname);
 
     const response = await fetch(activity.actor, { headers: { 'Accept': 'application/activity+json' } });
