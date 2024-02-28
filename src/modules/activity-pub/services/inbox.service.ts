@@ -5,6 +5,7 @@ import { parse, verify, VerifyOptions } from '@yuforium/http-signature';
 import { SyncDispatchService } from './sync-dispatch.service';
 import { InboxProcessorService } from './inbox-processor.service';
 import { ActivityPubService } from './activity-pub.service';
+import { resolveDomain } from 'src/common/decorators/service-domain.decorator';
 
 export interface AcceptOptions {
   requestSignature?: {
@@ -42,6 +43,10 @@ export class InboxService {
     // if (!psl.isValid(parsedUrl.hostname) && (parsedUrl.hostname.substring(parsedUrl.hostname.length -6) !== '.local')) {
     //   throw new TypeError('Invalid URL');
     // }
+
+    const url = new URL(activity.actor);
+
+    resolveDomain(url.hostname);
 
     const response = await fetch(activity.actor, { headers: { 'Accept': 'application/activity+json' } });
     const actor = await response.json();
