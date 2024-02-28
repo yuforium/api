@@ -6,6 +6,7 @@ import { SyncDispatchService } from './sync-dispatch.service';
 import { InboxProcessorService } from './inbox-processor.service';
 import { ActivityPubService } from './activity-pub.service';
 import { resolveDomain } from 'src/common/decorators/service-domain.decorator';
+import { parse as parseDomain } from 'tldts';
 
 export interface AcceptOptions {
   requestSignature?: {
@@ -44,15 +45,23 @@ export class InboxService {
     //   throw new TypeError('Invalid URL');
     // }
 
-    const url = new URL(activity.actor);
+    const actorURL = new URL(activity.actor);
 
-    if (url.protocol !== 'https:') {
+    if (actorURL.protocol !== 'https:') {
       throw new BadRequestException('Actor URL must be avaiable via https protocol');
     }
 
-    resolveDomain(url.hostname);
+    if (actorURL.port !== '') {
+      throw new BadRequestException('Actor URL must operate on default port');
+    }
 
-    const response = await fetch(activity.actor, { headers: { 'Accept': 'application/activity+json' } });
+    const domain = parseDomain(actorURL.hostname);
+
+    if (!domain.domain || !domain.isIcann || domain.isPrivate) {
+      throw new BadRequestException('Invalid domain');
+    }
+
+    const response = await fetch(`${actorURL.origin}${actorURL.pathname}`, { headers: { 'Accept': 'application/activity+json' } });
     const actor = await response.json();
 
     if (options?.requestSignature) {
