@@ -24,7 +24,7 @@ export class ActivityService {
    * @returns
    */
   public async get(id: string): Promise<ActivityDto | null> {
-    const activity = this.activityModel.findOne({id});
+    const activity = this.activityModel.findOne({id: id.toString()});
     if (activity) {
       return plainToInstance(ActivityDto, activity, {excludeExtraneousValues: true});
     }
