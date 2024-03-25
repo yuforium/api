@@ -6,13 +6,14 @@ import { ActivityService } from '../../../modules/activity/services/activity.ser
 import { ObjectService } from '../../../modules/object/object.service';
 import { RelationshipRecord } from '../../../modules/object/schema/relationship.schema';
 import { ActivityPubService } from './activity-pub.service';
-import { Activity } from '@yuforium/activity-streams';
+import { Activity, ASObject } from '@yuforium/activity-streams';
 import { UserActorDto } from 'src/modules/user/dto/user-actor.dto';
 import { resolveDomain } from '../../../common/decorators/service-domain.decorator';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActorDocument, ActorRecord } from '../../object/schema/actor.schema';
 import { Model } from 'mongoose';
 import { ObjectDto } from '../../../common/dto/object';
+import { RelationshipType } from 'src/modules/object/type/relationship.type';
 
 @Injectable()
 export class InboxProcessorService {
@@ -106,19 +107,20 @@ export class InboxProcessorService {
 
     const _id = this.objectService.id().toString();
 
-    const relationshipDto: RelationshipRecord = await this.objectService.assignObjectMetadata({
-      id: `${followee.id}/relationship/${_id.toString()}`,
-      type: 'Relationship',
-      summary: 'Follows',
-      relationship: 'https://yuforium.com/vocab/relationship/followerOf',
-      _relationship: 'followerOf',
-      subject: activity.actor,
-      object: activity.object as string,
-      _domain: followee._domain,
-      _public: true,
-      _local: true,
-      to: []
-    });
+    const relationshipDto: RelationshipType = Object.assign(
+      await this.objectService.assignObjectMetadata({
+        '@context': 'https://www.w3.org/ns/activitystreams',
+        id: `${followee.id}/relationship/${_id.toString()}`,
+        type: 'Relationship',
+        summary: 'Follows',
+        attributedTo: followee.id,
+      }),
+      {
+        relationship: 'https://yuforium.com/vocab/relationship/followerOf',
+        _relationship: 'followerOf',
+        subject: activity.actor,
+        object: activity.object as string,
+      });
 
     const relationship = await this.objectService.createRelationship(relationshipDto);
     this.logger.debug(`follow(): created relationship ${relationship.id}`);
@@ -150,7 +152,7 @@ export class InboxProcessorService {
 
     const acceptActivity = await this.activityService.createActivity(acceptActivityDto);
 
-    this.activityPubSerice.dispatchToInbox(plainToInstance(ActivityDto, acceptActivity), actor.inbox);
+    // this.activityPubSerice.dispatchToInbox(plainToInstance(ActivityDto, acceptActivity), actor.inbox);
 
     return acceptActivityDto;
   }

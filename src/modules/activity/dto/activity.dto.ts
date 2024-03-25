@@ -24,6 +24,9 @@ export class ActivityDto extends Activity {
   @Expose()
   public type!: string;
 
+  /**
+   * @todo this could come in as an object, e.g. {id: 'https://example.com/actor', type: 'Person'}
+   */
   @Prop({type: String, required: true})
   @IsRequired()
   @Expose()

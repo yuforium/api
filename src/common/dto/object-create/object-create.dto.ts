@@ -4,8 +4,8 @@ import { Equals, IsString, MaxLength } from 'class-validator';
 import { ObjectDto } from '../object/object.dto';
 
 /**
- * Basic requirements class for all objects submitted for *creation* to the 
- * API server by the user.  This is a generic class that should be extended 
+ * Basic requirements class for all objects submitted for *creation* to the
+ * API server by the user.  This is a generic class that should be extended
  * by more specific object types.
  */
 export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'type', 'to', 'attributedTo']) {
@@ -33,5 +33,5 @@ export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'ty
 
   @ApiProperty({required: false})
   @IsString({each: true})
-  public attributedTo?: string | string[];
+  public attributedTo!: string | string[];
 }

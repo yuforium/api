@@ -4,13 +4,12 @@ import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcryptjs';
 import { UserDocument } from '../user/schemas/user.schema';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
-import { PersonDto } from '../../common/dto/object/person.dto';
 import { ObjectService } from '../object/object.service';
 import { UserActorDto } from '../user/dto/user-actor.dto';
 
 export interface JwtUser {
   _id: string;
-  actor: PersonDto;
+  actor: UserActorDto;
 }
 
 @Injectable()

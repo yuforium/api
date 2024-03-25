@@ -8,6 +8,9 @@ import { RelationshipDocument, RelationshipRecord } from './schema/relationship.
 import { ConfigService } from '@nestjs/config';
 import { BaseObjectRecord, Destination, Origination } from './schema/base-object.schema';
 import { resolveDomain } from '../../common/decorators/service-domain.decorator';
+import { ASObject } from '@yuforium/activity-streams';
+import { RelationshipType } from './type/relationship.type';
+import { ObjectType } from './type/object.type';
 
 
 /**
@@ -28,9 +31,7 @@ export class ObjectService {
     @InjectModel(RelationshipRecord.name) protected relationshipModel: Model<RelationshipDocument>,
     @InjectConnection() protected connection: Connection,
     protected configService: ConfigService
-  ) {
-    console.log(configService.get('service.defaultDomain'));
-  }
+  ) { }
 
   public async get(id: string): Promise<ObjectDocument | null> {
     return this.objectModel.findOne({ id });
@@ -44,8 +45,12 @@ export class ObjectService {
     return new Types.ObjectId();
   }
 
-  protected isPublic(obj: ObjectDto): boolean {
+  protected isPublic(obj: ObjectType): boolean {
     const pub = 'https://www.w3.org/ns/activitystreams#Public';
+
+    if (!obj.to) {
+      return false;
+    }
 
     const isPublic =
       obj.to === pub || (Array.isArray(obj.to) && obj.to.includes(pub)) ||
@@ -55,7 +60,7 @@ export class ObjectService {
     return isPublic;
   }
 
-  protected isLocal(obj: ObjectDto): boolean {
+  protected isLocal(obj: ObjectType): boolean {
     const local = this.configService.get('service.defaultDomain');
     const url = new URL(obj.id);
     const domain = resolveDomain(url.hostname);
@@ -68,7 +73,7 @@ export class ObjectService {
    * @param dto
    * @returns
    */
-  public async getObjectMetadata(dto: ObjectDto): Promise<BaseObjectRecord> {
+  public async getObjectMetadata(dto: ObjectType): Promise<BaseObjectRecord> {
     const url = new URL(dto.id);
     const _domain = resolveDomain(url.hostname);
     const _public = this.isPublic(dto);
@@ -77,12 +82,8 @@ export class ObjectService {
     const destinations = [];
 
     if (dto.to) {
-
+      destinations.push(...(Array.isArray(dto.to) ? dto.to : [dto.to]));
     }
-    // const to = [].push(
-    // Array.isArray(dto.to) ? dto.to : (dto.to ? [dto.to] : [])
-    // );
-
     if (dto.bcc) {
       destinations.push(...(Array.isArray(dto.bcc) ? dto.bcc : [dto.bcc]));
     }
@@ -90,15 +91,9 @@ export class ObjectService {
       destinations.push(...(Array.isArray(dto.cc) ? dto.cc : [dto.cc]));
     }
 
-    console.log(dto.cc);
-
-    console.log("TO", destinations);
-
     const attributedTo = Array.isArray(dto.attributedTo) ? dto.attributedTo : typeof dto.attributedTo === 'string' ? [dto.attributedTo] : [];
 
-    console.log("TO", destinations);
-
-    const _destination: Destination[] = (await Promise.all(destinations.map(t => this.findOne({ id: t, _local: true }))))
+    const _destination: Destination[] = (await Promise.all(destinations.map(dest => this.findOne({ id: dest, _local: true }))))
       .filter(o => o !== null)
       .map((o: any): Destination => ({ rel: 'inbox', _id: o._id as Types.ObjectId }));
 
@@ -121,7 +116,7 @@ export class ObjectService {
    * @param dto
    * @returns
    */
-  public async assignObjectMetadata<T extends ObjectDto = ObjectDto>(dto: T): Promise<T & BaseObjectRecord> {
+  public async assignObjectMetadata<T extends ObjectType = ObjectType>(dto: T): Promise<T & BaseObjectRecord> {
     const metadata: BaseObjectRecord = await this.getObjectMetadata(dto);
     return Object.assign(dto, metadata);
   }
@@ -174,7 +169,7 @@ export class ObjectService {
   protected applyDefaultParams() {
   }
 
-  public async createRelationship(dto: RelationshipRecord): Promise<RelationshipDocument> {
+  public async createRelationship(dto: RelationshipType): Promise<RelationshipDocument> {
     return this.relationshipModel.create(dto);
   }
 

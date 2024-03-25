@@ -1,12 +1,23 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { ServiceDomain } from 'src/common/decorators/service-domain.decorator';
 
 @Controller('topics')
 export class TopicController {
+  @ApiOperation({ operationId: 'getTopic', summary: 'Get topic' })
+  @ApiParam({
+    name: 'topicname',
+    type: String,
+    required: true,
+    example: 'general'
+  })
+  @ApiOkResponse({
+    description: 'User content'
+  })
   @Get(':topicname')
   public async getTopic(
     @ServiceDomain() domain: string,
-    @Param() params: {topicname: string}
+    @Param() params: { topicname: string }
   ) {
     return {
       '@context': [

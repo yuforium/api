@@ -1,20 +1,18 @@
-import { Exclude, Expose } from 'class-transformer';
-import { PersonDto } from 'src/common/dto/object/person.dto';
+import { Expose } from 'class-transformer';
+import { ActorDto } from 'src/common/dto/actor/actor.dto';
+// import { PersonDto } from 'src/common/dto/object/person.dto';
 
-export class UserActorDto extends PersonDto {
-  @Exclude()
-    to!: string | string[];
-  
-  @Expose()
-  get inbox(): string {
-    return this.id + '/inbox';
-  }
+export class UserActorDto extends ActorDto {
+  // @Expose()
+  // get inbox(): string {
+  //   return this.id + '/inbox';
+  // }
 
-  @Expose()
-  get outbox(): string {
-    return this.id + '/outbox';
-  }
+  // @Expose()
+  // get outbox(): string {
+  //   return this.id + '/outbox';
+  // }
 
   @Expose()
-    preferredUsername!: string;
+  public preferredUsername!: string;
 }

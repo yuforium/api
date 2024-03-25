@@ -8,9 +8,8 @@ import { parse } from 'tldts';
 const logger = new Logger('ServiceId');
 
 export const ServiceDomain = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): ServiceDomainType => {
+  (_, ctx: ExecutionContext): ServiceDomainType => {
     const request = ctx.switchToHttp().getRequest();
-    
     return resolveDomain(request.hostname);
   }
 );

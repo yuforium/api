@@ -1,17 +1,17 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcryptjs';
+import { plainToInstance } from 'class-transformer';
+import { generateKeyPairSync } from 'crypto';
+import { MongoServerError } from 'mongodb';
 import { Model, Schema } from 'mongoose';
+import { ActorDto } from '../../common/dto/actor/actor.dto';
+import { ObjectService } from '../object/object.service';
+import { ActorDocument } from '../object/schema/actor.schema';
+import { PersonDocument } from '../object/schema/person.schema';
+import { UserActorDocument, UserActorRecord } from '../object/schema/user-actor.schema';
 import { UserCreateDto } from './dto/user-create.dto';
 import { User, UserDocument } from './schemas/user.schema';
-import * as bcrypt from 'bcryptjs';
-import { ObjectService } from '../object/object.service';
-import { MongoServerError } from 'mongodb';
-import { generateKeyPairSync } from 'crypto';
-import { PersonDto } from 'src/common/dto/object/person.dto';
-import { validate } from 'class-validator';
-import { ActorDocument, ActorRecord } from '../object/schema/actor.schema';
-import { ActorDto } from '../../common/dto/actor/actor.dto';
-import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -20,7 +20,7 @@ export class UserService {
   constructor(
     protected readonly objectService: ObjectService,
     @InjectModel(User.name) protected userModel: Model<UserDocument>,
-    @InjectModel(ActorRecord.name) protected actorModel: Model<ActorDocument>,
+    @InjectModel(UserActorRecord.name) protected userActorModel: Model<UserActorDocument>,
   ) { }
 
   public async create(_domain: string, userDto: UserCreateDto): Promise<any> {
@@ -31,7 +31,7 @@ export class UserService {
       throw new Error('Password is required');
     }
 
-    // @todo - consider if we should require an actual domain record to exist 
+    // @todo - consider if we should require an actual domain record to exist
     // to allow for the creation of a user
     // const domain = await this.objectService.find({id: `https://${serviceId}`});
 
@@ -56,18 +56,18 @@ export class UserService {
       this.logger.debug(`Creating person object for user "${userDto.username}"`);
 
       const id = `https://${_domain}/${_path}/${_pathId}`;
-      const personDtoParams: ActorRecord = plainToInstance(ActorRecord, {
+      const personDtoParams: UserActorRecord = {
         '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
         type: 'Person',
         id: id,
         attributedTo: id, // assume the user is creating themselves for now
-        inbox: `${id}/inbox`,
         outbox: `${id}/outbox`,
+        inbox: `${id}/inbox`,
         following: `${id}/following`,
         followers: `${id}/followers`,
         name: userDto.name || user.username,
         preferredUsername: user.username,
-        summary: userDto.summary,
+        // summary: userDto.summary,
         _domain,
         _local: true,
         _public: true,
@@ -76,13 +76,15 @@ export class UserService {
           owner: `https://${_domain}/${_path}/${_pathId}`,
           publicKeyPem: publicKey.toString()
         }
-      });
+      };
 
-      const personDto = Object.assign(new PersonDto(), personDtoParams);
-      await validate(personDto);
-      
+      // console.log(personDtoParams);
+
+      // const personDto = Object.assign(new PersonDto(), personDtoParams);
+      // await validate(personDto);
+
       // effectively the person is creating themselves
-      const record = await this.actorModel.create(personDto);
+      const record = await this.userActorModel.create(personDtoParams);
 
       // @todo - a Create activity should be associated with the person object, attributed to the user, and to any other related information (such as IP address)
 
@@ -92,7 +94,8 @@ export class UserService {
       await user.save();
 
       return record;
-    } catch (e) {
+    }
+    catch (e) {
       if (e instanceof MongoServerError) {
         if (e.code === 11000) {
           throw new ConflictException('Username already exists');
@@ -105,9 +108,9 @@ export class UserService {
 
   /**
    * @todo this method is problematic, it shouldn't be limited to finding just by username and be more like the Mongoose findOne() method
-   * @param serviceId 
-   * @param username 
-   * @returns 
+   * @param serviceId
+   * @param username
+   * @returns
    */
   public async findOne(serviceDomain: string, username: string): Promise<UserDocument | null> {
     return await this.userModel.findOne({domain: serviceDomain, username: {'$eq': username}});
@@ -116,9 +119,9 @@ export class UserService {
   public async findPerson(_domain: string, username: string): Promise<ActorDto | undefined> {
     this.logger.debug(`findPerson "${username}"`);
 
-    const person = await this.actorModel.findOne({
-      id: `https://${_domain}/users/${username}`, 
-      type: 'Person', 
+    const person = await this.userActorModel.findOne({
+      id: `https://${_domain}/users/${username}`,
+      type: 'Person',
       preferredUsername: username
     });
 
@@ -157,10 +160,10 @@ export class UserService {
 
   /**
    * Reset a user's password
-   * @param serviceId 
-   * @param username 
+   * @param serviceId
+   * @param username
    * @param hashedPassword bcrypt hashed password
-   * @returns 
+   * @returns
    */
   public async resetPassword(domain: string, username: string, hashedPassword: string): Promise<string | undefined> {
     const user = await this.findOne(domain, username);
@@ -179,6 +182,9 @@ export class UserService {
     return hashedPassword;
   }
 
+  /**
+   * Reset a user's key pair
+   */
   public async resetKey(serviceId: string, username: string): Promise<any> {
     const user = await this.findOne(serviceId, username);
 
@@ -187,7 +193,7 @@ export class UserService {
       return null;
     }
 
-    const person = await this.objectService.findOne({_id: user.defaultIdentity});
+    const person = await this.objectService.findOne({_id: user.defaultIdentity}) as PersonDocument;
 
     if (person) {
       person['@context'] = ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'];
@@ -213,6 +219,6 @@ export class UserService {
   }
 
   public async findPersonById(_id: string | Schema.Types.ObjectId): Promise<ActorDocument | null> {
-    return this.actorModel.findOne({_id, type: 'Person'});
+    return this.userActorModel.findOne({_id, type: 'Person'});
   }
 }

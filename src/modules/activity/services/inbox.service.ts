@@ -10,6 +10,7 @@ import { ActivityRecord } from '../schema/activity.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActorDocument, ActorRecord } from '../../object/schema/actor.schema';
 import { Model } from 'mongoose';
+import { RelationshipType } from 'src/modules/object/type/relationship.type';
 
 @Injectable()
 export class InboxService {
@@ -156,7 +157,9 @@ export class InboxService {
 
     const _id = this.objectService.id().toString();
 
-    const relationshipDto: RelationshipRecord = await this.objectService.assignObjectMetadata({
+    const relationshipDto: RelationshipType = await this.objectService.assignObjectMetadata({
+      '@context': 'https://www.w3.org/ns/activitystreams',
+      attributedTo: activity.actor,
       id: `${followee.id}/relationship/${_id.toString()}`,
       type: 'Relationship',
       summary: 'Follows',

@@ -1,20 +1,23 @@
 import { Prop } from '@nestjs/mongoose';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { ActivityStreams, ASObjectOrLink, Collection, IsRequired } from '@yuforium/activity-streams';
+import {
+  ActivityStreams,
+  ASObjectOrLink,
+  Collection
+} from '@yuforium/activity-streams';
 import { Expose } from 'class-transformer';
 import * as mongoose from 'mongoose';
+import { ObjectType } from 'src/modules/object/type/object.type';
 
 const { Mixed } = mongoose.Schema.Types;
 
-const OneOfStringOrArray = {
+/**
+ * Helper object for defining a property that may be a string or array of strings
+ */
+const ApiPropertyOneOfStringOrArray = {
   required: false,
-  oneOf: [
-    { type: 'string' },
-    { type: 'array', items: { type: 'string' } }
-  ]
+  oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }]
 };
-
-const OneOfStringOrArrayRequired = Object.assign({}, OneOfStringOrArray, { required: true });
 
 /**
  * ObjectDto
@@ -26,11 +29,15 @@ const OneOfStringOrArrayRequired = Object.assign({}, OneOfStringOrArray, { requi
  * In addition, the ObjectDto provides some static helper functions to
  * do things like normalize IDs or resolve link references to objects.
  */
-export class ObjectDto extends ActivityStreams.object('Object') {
+export class ObjectDto extends ActivityStreams.object('Object') implements ObjectType {
   @ApiHideProperty()
-  @Prop({ name: '@context', type: mongoose.Schema.Types.Mixed, required: false })
+  @Prop({
+    name: '@context',
+    type: mongoose.Schema.Types.Mixed,
+    required: false
+  })
   @Expose()
-  public '@context'?: string | string[] = 'https://www.w3.org/ns/activitystreams';
+  public '@context': string | string[] = 'https://www.w3.org/ns/activitystreams';
 
   @ApiProperty({ required: true, type: 'string' })
   @Prop({ type: String, required: true })
@@ -43,19 +50,17 @@ export class ObjectDto extends ActivityStreams.object('Object') {
   @ApiProperty({ type: 'string', required: true })
   @Prop({ type: Mixed, required: true })
   @Expose()
-  public type!: string | string[];
+  public type!: string;
 
   @ApiProperty({ type: String })
   @Prop({ type: Mixed })
   @Expose()
-  public attributedTo?: string | string[];
+  public attributedTo!: ASObjectOrLink | ASObjectOrLink[];
 
   @ApiProperty({
     type: String,
     required: true,
-    oneOf: [
-      { type: 'string' },
-      { type: 'array', items: { type: 'string' } }],
+    oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
     format: 'uri'
   })
   @Prop({ type: String })
@@ -70,10 +75,7 @@ export class ObjectDto extends ActivityStreams.object('Object') {
   @ApiProperty({
     required: false,
     type: 'string',
-    oneOf: [
-      { type: 'string' },
-      { type: 'array', items: { type: 'string' } }
-    ]
+    oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }]
   })
   @Prop({ type: String })
   @Expose()
@@ -96,18 +98,17 @@ export class ObjectDto extends ActivityStreams.object('Object') {
   @Expose()
   public updated?: string;
 
-  @ApiProperty(OneOfStringOrArray)
+  @ApiProperty(ApiPropertyOneOfStringOrArray)
   @Prop({ type: Mixed })
   @Expose()
-  @IsRequired()
-  public to!: string | string[]; // note that the "to" field should always have a value, even if the spec says it's optional
+  public to?: string | string[]; // note that the "to" field should always have a value, even if the spec says it's optional
 
-  @ApiProperty(OneOfStringOrArray)
+  @ApiProperty(ApiPropertyOneOfStringOrArray)
   @Prop({ type: Mixed })
   @Expose()
   public cc?: string | string[];
 
-  @ApiProperty(OneOfStringOrArray)
+  @ApiProperty(ApiPropertyOneOfStringOrArray)
   @Prop({ type: Mixed })
   @Expose()
   public bcc?: string | string[];
@@ -127,7 +128,9 @@ export class ObjectDto extends ActivityStreams.object('Object') {
    * @param value
    * @returns Normalized array of string ids
    */
-  public static normalizeIds(value: ASObjectOrLink | ASObjectOrLink[]): string[] {
+  public static normalizeIds(
+    value: ASObjectOrLink | ASObjectOrLink[]
+  ): string[] {
     if (Array.isArray(value)) {
       return value
         .filter((item: ASObjectOrLink) => {
