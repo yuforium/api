@@ -1,6 +1,7 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsNotEmptyArray, IsRequired } from '@yuforium/activity-streams';
-import { Equals, IsString, MaxLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { Equals, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ObjectDto } from '../object/object.dto';
 
 /**
@@ -8,7 +9,7 @@ import { ObjectDto } from '../object/object.dto';
  * API server by the user.  This is a generic class that should be extended
  * by more specific object types.
  */
-export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'type', 'to', 'attributedTo']) {
+export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'type', 'to']) {
   @ApiProperty({required: false})
   @IsString()
   @MaxLength(255)
@@ -29,9 +30,16 @@ export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'ty
   @ApiProperty({required: true})
   @IsNotEmptyArray()
   @IsString({each: true})
+  @Transform(({value}) => {
+    return value.toString();
+  })
   public to!: string | string[];
 
-  @ApiProperty({required: false})
+  @ApiProperty({
+    required: false,
+    oneOf: [{type: 'string'}, {type: 'array', items: {type: 'string'}}]
+  })
+  @IsOptional()
   @IsString({each: true})
-  public attributedTo!: string | string[];
+  public attributedTo?: string | string[];
 }

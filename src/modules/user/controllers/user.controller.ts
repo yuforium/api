@@ -16,7 +16,7 @@ import { ActorDto } from '../../../common/dto/actor/actor.dto';
 @Controller('users')
 export class UserController {
   protected logger = new Logger(UserController.name);
-  
+
   constructor(
     protected userService: UserService,
     protected objectService: ObjectService
@@ -69,7 +69,6 @@ export class UserController {
   @Header('Content-Type', 'application/activity+json')
   public async findOne(@Req() req: Request, @ServiceDomain() domain: string, @Param('username') username: string): Promise<ActorDto> {
     const person = await this.userService.findPerson(domain, username.toLowerCase());
-    console.log(req.headers);
     if (person) {
       this.logger.debug(`Found user ${username}`);
       return person;

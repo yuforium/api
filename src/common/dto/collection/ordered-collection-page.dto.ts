@@ -1,10 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { ASLink, ASObject, ActivityStreams } from '@yuforium/activity-streams';
+import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
+import { ActivityStreams, Link } from '@yuforium/activity-streams';
 import { ObjectDto } from '../object';
 
+@ApiExtraModels(ObjectDto, Link)
 export class OrderedCollectionPageDto extends ActivityStreams.collectionPage('OrderedCollectionPage') {
   static type = 'OrderedCollectionPage';
 
   @ApiProperty({type: [ObjectDto]})
-    items!: (string | ASObject | ASLink)[];
+  public items!: (string | ObjectDto | Link)[];
 }

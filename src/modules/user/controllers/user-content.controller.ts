@@ -47,17 +47,6 @@ export class UserContentController {
     protected readonly resolver: StoredObjectResolver
   ) { }
 
-  @Get('test')
-  public async test() {
-    const note = plainToInstance(ObjectDto, {
-      id: 'https://example.com/note/1',
-      type: 'Note',
-      attributedTo: 'https://localhost/users/chris'
-    });
-
-    return note;
-  }
-
   @ApiParam({
     name: 'username',
     type: String,
@@ -84,7 +73,7 @@ export class UserContentController {
     required: true,
     example: 'chris'
   })
-  @ApiExtraModels(UserContentQueryOptionsDto)
+  @ApiExtraModels(UserContentQueryOptionsDto, OrderedCollectionPageDto)
   @ApiQuery({
     name: 'contentQuery',
     required: false,

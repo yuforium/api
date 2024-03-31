@@ -4,7 +4,7 @@ import { Expose, Transform } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 import * as mongoose from 'mongoose';
 import { NoteDto, ArticleDto } from '../../../common/dto/object';
-import { LinkDto } from 'src/modules/link/dto/link.dto';
+import { LinkDto } from '../../../modules/link/dto/link.dto';
 
 const { Mixed } = mongoose.Schema.Types;
 

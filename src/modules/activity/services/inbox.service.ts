@@ -5,12 +5,11 @@ import { VerifyOptions, parse, verify } from '@yuforium/http-signature';
 import { ExternalActorDto } from '../dto/external-actor.dto';
 import { ObjectService } from '../../object/object.service';
 import { ActivityService } from './activity.service';
-import { RelationshipRecord } from '../../object/schema/relationship.schema';
 import { ActivityRecord } from '../schema/activity.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActorDocument, ActorRecord } from '../../object/schema/actor.schema';
 import { Model } from 'mongoose';
-import { RelationshipType } from 'src/modules/object/type/relationship.type';
+import { RelationshipType } from '../../../modules/object/type/relationship.type';
 
 @Injectable()
 export class InboxService {

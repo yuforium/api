@@ -6,8 +6,8 @@ import { ActivityService } from '../../../modules/activity/services/activity.ser
 import { ObjectService } from '../../../modules/object/object.service';
 import { RelationshipRecord } from '../../../modules/object/schema/relationship.schema';
 import { ActivityPubService } from './activity-pub.service';
-import { Activity, ASObject } from '@yuforium/activity-streams';
-import { UserActorDto } from 'src/modules/user/dto/user-actor.dto';
+import { Activity } from '@yuforium/activity-streams';
+import { UserActorDto } from '../../../modules/user/dto/user-actor.dto';
 import { resolveDomain } from '../../../common/decorators/service-domain.decorator';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActorDocument, ActorRecord } from '../../object/schema/actor.schema';

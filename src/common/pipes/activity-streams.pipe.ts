@@ -9,7 +9,7 @@ export class ActivityStreamsPipe<T> implements PipeTransform {
 
   constructor(@Optional() protected transformer: ActivityStreams.Transformer) {
     if (this.transformer === undefined) {
-      this.transformer = ActivityStreams.transformer;
+      this.transformer = new ActivityStreams.Transformer(undefined, {convertTextToLinks: false});
     }
   }
 

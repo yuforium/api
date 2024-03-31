@@ -1,13 +1,14 @@
 import { Prop } from '@nestjs/mongoose';
-import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { ApiExtraModels, ApiHideProperty, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import {
   ActivityStreams,
   ASObjectOrLink,
-  Collection
+  Collection,
+  Link
 } from '@yuforium/activity-streams';
 import { Expose } from 'class-transformer';
 import * as mongoose from 'mongoose';
-import { ObjectType } from 'src/modules/object/type/object.type';
+import { ObjectType } from '../../../modules/object/type/object.type';
 
 const { Mixed } = mongoose.Schema.Types;
 
@@ -29,6 +30,7 @@ const ApiPropertyOneOfStringOrArray = {
  * In addition, the ObjectDto provides some static helper functions to
  * do things like normalize IDs or resolve link references to objects.
  */
+@ApiExtraModels(Link)
 export class ObjectDto extends ActivityStreams.object('Object') implements ObjectType {
   @ApiHideProperty()
   @Prop({
@@ -52,7 +54,9 @@ export class ObjectDto extends ActivityStreams.object('Object') implements Objec
   @Expose()
   public type!: string;
 
-  @ApiProperty({ type: String })
+  @ApiProperty({
+    oneOf: [{ type: 'string' }, { $ref: getSchemaPath(Link) }, {$ref: getSchemaPath(ObjectDto) }]
+  })
   @Prop({ type: Mixed })
   @Expose()
   public attributedTo!: ASObjectOrLink | ASObjectOrLink[];
