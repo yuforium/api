@@ -35,7 +35,7 @@
     "@nestjs/passport": "^10.0.0",
     "@nestjs/platform-express": "^10.0.5",
     "@nestjs/swagger": "^7.1.1",
-    "@yuforium/activity-streams": "^0.2.0-alpha",
+    "@yuforium/activity-streams": "^0.2.0-alpha.3",
     "@yuforium/http-signature": "^0.0.1",
     "bcrypt": "^5.0.1",
     "bcryptjs": "^2.4.3",

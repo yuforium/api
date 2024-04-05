@@ -1,6 +1,5 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsNotEmptyArray, IsRequired } from '@yuforium/activity-streams';
-import { Transform } from 'class-transformer';
 import { Equals, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ObjectDto } from '../object/object.dto';
 
@@ -30,9 +29,6 @@ export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'ty
   @ApiProperty({required: true})
   @IsNotEmptyArray()
   @IsString({each: true})
-  @Transform(({value}) => {
-    return value.toString();
-  })
   public to!: string | string[];
 
   @ApiProperty({
