@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Optional, PipeTransform } from '@nestjs/common';
 import { ActivityStreams } from '@yuforium/activity-streams';
+import { TransformationType } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
 
 @Injectable()
@@ -14,7 +15,7 @@ export class ActivityStreamsPipe<T> implements PipeTransform {
   }
 
   async transform(value: any): Promise<T> {
-    const obj = this.transformer.transform({value});
+    const obj = this.transformer.transform({value, type: TransformationType.PLAIN_TO_CLASS, key: '', obj: null, options: {excludeExtraneousValues: true}});
 
     if (!obj) {
       throw new BadRequestException(`The type "${value.type}" is not supported.`);

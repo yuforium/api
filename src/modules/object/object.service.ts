@@ -65,7 +65,7 @@ export class ObjectService {
     const url = new URL(obj.id);
     const domain = resolveDomain(url.hostname);
 
-    return domain === local;
+    return domain === local || domain === 'localhost';
   }
 
   /**

@@ -99,6 +99,7 @@ export class UserContentController {
     this.logger.debug(`getContent() for user ${params.username}@${domain}`);
 
     const user = await this.userService.findOne(domain, params.username);
+
     if (!user) {
       this.logger.error(
         `getContent() user not found for ${params.username}@${domain}`
@@ -111,9 +112,7 @@ export class UserContentController {
       _id: user.defaultIdentity
     });
     if (!person) {
-      this.logger.error(
-        `getContent() user default identity not found for ${params.username}@${domain}`
-      );
+      this.logger.error(`getContent() user default identity not found for ${params.username}@${domain}`);
       throw new NotFoundException();
     }
 
