@@ -67,7 +67,7 @@ export class UserController {
   @ApiResponse({status: 404, type: PersonDto})
   @Get(':username')
   @Header('Content-Type', 'application/activity+json')
-  public async findOne(@Req() req: Request, @ServiceDomain() domain: string, @Param('username') username: string): Promise<ActorDto> {
+  public async findOne(@ServiceDomain() domain: string, @Param('username') username: string): Promise<ActorDto> {
     const person = await this.userService.findPerson(domain, username.toLowerCase());
     if (person) {
       this.logger.debug(`Found user ${username}`);

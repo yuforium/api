@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ObjectDocument, ObjectRecord } from './schema/object.schema';
 import { Model, Types, Schema, Connection } from 'mongoose';
@@ -8,7 +8,6 @@ import { RelationshipDocument, RelationshipRecord } from './schema/relationship.
 import { ConfigService } from '@nestjs/config';
 import { BaseObjectRecord, Destination, Origination } from './schema/base-object.schema';
 import { resolveDomain } from '../../common/decorators/service-domain.decorator';
-import { ASObject } from '@yuforium/activity-streams';
 import { RelationshipType } from './type/relationship.type';
 import { ObjectType } from './type/object.type';
 
@@ -45,6 +44,9 @@ export class ObjectService {
     return new Types.ObjectId();
   }
 
+  /**
+   * Check to see if an object is public (readable by anyone and without authentication).
+   */
   protected isPublic(obj: ObjectType): boolean {
     const pub = 'https://www.w3.org/ns/activitystreams#Public';
 
@@ -121,6 +123,32 @@ export class ObjectService {
     return Object.assign(dto, metadata);
   }
 
+  /**
+   * Rebuild an object's metadata.  This does not save the object.
+   * @param dto
+   */
+  public async rebuildMetadata<T extends ObjectType = ObjectType>(dto: T): Promise<T & BaseObjectRecord> {
+    const metadata: BaseObjectRecord = await this.getObjectMetadata(dto);
+    return Object.assign(dto, metadata);
+  }
+
+  /**
+   * Rebuild an object's metadata and save the object.
+   * @param id The object's ID
+   * @returns The (repaired) object record
+   */
+  public async repairMetadata(id: string): Promise<BaseObjectRecord> {
+    const obj = await this.objectModel.findOne({ id });
+
+    if (!obj) {
+      throw new NotFoundException(`Object not found: ${id}`);
+    }
+
+    await this.rebuildMetadata(obj);
+    await obj.save();
+
+    return obj;
+  }
 
   public async create(dto: ObjectRecord): Promise<ObjectDto> {
     try {

@@ -6,8 +6,9 @@ import {
   Collection,
   Link
 } from '@yuforium/activity-streams';
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 import * as mongoose from 'mongoose';
+import * as sanitizeHtml from 'sanitize-html';
 import { ObjectType } from '../../../modules/object/type/object.type';
 
 const { Mixed } = mongoose.Schema.Types;
@@ -69,6 +70,15 @@ export class ObjectDto extends ActivityStreams.object('Object') implements Objec
   })
   @Prop({ type: String })
   @Expose()
+  /**
+   * @todo Sanitize HTML on the way out.  We should always preserve HTML as it was received in an activity which is we don't sanitize it before
+   * storing it in the database.  However, when we return it to the client, we should sanitize it to prevent XSS attacks.
+   * Note that this should be improved by adding a cached field at the database level to store the sanitized version of the content.
+   * Also note that we _will_ sanitize HTML when a user posts it to their outbox.
+   */
+  @Transform(({value}) => {
+    return sanitizeHtml(value);
+  }, { toClassOnly: true })
   public content?: string;
 
   @ApiProperty({ type: String })

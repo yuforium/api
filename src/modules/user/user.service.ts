@@ -117,7 +117,7 @@ export class UserService {
   }
 
   public async findPerson(_domain: string, username: string): Promise<ActorDto | undefined> {
-    this.logger.debug(`findPerson "${username}"`);
+    this.logger.debug(`findPerson "${username}" at domain "${_domain}"`);
 
     const person = await this.userActorModel.findOne({
       id: `https://${_domain}/users/${username}`,
