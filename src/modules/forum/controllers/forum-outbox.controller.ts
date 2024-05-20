@@ -17,7 +17,7 @@ import { OutboxService } from '../../activity/services/outbox.service';
 
 /**
  * Forum Outbox Controller
- * Note that this controller has a lot of overlap to the UserOutboxController.  This functionality can probably be merged into a 
+ * Note that this controller has a lot of overlap to the UserOutboxController.  This functionality can probably be merged into a
  * parent class.
  */
 @Controller('forums/:forumname/outbox')
@@ -70,9 +70,14 @@ export class ForumOutboxController {
     Object.assign(dto, {
       attributedTo: [user.actor.id, `https://${domain}/forums/${params.forumname}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
       published: new Date().toISOString(),
-      context: `https://yuforium.com/topics/${params.forumname}`, // @todo this will be a property of the forum that the post will inherit
+      context: [
+        `https://yuforium.com/community/${params.forumname}`,
+        `https://yuforium.com/forum/${params.forumname}`, // @todo this will be a property of the forum that the post will inherit
+      ],
       to: ['https://www.w3.org/ns/activitystreams#Public'],
-      cc: [`${params.forumname}/followers`], // @todo consider 
+      cc: [`${params.forumname}/followers`], // @todo consider
+      audience: [`${params.forumname}/followers`], // represents the primary audience for the post.  In Yuforium, this is explicitly set to the followers of the forum, and not the context which would be considered as a wider scope than the audience
+
     });
 
     const activity = await this.outboxService.createObject(domain, user, forumId, dto);

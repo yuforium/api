@@ -9,33 +9,33 @@ import { ObjectDto } from '../object/object.dto';
  * by more specific object types.
  */
 export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'type', 'to']) {
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsString()
   @MaxLength(255)
   public name!: string;
 
-  @ApiProperty({required: true})
+  @ApiProperty({ required: true })
   @IsString()
   @IsRequired()
   @MaxLength(65536)
   public content!: string;
 
-  @ApiProperty({required: true, enum: ['Object']})
+  @ApiProperty({ required: true, enum: ['Object'] })
   @IsString()
   @IsRequired()
   @Equals('Object')
   public type!: string;
 
-  @ApiProperty({required: true})
+  @ApiProperty({ required: true })
   @IsNotEmptyArray()
-  @IsString({each: true})
+  @IsString({ each: true })
   public to!: string | string[];
 
   @ApiProperty({
     required: false,
-    oneOf: [{type: 'string'}, {type: 'array', items: {type: 'string'}}]
+    oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }]
   })
   @IsOptional()
-  @IsString({each: true})
+  @IsString({ each: true })
   public attributedTo?: string | string[];
 }

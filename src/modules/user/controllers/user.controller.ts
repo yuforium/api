@@ -34,8 +34,8 @@ export class UserController {
   @ApiParam({name: 'username', type: 'string', required: true, example: 'chris'})
   @Get('exists/:username')
   @Header('Content-Type', 'application/activity+json')
-  public async userExists(@ServiceDomain() serviceId: string, @Param() params: UserParamsDto): Promise<boolean> {
-    const person = await this.userService.findOne(serviceId, params.username.toLowerCase());
+  public async userExists(@ServiceDomain() domain: string, @Param() params: UserParamsDto): Promise<boolean> {
+    const person = await this.userService.findOne(domain, params.username.toLowerCase());
 
     if (person) {
       return true;

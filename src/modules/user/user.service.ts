@@ -23,7 +23,7 @@ export class UserService {
     @InjectModel(UserActorRecord.name) protected userActorModel: Model<UserActorDocument>,
   ) { }
 
-  public async create(_domain: string, userDto: UserCreateDto): Promise<any> {
+  public async create(domain: string, userDto: UserCreateDto): Promise<any> {
     const saltRounds = 10;
     const {username, password} = userDto;
 
@@ -43,7 +43,7 @@ export class UserService {
       const {publicKey, privateKey} = await this.generateUserKeyPair();
 
       const user = await this.userModel.create({
-        domain: _domain,
+        domain: domain,
         username,
         email: userDto.email,
         password: await bcrypt.hash(password, saltRounds),
@@ -55,7 +55,7 @@ export class UserService {
 
       this.logger.debug(`Creating person object for user "${userDto.username}"`);
 
-      const id = `https://${_domain}/${_path}/${_pathId}`;
+      const id = `https://${domain}/${_path}/${_pathId}`;
       const personDtoParams: UserActorRecord = {
         '@context': ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'],
         type: 'Person',
@@ -68,12 +68,12 @@ export class UserService {
         name: userDto.name || user.username,
         preferredUsername: user.username,
         // summary: userDto.summary,
-        _domain,
+        _domain: domain,
         _local: true,
         _public: true,
         publicKey: {
-          id: `https://${_domain}/${_path}/${_pathId}#main-key`,
-          owner: `https://${_domain}/${_path}/${_pathId}`,
+          id: `https://${domain}/${_path}/${_pathId}#main-key`,
+          owner: `https://${domain}/${_path}/${_pathId}`,
           publicKeyPem: publicKey.toString()
         }
       };
