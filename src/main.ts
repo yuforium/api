@@ -42,7 +42,7 @@ async function bootstrap() {
     });
   }
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+  app.useGlobalPipes(new ValidationPipe({transform: false, whitelist: true}));
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector), {excludeExtraneousValues: true})
   );

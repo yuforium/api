@@ -120,7 +120,7 @@ export class UserContentController {
       // domain,
       // attributedTo: userId,
       // type: contentQuery.type,
-      $or: [{ _destination: person._id }, { _origination: person._id }]
+      $or: [{'_destination._id': person._id}, {'_origination._id': person._id}]
     };
 
     const items = (await this.objectService.find(queryParams, contentQuery))

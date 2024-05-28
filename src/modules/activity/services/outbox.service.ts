@@ -28,7 +28,7 @@ export class OutboxService {
    */
   public async createObject<T extends ObjectCreateDto = ObjectCreateDto>(
     _domain: string,
-    user: JwtUser,
+    _user: JwtUser,
     outboxActorId: string,
     dto: T
   ) {
@@ -50,8 +50,6 @@ export class OutboxService {
     if (outboxActor === null) {
       throw new Error(`Outbox actor not found for ${outboxActorId}.`);
     }
-
-    // lookups.forEach(lookup => lookup = lookup.select('_id'));
 
     const _attribution = (await Promise.all(lookups)).map(doc => doc?._id).filter(id => id !== null);
 

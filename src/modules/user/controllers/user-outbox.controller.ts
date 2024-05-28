@@ -61,7 +61,7 @@ export class UserOutboxController {
     Object.assign(dto, {
       attributedTo: (req.user as any).actor.id,
       published: (new Date()).toISOString(),
-      to: Array.isArray(dto.to) ? dto.to : [dto.to as string]
+      to: Array.isArray(dto.to) ? dto.to.map(i => i.toString()) : [dto.to.toString()]
     });
 
     const activity = this.outboxService.createObject(domain, user, userId, dto);
