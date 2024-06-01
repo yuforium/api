@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, NotFoundException, NotImplementedException, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Logger, NotFoundException, NotImplementedException, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { SyncActivityStreamService } from '../../../modules/activity-stream/services/sync-activity-stream.service';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
@@ -38,7 +38,7 @@ export class ForumOutboxController {
   @ApiOperation({operationId: 'postOutbox', summary: 'Post to a forum outbox'})
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  public async postOutbox(
+  public async postForumOutbox(
     @Param() params: ForumParams,
     @ServiceDomain() domain: string,
     @User() user: JwtUser,
@@ -83,5 +83,11 @@ export class ForumOutboxController {
     const activity = await this.outboxService.createObject(domain, user, forumId, dto);
 
     return activity;
+  }
+
+  @ApiOperation({operationId: 'getForumOutbox', summary: 'Get a forum outbox'})
+  @Get()
+  public getOutbox() {
+    throw new NotImplementedException('Not implemented');
   }
 }

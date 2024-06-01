@@ -1,4 +1,4 @@
-import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards, Logger } from '@nestjs/common';
+import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { OrderedCollection } from '@yuforium/activity-streams';
@@ -19,7 +19,7 @@ import { OutboxService } from '../../activity/services/outbox.service';
 import { ArticleCreateDto } from '../../../common/dto/object-create/article-create.dto';
 
 @Controller('users/:username/outbox')
-@ApiTags('activity-pub')
+@ApiTags('user')
 export class UserOutboxController {
   protected readonly logger = new Logger(UserOutboxController.name);
 
@@ -33,7 +33,7 @@ export class UserOutboxController {
   @ApiBearerAuth()
   @ApiBody({type: NoteCreateDto})
   @ApiParam({name: 'username', type: 'string'})
-  @ApiOperation({operationId: 'postUserOutbox'})
+  @ApiOperation({operationId: 'postUserOutbox', summary: 'Post to user outbox'})
   @UseGuards(AuthGuard('jwt'))
   @Post()
   public async postOutbox(
@@ -41,7 +41,7 @@ export class UserOutboxController {
     @ServiceDomain() domain: string,
     @User() user: JwtUser,
     @Req() req: Request,
-    @Body(new ActivityStreamsPipe<ObjectCreateDto>(ObjectCreateTransformer)) dto: ObjectCreateDto | NoteCreateDto | ArticleCreateDto
+    @Body(new ActivityStreamsPipe<ObjectCreateDto>(ObjectCreateTransformer, {groups: ['outbox']})) dto: ObjectCreateDto | NoteCreateDto | ArticleCreateDto
   ) {
     if (dto instanceof ActivityDto) {
       throw new NotImplementedException('Activity objects are not supported at this time.');

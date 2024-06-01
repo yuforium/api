@@ -67,6 +67,10 @@ export function BaseObjectSchema<TBase extends GConstructor<ASObject & {id: stri
     @Prop({type: Schema.Types.Mixed, required: false})
     @Exclude()
     public _origination: Origination[] = [];
+
+    @Prop({type: Schema.Types.Mixed, required: false})
+    @Exclude()
+    public _replies: {moderator?: number, normal?: number} = {}
   }
 
   return BaseObjectSchema;

@@ -51,17 +51,10 @@ export class OutboxService {
       throw new Error(`Outbox actor not found for ${outboxActorId}.`);
     }
 
-    const _attribution = (await Promise.all(lookups)).map(doc => doc?._id).filter(id => id !== null);
-
     const recordDto: ObjectRecord = await this.objectService.assignObjectMetadata({
       ...dto,
       '@context': 'https://www.w3.org/ns/activitystreams', // note that direct assignment like dto['@context'] = '...' doesn't work
-      id: `${outboxActor.id}/posts/${id.toString()}`,
-      _domain: _domain,
-      _outbox: outboxActor._id,
-      _attribution,
-      _public: Array.isArray(dto.to) ? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public',
-      _local: true
+      id: `${outboxActor.id}/posts/${id.toString()}`
     });
 
     const obj = await this.objectService.create(recordDto);
