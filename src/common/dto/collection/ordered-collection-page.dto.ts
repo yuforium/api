@@ -6,6 +6,9 @@ import { ObjectDto } from '../object';
 export class OrderedCollectionPageDto extends ActivityStreams.collectionPage('OrderedCollectionPage') {
   static type = 'OrderedCollectionPage';
 
+  @ApiProperty({type: 'integer'})
+  public totalItems!: number;
+
   @ApiProperty({type: [ObjectDto]})
   public items!: (string | ObjectDto | Link)[];
 }

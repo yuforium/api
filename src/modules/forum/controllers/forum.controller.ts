@@ -37,12 +37,13 @@ export class ForumController {
     return plainToInstance(ActorDto, this.forumService.create(domain, forumCreateDto));
   }
 
-  @ApiOperation({operationId: 'getForum'})
-  @ApiResponse({status: 200, description: 'Successful response', type: ActorDto})
-  @ApiResponse({status: 404, description: 'Forum does not exist'})
+  @ApiOperation({operationId: 'getForum', summary: 'Get a forum'})
+  @ApiResponse({status: 200, description: 'Forum found', type: ActorDto})
+  @ApiResponse({status: 404, description: 'Forum not found'})
   @Get(':forumname')
+  @Header('Content-Type', 'application/activity+json')
   public async findOne(
-    @ServiceDomain() domainId: string, 
+    @ServiceDomain() domainId: string,
     @Param() params: ForumParams
   ): Promise<ActorDto> {
     const forum = await this.forumService.get(domainId, params.forumname);

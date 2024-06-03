@@ -87,7 +87,7 @@ export class ForumOutboxController {
 
   @ApiOperation({operationId: 'getForumOutbox', summary: 'Get a forum outbox'})
   @Get()
-  public getOutbox() {
+  public getOutbox(@ServiceDomain() _domain: string, @Param() _params: ForumParams) {
     throw new NotImplementedException('Not implemented');
   }
 }

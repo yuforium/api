@@ -6,6 +6,8 @@ import { Equals, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ObjectDto } from '../object/object.dto';
 import sanitizeHtml from 'sanitize-html';
 
+const allowedTags = sanitizeHtml.defaults.allowedTags.concat(['strong']);
+
 /**
  * Basic requirements class for all objects submitted for *creation* to the
  * API server by a user through the outbox.  This is a generic class that should be extended
@@ -21,7 +23,7 @@ export class ObjectCreateDto extends PickType(ObjectDto, ['name', 'content', 'ty
   @IsString()
   @IsRequired()
   @MaxLength(65536)
-  @Transform(({value}) => sanitizeHtml(value), {
+  @Transform(({value}) => sanitizeHtml(value, {allowedTags}), {
     toClassOnly: true,
     // note that we _will_ sanitize HTML when a user posts it to their outbox to prevent XSS attacks.
     // different AP software may santize differently, so whatever we store should be the raw content,

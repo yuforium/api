@@ -1,8 +1,12 @@
 import { Prop } from '@nestjs/mongoose';
+import { ApiProperty } from '@nestjs/swagger';
 import { ActivityStreams } from '@yuforium/activity-streams';
 import { Expose } from 'class-transformer';
-import { IsAlphanumeric, IsNotEmpty, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
+import { IsAlphanumeric, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 import { Schema } from 'mongoose';
+
+const ASMultiType = [{type: 'string'}, {type: 'array', items: {type: 'string'}}];
+const ASMultiContext = [{type: 'string'}, {type: 'array', items: {type: 'string'}}];
 
 /**
  * Yuforium's base Actor type diverges from its base Object type in that it
@@ -15,22 +19,33 @@ import { Schema } from 'mongoose';
  * field below).
  */
 export class ActorDto extends ActivityStreams.object('Actor') {
+  @ApiProperty({
+    oneOf: [{type: 'string'}, {type: 'array', items: {type: 'string'}}],
+    description: 'The context of the actor, multiple supported'
+  })
   @Expose()
   @Prop({type: Schema.Types.Mixed, required: true})
   public '@context': string | string[] = 'https://www.w3.org/ns/activitystreams';
 
+  @ApiProperty({
+    oneOf: [{type: 'string'}, {type: 'array', items: {type: 'string'}}],
+    description: 'The type of the actor, multiple supported'
+  })
   @Expose()
   @Prop({type: Schema.Types.Mixed, required: true})
   public type!: string;
 
+  @ApiProperty({type: 'string', description: 'The name of the actor'})
   @Expose()
   @Prop({type: String, required: true})
   public name!: string;
 
+  @ApiProperty({type: 'string', description: 'A descriptive summary of the actor'})
   @Expose()
   @Prop({type: String, required: false})
   public summary?: string;
 
+  @ApiProperty({type: 'string', description: 'The preferred username of the actor, used in mentions and other places'})
   @Expose()
   @Prop({type: String, required: true})
   @IsNotEmpty()
@@ -40,6 +55,7 @@ export class ActorDto extends ActivityStreams.object('Actor') {
   @MaxLength(64)
   public preferredUsername!: string;
 
+  @ApiProperty({type: 'string', description: 'The ID of the actor'})
   @Prop({type: String, required: true})
   public id!: string;
 

@@ -9,7 +9,6 @@ import { PersonDto } from '../../../common/dto/object/person.dto';
 import { UserCreateDto } from '../dto/user-create.dto';
 import { UserService } from '../user.service';
 import { UserParamsDto } from '../dto/user-params.dto';
-import { Request } from 'express';
 import { ActorDto } from '../../../common/dto/actor/actor.dto';
 
 @ApiTags('user')
@@ -52,7 +51,7 @@ export class UserController {
     return req.user.actor;
   }
 
-  @ApiOperation({operationId: 'create'})
+  @ApiOperation({operationId: 'createUser'})
   @Post()
   @Header('Content-Type', 'application/activity+json')
   public async create(@ServiceDomain() serviceId: string, @Body() userDto: UserCreateDto) {
@@ -63,8 +62,9 @@ export class UserController {
     return plainToInstance(PersonDto, await this.userService.create(serviceId, userDto));
   }
 
-  @ApiOperation({operationId: 'get'})
-  @ApiResponse({status: 404, type: PersonDto})
+  @ApiOperation({operationId: 'getUser'})
+  @ApiResponse({status: 200, description: 'User found', type: PersonDto})
+  @ApiResponse({status: 404, description: 'User not found'})
   @Get(':username')
   @Header('Content-Type', 'application/activity+json')
   public async findOne(@ServiceDomain() domain: string, @Param('username') username: string): Promise<ActorDto> {

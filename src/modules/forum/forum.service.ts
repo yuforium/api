@@ -21,13 +21,16 @@ export class ForumService {
 
   public async create(_domain: string, forumCreateDto: ForumCreateDto): Promise<ActorRecord> {
     const dto = {
-      '@context': 'https://www.w3.org/ns/activitystreams',
-      id: `https://${_domain}/forums/${forumCreateDto.pathId}`, 
+      '@context': [
+        'https://www.w3.org/ns/activitystreams',
+        'https://yuforium.org/ns/activitystreams'
+      ],
+      id: `https://${_domain}/forums/${forumCreateDto.pathId}`,
       preferredUsername: forumCreateDto.pathId,
       name: forumCreateDto.name,
       summary: forumCreateDto.summary,
-      _domain, 
-      type: ['Service'],
+      _domain,
+      type: ['Service', 'Forum'],
       _public: true,
       _local: true
     };
