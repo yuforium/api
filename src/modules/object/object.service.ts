@@ -224,6 +224,13 @@ export class ObjectService {
     return this.objectModel.find(params, {}, options);
   }
 
+  public async findPageWithTotal(params: any = {}, options: {skip: number, limit: number, sort?: string} = {skip: 0, limit: 10}): Promise<{total: number, data: ObjectDocument[]}> {
+    const facet = {$facet: {metadata: [{$count: 'total'}], data: [{ $skip: options.skip }, { $limit: options.limit }]}};
+    const result = await this.objectModel.aggregate([{$match: params}, facet], options);
+
+    return {total: result[0].metadata[0].total, data: result[0].data}
+  }
+
   public async findOne(params: any): Promise<ObjectDocument | null> {
     return this.objectModel.findOne(params);
   }

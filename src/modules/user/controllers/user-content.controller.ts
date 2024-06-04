@@ -123,12 +123,13 @@ export class UserContentController {
       $or: [{'_destination._id': person._id}, {'_origination._id': person._id}]
     };
 
-    const items = (await this.objectService.find(queryParams, contentQuery))
-      .map(item => plainToInstance(ObjectDto, item));
+    const {data, total} = await this.objectService.findPageWithTotal(queryParams, contentQuery);
+
+    const items = data.map((item: any) => plainToInstance(ObjectDto, item));
 
     collectionPage.id = `${userId}/content`;
     collectionPage.items = items;
-    collectionPage.totalItems = collectionPage.items.length;
+    collectionPage.totalItems = total; //collectionPage.items.length;
 
     const resolveUsers = items
       .map((i: ObjectDto) => {
