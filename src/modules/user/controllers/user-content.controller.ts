@@ -37,7 +37,7 @@ import { Link } from '@yuforium/activity-streams';
   })
 )
 @ApiTags('user')
-@Controller('users/:username/content')
+@Controller('users/:username/posts')
 export class UserContentController {
   protected readonly logger: Logger = new Logger(this.constructor.name);
 
@@ -88,7 +88,7 @@ export class UserContentController {
     type: OrderedCollectionPageDto
   })
   @Get()
-  public async getContent(
+  public async getPosts(
     @ServiceDomain() domain: string,
     @Param() params: UserParamsDto,
     @Query('contentQuery') contentQuery: UserContentQueryOptionsDto
@@ -145,7 +145,7 @@ export class UserContentController {
     return collectionPage;
   }
 
-  @Get('posts/:postId')
+  @Get(':postId')
   @ApiParam({
     name: 'username',
     type: 'string',
