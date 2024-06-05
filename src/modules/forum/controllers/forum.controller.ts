@@ -22,8 +22,8 @@ export class ForumController {
   @ApiOperation({operationId: 'findForums', summary: 'Find forums'})
   @Get()
   @Header('Content-Type', 'application/activity+json')
-  public async findForums() {
-    const forums = await this.objectService.find({type: 'Forum'});
+  public async findForums(@ServiceDomain() _domain: string) {
+    const forums = await this.objectService.find({type: 'Forum', _domain});
     const collection = new ForumCollectionDto();
     collection.items = forums.map((item: ObjectDocument) => plainToInstance(ForumDto, item));
 
