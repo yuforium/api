@@ -78,11 +78,6 @@ export class UserService {
         }
       };
 
-      // console.log(personDtoParams);
-
-      // const personDto = Object.assign(new PersonDto(), personDtoParams);
-      // await validate(personDto);
-
       // effectively the person is creating themselves
       const record = await this.userActorModel.create(personDtoParams);
 

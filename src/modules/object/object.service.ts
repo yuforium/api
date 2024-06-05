@@ -226,7 +226,7 @@ export class ObjectService {
 
   public async findPageWithTotal(params: any = {}, options: {skip: number, limit: number, sort?: string} = {skip: 0, limit: 10}): Promise<{total: number, data: ObjectDocument[]}> {
     const facet = {$facet: {metadata: [{$count: 'total'}], data: [{ $skip: options.skip }, { $limit: options.limit }]}};
-    const result = await this.objectModel.aggregate([{$match: params}, facet], options);
+    const result = await this.objectModel.aggregate([{$match: params}, {$sort: {published: -1}}, facet], options);
 
     return {total: result[0].metadata[0].total, data: result[0].data}
   }
