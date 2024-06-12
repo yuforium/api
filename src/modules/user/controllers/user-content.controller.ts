@@ -29,6 +29,7 @@ import { OrderedCollectionPageDto } from '../../../common/dto/collection/ordered
 import { Reflector } from '@nestjs/core';
 import { StoredObjectResolver } from 'src/modules/object/resolver/stored-object.resolver';
 import { Link } from '@yuforium/activity-streams';
+import { ContentQueryOptionsDto } from 'src/modules/object/dto/content-query-options.dto';
 
 @UseInterceptors(
   new ClassSerializerInterceptor(new Reflector(), {
@@ -91,19 +92,19 @@ export class UserContentController {
   public async getPosts(
     @ServiceDomain() domain: string,
     @Param() params: UserParamsDto,
-    @Query('contentQuery') contentQuery: UserContentQueryOptionsDto
+    @Query('contentQuery') contentQuery: ContentQueryOptionsDto
   ): Promise<OrderedCollectionPageDto> {
     const collectionPage = new OrderedCollectionPageDto();
     const userId = `https://${domain}/users/${params.username}`;
+
+    contentQuery = contentQuery || new ContentQueryOptionsDto();
 
     this.logger.debug(`getContent() for user ${params.username}@${domain}`);
 
     const user = await this.userService.findOne(domain, params.username);
 
     if (!user) {
-      this.logger.error(
-        `getContent() user not found for ${params.username}@${domain}`
-      );
+      this.logger.debug(`getContent() user not found for ${params.username}@${domain}`);
       throw new NotFoundException();
     }
 
@@ -111,19 +112,20 @@ export class UserContentController {
       _domain: domain,
       _id: user.defaultIdentity
     });
+
     if (!person) {
       this.logger.error(`getContent() user default identity not found for ${params.username}@${domain}`);
       throw new NotFoundException();
     }
 
     const queryParams = {
-      // domain,
-      // attributedTo: userId,
-      // type: contentQuery.type,
-      $or: [{'_destination._id': person._id}, {'_origination._id': person._id}]
+      $or: [
+        {'_attribution._id': person._id, '_attribution.rel': 'attributedTo', '_public': true},
+        {'_attribution._id': person._id, '_attribution.rel': 'to', '_public': true}
+      ]
     };
 
-    const {data, total} = await this.objectService.findPageWithTotal(queryParams, contentQuery);
+    const {data, totalItems: total} = await this.objectService.findPageWithTotal(queryParams, contentQuery);
 
     const items = data.map((item: any) => plainToInstance(ObjectDto, item));
 
@@ -131,17 +133,19 @@ export class UserContentController {
     collectionPage.items = items;
     collectionPage.totalItems = total; //collectionPage.items.length;
 
-    const resolveUsers = items
-      .map((i: ObjectDto) => {
-        if (i.attributedTo instanceof Link) {
-          return i.attributedTo.resolve(this.resolver);
-        }
-        else {
-          return Promise.resolve(i.attributedTo);
-        }
-      });
+    await this.objectService.resolveFields(items, 'attributedTo');
 
-    await Promise.all(resolveUsers);
+    // const resolveUsers = items
+    //   .map((i: ObjectDto) => {
+    //     if (i.attributedTo instanceof Link) {
+    //       return i.attributedTo.resolve(this.resolver);
+    //     }
+    //     else {
+    //       return Promise.resolve(i.attributedTo);
+    //     }
+    //   });
+
+    // await Promise.all(resolveUsers);
 
     return collectionPage;
   }

@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { ObjectDocument, ObjectRecord } from './schema/object.schema';
 import { Model, Types, Schema, Connection } from 'mongoose';
@@ -6,11 +6,15 @@ import { plainToInstance } from 'class-transformer';
 import { ObjectDto } from '../../common/dto/object/object.dto';
 import { RelationshipDocument, RelationshipRecord } from './schema/relationship.schema';
 import { ConfigService } from '@nestjs/config';
-import { BaseObjectRecord, Destination, Origination } from './schema/base-object.schema';
+import { Attribution, BaseObjectRecord } from './schema/base-object.schema';
 import { resolveDomain } from '../../common/decorators/service-domain.decorator';
 import { RelationshipType } from './type/relationship.type';
 import { ObjectType } from './type/object.type';
+import { ASObjectOrLink, Link, ResolvableArray } from '@yuforium/activity-streams';
+import { StoredObjectResolver } from './resolver/stored-object.resolver';
+import { ActivityStreams } from '@yuforium/activity-streams';
 
+type Resolvable = 'attributedTo' | 'to' | 'cc' | 'bcc';
 
 /**
  * Object Service
@@ -29,7 +33,8 @@ export class ObjectService {
     @InjectModel(ObjectRecord.name) protected objectModel: Model<ObjectDocument>,
     @InjectModel(RelationshipRecord.name) protected relationshipModel: Model<RelationshipDocument>,
     @InjectConnection() protected connection: Connection,
-    protected configService: ConfigService
+    protected configService: ConfigService,
+    @Inject(forwardRef(() => StoredObjectResolver)) protected readonly resolver: StoredObjectResolver
   ) { }
 
   public async get(id: string): Promise<ObjectDocument | null> {
@@ -40,8 +45,48 @@ export class ObjectService {
     return this.objectModel.findOne({ _serviceId, _servicePath, _servicePathId });
   }
 
+  /**
+   * Convenience method for generating a new Object ID.
+   */
   public id() {
     return new Types.ObjectId();
+  }
+
+  /**
+   * Resolve the fields of an object.
+   * @todo This uses the @yuforium/activity-streams resolver to resolve links.  The activity-streams library
+   * does not currently support resolving arrays of links, but should be able to in the future (by providing
+   * a ResolvableArray class for arrays that would resolve each item).
+   */
+  public async resolveFields(item: ObjectDto | ObjectDto[], fields: Resolvable | Resolvable[]): Promise<any> {
+    if (Array.isArray(item)) {
+      return Promise.all(item.map(i => this.resolveFields(i, fields)));
+    }
+
+    fields = Array.isArray(fields) ? fields : [fields];
+
+    return Promise.all(fields.map(field => {
+      const value = item[field];
+      if (value instanceof Link || value instanceof ResolvableArray) {
+        return value.resolve(this.resolver);
+      }
+      return Promise.resolve(value);
+    }));
+
+    // return item;
+
+
+
+    // const resolveUsers = items
+    //   .map((i: ObjectDto) => {
+    //     if (i.attributedTo instanceof Link) {
+    //       return i.attributedTo.resolve(this.resolver);
+    //     }
+    //     else {
+    //       return Promise.resolve(i.attributedTo);
+    //     }
+    //   });
+
   }
 
   /**
@@ -81,35 +126,35 @@ export class ObjectService {
     const _public = this.isPublic(dto);
     const _local = this.isLocal(dto);
 
-    const destinations = [];
+    const lookup = async (fields: ASObjectOrLink | ASObjectOrLink[] | undefined): Promise<(ObjectDocument)[]> => {
+      if (!fields) {
+        return [];
+      }
 
-    if (dto.to) {
-      destinations.push(...(Array.isArray(dto.to) ? dto.to : [dto.to]));
+      const ids = (Array.isArray(fields) ? fields : (fields ? [fields] : []))
+        .map(i => typeof i === 'object' ? i.id : i)
+        .filter(i => i !== undefined ? true : false) as string[];
+
+      return Promise.all(ids.map(id => this.findOne({id, _local: true})))
+        .then(results => results.filter(o => o !== null) as ObjectDocument[]);
     }
-    if (dto.bcc) {
-      destinations.push(...(Array.isArray(dto.bcc) ? dto.bcc : [dto.bcc]));
-    }
-    if (dto.cc) {
-      destinations.push(...(Array.isArray(dto.cc) ? dto.cc : [dto.cc]));
-    }
 
-    const attributedTo = Array.isArray(dto.attributedTo) ? dto.attributedTo : typeof dto.attributedTo === 'string' ? [dto.attributedTo] : [];
+    const _attribution: Attribution[] = [];
 
-    const _destination: Destination[] = (await Promise.all(destinations.map(dest => this.findOne({ id: dest, _local: true }))))
-      .filter(o => o !== null)
-      .map((o: any): Destination => ({ rel: 'inbox', _id: o._id as Types.ObjectId }));
-
-    const _origination: Origination[] = (await Promise.all(attributedTo.map(t => this.findOne({ id: t, _local: true }))))
-      .filter(o => o !== null)
-      // @todo attribution needs to be figured out - self is going to be the last entry in the attributedTo array
-      .map((o: any): Origination => ({ rel: 'self', _id: o._id as Types.ObjectId }));
+    await Promise.all([lookup(dto.to), lookup(dto.cc), lookup(dto.bcc), lookup(dto.attributedTo)])
+      .then(results => {
+        const [to, cc, bcc, attributedTo] = results;
+        to.forEach(obj => _attribution.push({rel: 'to', _id: obj._id, id: obj.id}));
+        cc.forEach(obj => _attribution.push({rel: 'cc', _id: obj._id, id: obj.id}));
+        bcc.forEach(obj => _attribution.push({rel: 'bcc', _id: obj._id, id: obj.id}));
+        attributedTo.forEach(obj => _attribution.push({rel: 'attributedTo', _id: obj._id, id: obj.id}));
+      });
 
     return {
+      _attribution,
       _domain,
       _public,
-      _local,
-      _origination,
-      _destination
+      _local
     };
   }
 
@@ -150,6 +195,9 @@ export class ObjectService {
     return obj;
   }
 
+  /**
+   * Create a new object record.
+   */
   public async create(dto: ObjectRecord): Promise<ObjectDto> {
     try {
       const obj = await this.objectModel.create(dto);
@@ -215,7 +263,17 @@ export class ObjectService {
     return { record };
   }
 
+  /**
+   * Find an object by its Activity Streams ID.  Note that this is different from the internal ID (MongoDB ObjectId).
+   */
   public async findById(id: string | Schema.Types.ObjectId): Promise<any> {
+    return this.objectModel.findOne({id});
+  }
+
+  /**
+   * Find an object by its internal ID (MongoDB ObjectId).
+   */
+  public async findByInternalId(id: string | Schema.Types.ObjectId): Promise<ObjectDocument | null> {
     return this.objectModel.findById(id);
   }
 
@@ -224,10 +282,13 @@ export class ObjectService {
     return this.objectModel.find(params, {}, options);
   }
 
-  public async findPageWithTotal(params: any = {}, options: {skip: number, limit: number, sort?: string} = {skip: 0, limit: 10}): Promise<{total: number, data: ObjectDocument[]}> {
+  /**
+   * Consider splitting this off into a content service or something similar.
+   */
+  public async findPageWithTotal(params: any = {}, options: {skip: number, limit: number, sort?: string} = {skip: 0, limit: 10}): Promise<{totalItems: number, data: ObjectDocument[]}> {
     const facet = {$facet: {metadata: [{$count: 'total'}], data: [{ $skip: options.skip }, { $limit: options.limit }]}};
     const result = await this.objectModel.aggregate([{$match: params}, {$sort: {published: -1}}, facet], options);
-    return {total: result[0].metadata[0]?.total || 0, data: result[0].data}
+    return {totalItems: result[0].metadata[0]?.total || 0, data: result[0].data}
   }
 
   public async findOne(params: any): Promise<ObjectDocument | null> {

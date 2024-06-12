@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ActivityStreams, ASLink, ASObject } from '@yuforium/activity-streams';
 import { ObjectService } from '../object.service';
 
 @Injectable()
 export class StoredObjectResolver extends ActivityStreams.Resolver {
-  constructor(protected objectService: ObjectService) {
+  constructor(@Inject(forwardRef(() => ObjectService)) protected objectService: ObjectService) {
     super();
   }
 

@@ -13,6 +13,23 @@ export type Destination = {
 export type Origination = {
   rel: 'self' | 'attribution';
   _id: Types.ObjectId;
+  description?: string;
+}
+
+export type Attribution = {
+  /**
+   * Type of relationship between the object and the actor.
+   */
+  rel: 'attributedTo' | 'to' | 'cc' | 'bcc';
+
+  /**
+   * The internal Object ID for the actor that is attributed to the object.
+   */
+  _id: Types.ObjectId;
+
+  id: string;
+  description?: string;
+  primary?: boolean;
 }
 
 /**
@@ -23,8 +40,9 @@ export type BaseObjectRecord = BaseRecord & {
   /**
    * Only used for local actors, specifies the outbox from which the object originated.
    */
-  _origination: Origination[];
-  _destination: Destination[];
+  // _origination: Origination[];
+  // _destination: Destination[];
+  _attribution: Attribution[];
 }
 
 /**
@@ -56,17 +74,21 @@ export function BaseObjectSchema<TBase extends GConstructor<ASObject & {id: stri
      * ]
      * ```
      */
-    @Prop({type: Schema.Types.Mixed, required: true})
-    @Exclude()
-    public _destination: Destination[] = [];
+    // @Prop({type: Schema.Types.Mixed, required: true})
+    // @Exclude()
+    // public _destination: Destination[] = [];
 
     /**
      * Actor who created the object.  This is used to determine the outbox from
      * which the object originated.
      */
-    @Prop({type: Schema.Types.Mixed, required: false})
+    // @Prop({type: Schema.Types.Mixed, required: false})
+    // @Exclude()
+    // public _origination: Origination[] = [];
+
+    @Prop({type: Schema.Types.Array, required: false})
     @Exclude()
-    public _origination: Origination[] = [];
+    public _attribution: Attribution[] = [];
 
     @Prop({type: Schema.Types.Mixed, required: false})
     @Exclude()

@@ -2,13 +2,17 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsInt, IsOptional } from 'class-validator';
 
+/**
+ * Base class that can be used or extended by controllers for querying content.
+ */
 export class ContentQueryOptionsDto {
   @ApiPropertyOptional({
     name: 'type',
     type: 'string',
     format: 'form',
     default: 'All',
-    description: 'Comma separated list of Activity Streams object types to include in the response.',
+    description:
+      'Comma separated list of Activity Streams object types to include in the response.',
     example: 'Note,Article'
   })
   @IsOptional()
@@ -19,9 +23,10 @@ export class ContentQueryOptionsDto {
     type: 'integer',
     format: 'form',
     default: 0,
-    description: 'The number of items to skip before returning the remaining items.',
+    description:
+      'The number of items to skip before returning the remaining items.'
   })
-  @Transform(({value}) => parseInt(value, 10))
+  @Transform(({ value }) => parseInt(value, 10))
   @IsInt()
   public skip: number = 0;
 
@@ -33,7 +38,7 @@ export class ContentQueryOptionsDto {
     description: 'The maximum number of items to return.',
     example: 1
   })
-  @Transform(({value}) => parseInt(value, 10))
+  @Transform(({ value }) => parseInt(value, 10))
   @IsInt()
   public limit: number = 20;
 

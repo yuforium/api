@@ -82,9 +82,9 @@ export class ObjectDto extends ActivityStreams.object('Object') implements Objec
   public content?: string;
 
   @ApiProperty({ type: String })
-  @Prop({ type: String })
+  @Prop({ type: Mixed })
   @Expose()
-  public context?: string;
+  public context?: string | string[];
 
   @ApiProperty({
     required: false,

@@ -53,6 +53,9 @@ export class ForumService {
     return forum;
   }
 
+  /**
+   * Get the content of a forum.
+   */
   public async getContent(_domain: string, forumname: string, opts: ForumQueryOpts = {}): Promise<ObjectRecord[]> {
     const forum = await this.get(_domain, forumname);
 
@@ -60,8 +63,13 @@ export class ForumService {
       throw new NotFoundException(`Forum "${forumname}" not found.`);
     }
 
+    // Consider merging _origination and _destination into a single _attribution field.
+    // e.g. {_id, rel: 'to', type: 'destination'},
+    // {_id, rel: 'cc', type: 'destination'},
+    // {_id, rel: 'attributedTo', type: 'origination'}
     const params = {
-      _attribution: forum._id,
+      // _attribution: {_id: forum._id},
+      _origination: {_id: forum._id},
     };
 
     const posts = (await this.objectService.find(params, opts))

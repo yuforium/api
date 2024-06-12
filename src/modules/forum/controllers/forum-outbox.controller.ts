@@ -68,16 +68,18 @@ export class ForumOutboxController {
     // @todo document how and why to/cc are set for various targets
     // see also https://github.com/mastodon/mastodon/issues/8067 and https://github.com/mastodon/mastodon/pull/3844#issuecomment-314897285
     Object.assign(dto, {
-      attributedTo: [user.actor.id, `https://${domain}/forums/${params.forumname}`], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
+      attributedTo: [
+        `https://${domain}/forums/${params.forumname}`,
+        user.actor.id
+      ], // @todo document that attributedTo is an array with the first element being the primary source, everything following it is considered "on behalf of" in that order
       published: new Date().toISOString(),
       context: [
         `https://yuforium.com/community/${params.forumname}`,
         `https://yuforium.com/forum/${params.forumname}`, // @todo this will be a property of the forum that the post will inherit
       ],
       to: ['https://www.w3.org/ns/activitystreams#Public'],
-      cc: [`${params.forumname}/followers`], // @todo consider
-      audience: [`${params.forumname}/followers`], // represents the primary audience for the post.  In Yuforium, this is explicitly set to the followers of the forum, and not the context which would be considered as a wider scope than the audience
-
+      cc: [`https://${domain}/forums/${params.forumname}/followers`], // cc: is most appropriate for federation
+      audience: [`https://${domain}/forums/${params.forumname}`] // represents the primary audience for the post.  In Yuforium, this is the forum, and not the context which would be considered as a wider scope than the audience
     });
 
     const activity = await this.outboxService.createObject(domain, user, forumId, dto);

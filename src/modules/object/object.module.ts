@@ -9,7 +9,10 @@ import { StoredObjectResolver } from './resolver/stored-object.resolver';
 import { UserActorRecord, UserActorSchema } from './schema/user-actor.schema';
 
 @Module({
-  providers: [ObjectService, StoredObjectResolver],
+  providers: [
+    StoredObjectResolver,
+    ObjectService
+  ],
   imports: [
     MongooseModule.forFeature([
       { name: ObjectRecord.name, schema: ObjectSchema },

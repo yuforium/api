@@ -13,7 +13,8 @@ export class WebfingerService {
     if (!user) {
       throw new NotFoundException();
     }
-    const person = await this.objectService.findById(user.defaultIdentity);
+
+    const person = await this.objectService.findByInternalId(user.defaultIdentity);
 
     if (!person) {
       throw new NotFoundException();

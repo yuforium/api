@@ -1,5 +1,5 @@
 import { Controller, Get, Param, NotFoundException, Header, Post, Body } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiExtraModels, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { ObjectService } from '../../object/object.service';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
@@ -38,8 +38,9 @@ export class ForumController {
   }
 
   @ApiOperation({operationId: 'getForum', summary: 'Get a forum'})
-  @ApiResponse({status: 200, description: 'Forum found', type: ActorDto})
-  @ApiResponse({status: 404, description: 'Forum not found'})
+  @ApiOkResponse({status: 200, description: 'Forum found', type: ActorDto})
+  @ApiNotFoundResponse({status: 404, description: 'Forum not found'})
+  @ApiExtraModels(ActorDto)
   @Get(':forumname')
   @Header('Content-Type', 'application/activity+json')
   public async findOne(
