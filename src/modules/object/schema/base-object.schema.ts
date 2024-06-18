@@ -20,7 +20,7 @@ export type Attribution = {
   /**
    * Type of relationship between the object and the actor.
    */
-  rel: 'attributedTo' | 'to' | 'cc' | 'bcc';
+  rel: 'attributedTo' | 'to' | 'cc' | 'bcc' | 'audience' | 'context';
 
   /**
    * The internal Object ID for the actor that is attributed to the object.
@@ -40,9 +40,7 @@ export type BaseObjectRecord = BaseRecord & {
   /**
    * Only used for local actors, specifies the outbox from which the object originated.
    */
-  // _origination: Origination[];
-  // _destination: Destination[];
-  _attribution: Attribution[];
+  _attribution?: Attribution[];
 }
 
 /**
@@ -57,42 +55,20 @@ export type BaseObjectRecord = BaseRecord & {
  */
 export function BaseObjectSchema<TBase extends GConstructor<ASObject & {id: string}>>(Base: TBase): TBase & GConstructor<BaseObjectRecord> {
   class BaseObjectSchema extends BaseSchema<TBase>(Base) {
+    public _id!: Types.ObjectId;
     /**
      * Specifies an actor or list of actors for where the object was received
-     * via the inbox. (local actors only)
-     *
-     * This is based on the to/cc/bcc field.
-     *
-     * @todo this can be expanded upon.  Instead of a simple actor reference,
-     * we can store more descriptive information about the recipient, such as
-     * the to/cc/bcc field, and the actor's role in the message.  For example:
-     *
-     * ```json
-     * [
-     *  {rel: "self", actor: "https://example.com/actors/1", _id: "<mongo object id>"},
-     *  {rel: "to", actor: "https://example.com/actors/2", _id: "<mongo object id>"},
-     * ]
-     * ```
+     * via the inbox or sent via outbox. It also includes tertiary actors that
+     * are not directly related to the object, but are included for querying,
+     * such as the audience or context field.
      */
-    // @Prop({type: Schema.Types.Mixed, required: true})
-    // @Exclude()
-    // public _destination: Destination[] = [];
-
-    /**
-     * Actor who created the object.  This is used to determine the outbox from
-     * which the object originated.
-     */
-    // @Prop({type: Schema.Types.Mixed, required: false})
-    // @Exclude()
-    // public _origination: Origination[] = [];
-
     @Prop({type: Schema.Types.Array, required: false})
     @Exclude()
-    public _attribution: Attribution[] = [];
+    public _attribution?: Attribution[];
 
     @Prop({type: Schema.Types.Mixed, required: false})
     @Exclude()
-    public _replies: {moderator?: number, normal?: number} = {}
+    public _replies?: {moderator?: number, normal?: number};
   }
 
   return BaseObjectSchema;

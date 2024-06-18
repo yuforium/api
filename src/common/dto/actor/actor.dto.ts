@@ -5,9 +5,6 @@ import { Expose } from 'class-transformer';
 import { IsAlphanumeric, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 import { Schema } from 'mongoose';
 
-const ASMultiType = [{type: 'string'}, {type: 'array', items: {type: 'string'}}];
-const ASMultiContext = [{type: 'string'}, {type: 'array', items: {type: 'string'}}];
-
 /**
  * Yuforium's base Actor type diverges from its base Object type in that it
  * adds a preferredusername field and helper methods to for values such as
@@ -33,7 +30,7 @@ export class ActorDto extends ActivityStreams.object('Actor') {
   })
   @Expose()
   @Prop({type: Schema.Types.Mixed, required: true})
-  public type!: string;
+  public type!: string | string[];
 
   @ApiProperty({type: 'string', description: 'The name of the actor'})
   @Expose()
@@ -55,6 +52,7 @@ export class ActorDto extends ActivityStreams.object('Actor') {
   @MaxLength(64)
   public preferredUsername!: string;
 
+  @Expose()
   @ApiProperty({type: 'string', description: 'The ID of the actor'})
   @Prop({type: String, required: true})
   public id!: string;

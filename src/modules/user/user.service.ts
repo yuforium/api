@@ -188,7 +188,7 @@ export class UserService {
       return null;
     }
 
-    const person = await this.objectService.findOne({_id: user.defaultIdentity}) as PersonDocument;
+    const person = await this.objectService.findByInternalId(user.defaultIdentity) as PersonDocument;
 
     if (person) {
       person['@context'] = ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'];

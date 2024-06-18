@@ -37,7 +37,7 @@ export function BaseSchema<SourceDtoType extends GConstructor<BaseDto> = GConstr
     public _id!: Types.ObjectId;
 
     /**
-     * The domain of the object.  This is used for querying content.  Although 
+     * The domain of the object.  This is used for querying content.  Although
      * there is no support for multiple domains, this is included for future support.
      */
     @Prop({type: String, required: true})
@@ -56,7 +56,7 @@ export function BaseSchema<SourceDtoType extends GConstructor<BaseDto> = GConstr
      */
     @Prop({type: Boolean, required: true})
     @Exclude()
-    public _local: boolean = false;
+    public _local!: boolean;
 
     /**
      * Specifies if this is a deleted object.  This is used for querying content.

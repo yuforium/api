@@ -99,8 +99,6 @@ export class InboxProcessorService {
       _public: true
     };
 
-    // console.log(activityRecordDto);
-
     this.logger.debug(`follow(): creating activity ${activityRecordDto.id}`);
     const activity = await this.activityService.createActivity(activityRecordDto);
     this.logger.debug(`follow(): created activity ${activity.id}`);

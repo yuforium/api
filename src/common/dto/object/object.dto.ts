@@ -127,6 +127,14 @@ export class ObjectDto extends ActivityStreams.object('Object') implements Objec
   @Expose()
   public bcc?: string | string[];
 
+  @ApiProperty(ApiPropertyOneOfStringOrArray)
+  @Prop({ type: Mixed })
+  @Expose()
+  public audience?: string | string[];
+
+  /**
+   * @todo This belongs in a separate Actor model
+   */
   @Prop({ type: Mixed })
   @Expose()
   public publicKey?: {

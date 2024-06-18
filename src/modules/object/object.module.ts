@@ -15,10 +15,15 @@ import { UserActorRecord, UserActorSchema } from './schema/user-actor.schema';
   ],
   imports: [
     MongooseModule.forFeature([
-      { name: ObjectRecord.name, schema: ObjectSchema },
-      { name: RelationshipRecord.name, schema: RelationshipSchema },
-      { name: ActorRecord.name, schema: ActorSchema },
-      { name: UserActorRecord.name, schema: UserActorSchema}
+      {
+        name: ObjectRecord.name,
+        schema: ObjectSchema,
+        discriminators: [
+          { name: ActorRecord.name, schema: ActorSchema, value: 'actor' },
+          { name: RelationshipRecord.name, schema: RelationshipSchema, value: 'relationship'}
+        ]
+      },
+      {name: UserActorRecord.name, schema: UserActorSchema}
     ])
   ],
   exports: [

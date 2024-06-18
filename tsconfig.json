@@ -14,7 +14,8 @@
     "skipLibCheck": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "strict": true
+    "strict": true,
+    "allowJs": true
   },
   "exclude": ["node_modules", "dist"]
 }

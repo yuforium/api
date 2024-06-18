@@ -10,6 +10,8 @@ import { ActivityRecord } from '../schema/activity.schema';
 import { instanceToPlain } from 'class-transformer';
 import { ObjectDocument, ObjectRecord } from '../../object/schema/object.schema';
 import { Activity } from '@yuforium/activity-streams';
+import { ObjectDto } from 'src/common/dto/object';
+import { ActorDto } from 'src/common/dto/actor/actor.dto';
 
 @Injectable()
 export class OutboxService {
@@ -81,7 +83,7 @@ export class OutboxService {
    * @param id
    * @returns
    */
-  public async getLocalObject(id: string): Promise<ObjectDocument | null> {
+  public async getLocalObject(id: string): Promise<ObjectDto | ActorDto | null> {
     return this.objectService.findOne({ id, _serviceId: { $ne: null } });
   }
 }

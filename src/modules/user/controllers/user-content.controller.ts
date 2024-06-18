@@ -28,7 +28,6 @@ import { UserService } from '../user.service';
 import { OrderedCollectionPageDto } from '../../../common/dto/collection/ordered-collection-page.dto';
 import { Reflector } from '@nestjs/core';
 import { StoredObjectResolver } from 'src/modules/object/resolver/stored-object.resolver';
-import { Link } from '@yuforium/activity-streams';
 import { ContentQueryOptionsDto } from 'src/modules/object/dto/content-query-options.dto';
 
 @UseInterceptors(
@@ -78,10 +77,10 @@ export class UserContentController {
   @ApiQuery({
     name: 'contentQuery',
     required: false,
-    type: 'UserContentQueryOptionsDto',
+    type: 'ContentQueryOptionsDto',
     style: 'deepObject',
     schema: {
-      $ref: getSchemaPath(UserContentQueryOptionsDto)
+      $ref: getSchemaPath(ContentQueryOptionsDto)
     }
   })
   @ApiOkResponse({
@@ -93,7 +92,7 @@ export class UserContentController {
     @ServiceDomain() domain: string,
     @Param() params: UserParamsDto,
     @Query('contentQuery') contentQuery: ContentQueryOptionsDto
-  ): Promise<OrderedCollectionPageDto> {
+  ): Promise<OrderedCollectionPageDto | any> {
     const collectionPage = new OrderedCollectionPageDto();
     const userId = `https://${domain}/users/${params.username}`;
 
@@ -120,10 +119,13 @@ export class UserContentController {
 
     const queryParams = {
       $or: [
-        {'_attribution._id': person._id, '_attribution.rel': 'attributedTo', '_public': true},
-        {'_attribution._id': person._id, '_attribution.rel': 'to', '_public': true}
+        {'_attribution.id': person.id, '_attribution.rel': 'attributedTo', '_public': true},
+        {'_attribution.id': person.id, '_attribution.rel': 'to', '_public': true}
       ]
     };
+
+    // const scratch = await this.objectService.findById('https://localhost/forums/scratch');
+    // return scratch;
 
     const {data, totalItems: total} = await this.objectService.findPageWithTotal(queryParams, contentQuery);
 
@@ -133,19 +135,9 @@ export class UserContentController {
     collectionPage.items = items;
     collectionPage.totalItems = total; //collectionPage.items.length;
 
-    await this.objectService.resolveFields(items, 'attributedTo');
+    await this.objectService.resolveFields(items, ['attributedTo', 'audience']);
 
-    // const resolveUsers = items
-    //   .map((i: ObjectDto) => {
-    //     if (i.attributedTo instanceof Link) {
-    //       return i.attributedTo.resolve(this.resolver);
-    //     }
-    //     else {
-    //       return Promise.resolve(i.attributedTo);
-    //     }
-    //   });
-
-    // await Promise.all(resolveUsers);
+    items[0].audience = (items[0].audience as any)?._asmeta?._resolved;
 
     return collectionPage;
   }

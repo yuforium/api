@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 import { ObjectDocument, ObjectRecord } from './schema/object.schema';
-import { Model, Types, Schema, Connection } from 'mongoose';
+import { Model, Types, Schema } from 'mongoose';
 import { plainToInstance } from 'class-transformer';
 import { ObjectDto } from '../../common/dto/object/object.dto';
 import { RelationshipDocument, RelationshipRecord } from './schema/relationship.schema';
@@ -10,11 +10,13 @@ import { Attribution, BaseObjectRecord } from './schema/base-object.schema';
 import { resolveDomain } from '../../common/decorators/service-domain.decorator';
 import { RelationshipType } from './type/relationship.type';
 import { ObjectType } from './type/object.type';
-import { ASObjectOrLink, Link, ResolvableArray } from '@yuforium/activity-streams';
+import { ActivityStreams, ASLink, ASObject, ASObjectOrLink, Link, ResolvableArray } from '@yuforium/activity-streams';
 import { StoredObjectResolver } from './resolver/stored-object.resolver';
-import { ActivityStreams } from '@yuforium/activity-streams';
+import { ActorDocument } from './schema/actor.schema';
+import { ActorDto } from '../../common/dto/actor/actor.dto';
+import { ActorType } from './type/actor.type';
 
-type Resolvable = 'attributedTo' | 'to' | 'cc' | 'bcc';
+type ResolvableFields = 'attributedTo' | 'to' | 'cc' | 'bcc' | 'audience';
 
 /**
  * Object Service
@@ -32,7 +34,6 @@ export class ObjectService {
   constructor(
     @InjectModel(ObjectRecord.name) protected objectModel: Model<ObjectDocument>,
     @InjectModel(RelationshipRecord.name) protected relationshipModel: Model<RelationshipDocument>,
-    @InjectConnection() protected connection: Connection,
     protected configService: ConfigService,
     @Inject(forwardRef(() => StoredObjectResolver)) protected readonly resolver: StoredObjectResolver
   ) { }
@@ -54,39 +55,49 @@ export class ObjectService {
 
   /**
    * Resolve the fields of an object.
-   * @todo This uses the @yuforium/activity-streams resolver to resolve links.  The activity-streams library
-   * does not currently support resolving arrays of links, but should be able to in the future (by providing
-   * a ResolvableArray class for arrays that would resolve each item).
+   * Note that this method will replace the fields in the object itself with the resolved values if they resolve.
+   * @todo - The ActivityStreams library currently handles resolution at the item level (e.g. items resolve themselves, and then return their
+   * resolved value when requested or converted.  This may not be the most ideal pattern, so this function will do the replacement of the
+   * fields in the object itself.
    */
-  public async resolveFields(item: ObjectDto | ObjectDto[], fields: Resolvable | Resolvable[]): Promise<any> {
-    if (Array.isArray(item)) {
-      return Promise.all(item.map(i => this.resolveFields(i, fields)));
-    }
-
+  public async resolveFields(item: ASObject, fields: ResolvableFields | ResolvableFields[]): Promise<any> {
     fields = Array.isArray(fields) ? fields : [fields];
 
-    return Promise.all(fields.map(field => {
+    return await Promise.all(fields.map(async (field) => {
       const value = item[field];
-      if (value instanceof Link || value instanceof ResolvableArray) {
-        return value.resolve(this.resolver);
+      let resolved;
+
+      if (Array.isArray(value)) {
+        resolved = await Promise.all(value.map(async (v) => this.resolve(v)));
       }
-      return Promise.resolve(value);
+      else if (value) {
+        resolved = await this.resolve(value);
+      }
+
+      if (resolved) {
+        item[field] = resolved;
+      }
+
+      return resolved;
     }));
+  }
 
-    // return item;
+  /**
+   * Resolve a link or string to an object.
+   */
+  public async resolve(value: ASObjectOrLink | string): Promise<ASObjectOrLink> {
+    if (typeof value === 'string') {
+      value = new Link(value);
+    }
 
+    // @todo the AS library should expose a method to determine if an object is a link.
+    // potentially a `resolve` method in the library would be useful too
+    if ((value as any)._asmeta?.baseType ===  'link') {
+      const val = await (value as Link).resolve(this.resolver);
+      return val;
+    }
 
-
-    // const resolveUsers = items
-    //   .map((i: ObjectDto) => {
-    //     if (i.attributedTo instanceof Link) {
-    //       return i.attributedTo.resolve(this.resolver);
-    //     }
-    //     else {
-    //       return Promise.resolve(i.attributedTo);
-    //     }
-    //   });
-
+    return value;
   }
 
   /**
@@ -116,6 +127,13 @@ export class ObjectService {
   }
 
   /**
+   * Check to see if an object is not null, handling TypeScript type guards.
+   */
+  protected isNotNull<T>(obj: T | null): obj is T {
+    return obj !== null;
+  }
+
+  /**
    * Get all metadata for an object.  Metadata is stored in the database and used to assist in making queries, and should be able to be reconstructed from the object.
    * @param dto
    * @returns
@@ -126,7 +144,7 @@ export class ObjectService {
     const _public = this.isPublic(dto);
     const _local = this.isLocal(dto);
 
-    const lookup = async (fields: ASObjectOrLink | ASObjectOrLink[] | undefined): Promise<(ObjectDocument)[]> => {
+    const lookup = async (fields: ASObjectOrLink | ASObjectOrLink[] | undefined): Promise<(ObjectDocument | ActorDocument)[]> => {
       if (!fields) {
         return [];
       }
@@ -135,19 +153,20 @@ export class ObjectService {
         .map(i => typeof i === 'object' ? i.id : i)
         .filter(i => i !== undefined ? true : false) as string[];
 
-      return Promise.all(ids.map(id => this.findOne({id, _local: true})))
-        .then(results => results.filter(o => o !== null) as ObjectDocument[]);
+      return Promise.all(ids.map(id => this.objectModel.findOne({id, _local: true})))
+        .then(results => results.filter(this.isNotNull));
     }
 
     const _attribution: Attribution[] = [];
 
-    await Promise.all([lookup(dto.to), lookup(dto.cc), lookup(dto.bcc), lookup(dto.attributedTo)])
+    await Promise.all([lookup(dto.to), lookup(dto.cc), lookup(dto.bcc), lookup(dto.attributedTo), lookup(dto.audience)])
       .then(results => {
-        const [to, cc, bcc, attributedTo] = results;
+        const [to, cc, bcc, attributedTo, audience] = results;
         to.forEach(obj => _attribution.push({rel: 'to', _id: obj._id, id: obj.id}));
         cc.forEach(obj => _attribution.push({rel: 'cc', _id: obj._id, id: obj.id}));
         bcc.forEach(obj => _attribution.push({rel: 'bcc', _id: obj._id, id: obj.id}));
         attributedTo.forEach(obj => _attribution.push({rel: 'attributedTo', _id: obj._id, id: obj.id}));
+        audience.forEach(obj => _attribution.push({rel: 'audience', _id: obj._id, id: obj.id}));
       });
 
     return {
@@ -283,16 +302,36 @@ export class ObjectService {
   }
 
   /**
-   * Consider splitting this off into a content service or something similar.
+   * Convert a Mongoose doc to DTO instance
    */
-  public async findPageWithTotal(params: any = {}, options: {skip: number, limit: number, sort?: string} = {skip: 0, limit: 10}): Promise<{totalItems: number, data: ObjectDocument[]}> {
-    const facet = {$facet: {metadata: [{$count: 'total'}], data: [{ $skip: options.skip }, { $limit: options.limit }]}};
-    const result = await this.objectModel.aggregate([{$match: params}, {$sort: {published: -1}}, facet], options);
-    return {totalItems: result[0].metadata[0]?.total || 0, data: result[0].data}
+  public docToInstance(doc: ObjectType): ObjectDto | ActorDto {
+    const type = Array.isArray(doc.type) ? doc.type : [doc.type];
+    const opts = {excludeExtraneousValues: true, exposeUnsetFields: false};
+
+    if (['Forum', 'Person'].some(i => type.includes(i))) {
+      const i = plainToInstance<ActorDto, ObjectType>(ActorDto, doc, opts);
+      return i;
+    }
+
+    return plainToInstance(ObjectDto, doc, opts);
   }
 
-  public async findOne(params: any): Promise<ObjectDocument | null> {
-    return this.objectModel.findOne(params);
+  /**
+   * Consider splitting this off into a content service or something similar.
+   */
+  public async findPageWithTotal(params: any = {}, options: {skip: number, limit: number, sort?: string} = {skip: 0, limit: 10}): Promise<{totalItems: number, data: ObjectRecord[]}> {
+    const facet = {$facet: {metadata: [{$count: 'total'}], data: [{ $skip: options.skip }, { $limit: options.limit }]}};
+    const result = await this.objectModel.aggregate([{$match: params}, {$sort: {published: -1}}, facet], options);
+    const data = result[0].data.map((doc: any) => this.docToInstance(doc));
+    return {totalItems: result[0].metadata[0]?.total || 0, data};
+  }
+
+  public async findOne(params: any): Promise<ObjectDto | ActorDto | null> {
+    const obj = await this.objectModel.findOne(params);
+    if (obj) {
+      return this.docToInstance(obj);
+    }
+    return obj;
   }
 
   public async getUserOutbox(userId: string): Promise<any> {
