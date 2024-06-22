@@ -88,7 +88,7 @@ export class ForumContentController {
     const {data, totalItems} = await this.objectService.findPageWithTotal(queryParams, opts);
     const items = data.map(item => plainToInstance(ObjectDto, item));
 
-    await this.objectService.resolveFields(items, 'attributedTo');
+    await Promise.all(items.map(item => this.objectService.resolveFields(item, 'attributedTo')));
 
     Object.assign(collectionPage, {
       items,

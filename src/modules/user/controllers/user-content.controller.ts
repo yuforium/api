@@ -135,9 +135,7 @@ export class UserContentController {
     collectionPage.items = items;
     collectionPage.totalItems = total; //collectionPage.items.length;
 
-    await this.objectService.resolveFields(items, ['attributedTo', 'audience']);
-
-    items[0].audience = (items[0].audience as any)?._asmeta?._resolved;
+    await Promise.all(items.map(item => this.objectService.resolveFields(item, ['attributedTo', 'audience'])));
 
     return collectionPage;
   }
