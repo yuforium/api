@@ -8,7 +8,7 @@ import { ActorDocument, ActorRecord } from '../../object/schema/actor.schema';
 import { Model, Query } from 'mongoose';
 import { ActivityRecord } from '../schema/activity.schema';
 import { instanceToPlain } from 'class-transformer';
-import { ObjectDocument, ObjectRecord } from '../../object/schema/object.schema';
+import { ObjectRecord } from '../../object/schema/object.schema';
 import { Activity } from '@yuforium/activity-streams';
 import { ObjectDto } from 'src/common/dto/object';
 import { ActorDto } from 'src/common/dto/actor/actor.dto';
@@ -18,6 +18,7 @@ export class OutboxService {
   constructor(
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService,
+    @InjectModel(ObjectRecord.name) protected readonly objectModel: Model<ObjectRecord>,
     @InjectModel(ActorRecord.name) protected readonly actorModel: Model<ActorDocument>,
   ) { }
 
@@ -47,7 +48,7 @@ export class OutboxService {
       throw new Error('attributedTo must be a string or an array of strings.');
     }
 
-    const outboxActor = await this.actorModel.findOne({ id: outboxActorId }).select(['_id', 'id']);
+    const outboxActor = await this.objectModel.findOne({ id: outboxActorId });
 
     if (outboxActor === null) {
       throw new Error(`Outbox actor not found for ${outboxActorId}.`);

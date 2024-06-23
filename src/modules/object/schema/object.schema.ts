@@ -22,7 +22,7 @@ export class ObjectRecord extends BaseObjectSchema<GConstructor<ObjectType>>(Obj
   /**
    * Base Type of the object.  This is used by the Object model's discriminator.
    */
-  @Prop({type: String, required: true})
+  @Prop({type: String, required: false})
   @Exclude()
   public _baseType?: 'actor' | 'object';
 }

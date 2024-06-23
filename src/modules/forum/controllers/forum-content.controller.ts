@@ -72,8 +72,8 @@ export class ForumContentController {
 
     const queryParams = {
       $or: [
-        {'_attribution._id': forum._id, '_attribution.rel': 'attributedTo', '_public': true},
-        {'_attribution._id': forum._id, '_attribution.rel': 'to', '_public': true}
+        {'_attribution.id': forum.id, '_attribution.rel': 'attributedTo', '_public': true},
+        {'_attribution.id': forum.id, '_attribution.rel': 'to', '_public': true}
       ]
     }
 

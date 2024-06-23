@@ -19,8 +19,9 @@ import { UserActorRecord, UserActorSchema } from './schema/user-actor.schema';
         name: ObjectRecord.name,
         schema: ObjectSchema,
         discriminators: [
-          { name: ActorRecord.name, schema: ActorSchema, value: 'actor' },
-          { name: RelationshipRecord.name, schema: RelationshipSchema, value: 'relationship'}
+          {name: ActorRecord.name, schema: ActorSchema, value: 'Actor'},
+          {name: ActorRecord.name, schema: ActorSchema, value: 'Forum'},
+          {name: RelationshipRecord.name, schema: RelationshipSchema, value: 'relationship'}
         ]
       },
       {name: UserActorRecord.name, schema: UserActorSchema}

@@ -35,7 +35,7 @@ export class ForumOutboxController {
   @ApiBearerAuth()
   @ApiBody({schema: {oneOf: [{$ref: getSchemaPath(NoteCreateDto)}]}})
   @ApiExtraModels(NoteCreateDto)
-  @ApiOperation({operationId: 'postOutbox', summary: 'Post to a forum outbox'})
+  @ApiOperation({operationId: 'postForumOutbox', summary: 'Post to a forum outbox'})
   @UseGuards(AuthGuard('jwt'))
   @Post()
   public async postForumOutbox(

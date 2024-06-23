@@ -2,6 +2,7 @@ import { ASObjectOrLink } from '@yuforium/activity-streams';
 
 /**
  * ObjectType defines the minimal properties that are required for an object to be stored in the database.
+ * This differs from the ObjectRecord definition which also defines the schema and metadata for the object.
  */
 export type ObjectType = {
   '@context': string | string[];

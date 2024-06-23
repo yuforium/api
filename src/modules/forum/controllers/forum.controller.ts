@@ -10,12 +10,13 @@ import { ForumService } from '../forum.service';
 import { ForumCreateDto } from '../../../common/dto/forum-create.dto';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';
 import { ActorDto } from 'src/common/dto/actor/actor.dto';
+import { ObjectType } from 'src/modules/object/type/object.type';
+import { ObjectDto } from 'src/common/dto/object';
 
 @ApiTags('forum')
 @Controller('forums')
 export class ForumController {
   constructor(
-    protected readonly forumService: ForumService,
     protected readonly objectService: ObjectService
   ) { }
 
@@ -33,8 +34,19 @@ export class ForumController {
   @ApiOperation({operationId: 'createForum', summary: 'Create a forum'})
   @Post()
   @Header('Content-Type', 'application/activity+json')
-  public async create(@ServiceDomain() domain: string, @Body() forumCreateDto: ForumCreateDto): Promise<ActorDto> {
-    return plainToInstance(ActorDto, this.forumService.create(domain, forumCreateDto));
+  public async create(@ServiceDomain() domain: string, @Body() forumCreateDto: ForumCreateDto): Promise<ActorDto | ObjectDto> {
+    const forum = await this.objectService.create({
+      ...forumCreateDto,
+      '@context': [
+        'https://www.w3.org/ns/activitystreams',
+        'https://w3id.org/security/v1',
+        'https://yuforium.org/ns/activitystreams'
+      ],
+      id: `https://${domain}/forums/${forumCreateDto.name}`,
+      type: ['Service', 'Forum']
+    });
+
+    return forum;
   }
 
   @ApiOperation({operationId: 'getForum', summary: 'Get a forum'})
@@ -47,7 +59,8 @@ export class ForumController {
     @ServiceDomain() domainId: string,
     @Param() params: ForumParams
   ): Promise<ActorDto> {
-    const forum = await this.forumService.get(domainId, params.forumname);
+    const id = `https://${domainId}/forums/${params.forumname}`;
+    const forum = await this.objectService.get(id);
 
     if (!forum) {
       throw new NotFoundException(`Forum ${params.forumname} not found.`);

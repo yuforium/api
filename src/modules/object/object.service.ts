@@ -10,11 +10,11 @@ import { Attribution, BaseObjectRecord } from './schema/base-object.schema';
 import { resolveDomain } from '../../common/decorators/service-domain.decorator';
 import { RelationshipType } from './type/relationship.type';
 import { ObjectType } from './type/object.type';
-import { ActivityStreams, ASLink, ASObject, ASObjectOrLink, Link, ResolvableArray } from '@yuforium/activity-streams';
+import { ASObject, ASObjectOrLink, Link } from '@yuforium/activity-streams';
 import { StoredObjectResolver } from './resolver/stored-object.resolver';
 import { ActorDocument } from './schema/actor.schema';
 import { ActorDto } from '../../common/dto/actor/actor.dto';
-import { ActorType } from './type/actor.type';
+import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
 
 type ResolvableFields = 'attributedTo' | 'to' | 'cc' | 'bcc' | 'audience';
 
@@ -134,7 +134,8 @@ export class ObjectService {
   }
 
   /**
-   * Get all metadata for an object.  Metadata is stored in the database and used to assist in making queries, and should be able to be reconstructed from the object.
+   * Get all metadata for an object.  Metadata is stored in the database and used to assist in making queries,
+   * and should be able to be reconstructed from a base activity streams object.
    * @param dto
    * @returns
    */
@@ -217,10 +218,12 @@ export class ObjectService {
   /**
    * Create a new object record.
    */
-  public async create(dto: ObjectRecord): Promise<ObjectDto> {
+  public async create(dto: ObjectType): Promise<ObjectDto | ActorDto> {
     try {
-      const obj = await this.objectModel.create(dto);
-      return plainToInstance(ObjectDto, obj);
+      const record = Object.assign({}, dto, this.getObjectMetadata(dto));
+      const doc = await this.objectModel.create(record);
+
+      return this.docToInstance(doc);
     }
     catch (err) {
       this.logger.error(`create(): ${(err as Error).message}`);
@@ -285,7 +288,7 @@ export class ObjectService {
   /**
    * Find an object by its Activity Streams ID.  Note that this is different from the internal ID (MongoDB ObjectId).
    */
-  public async findById(id: string | Schema.Types.ObjectId): Promise<any> {
+  public async findById(id: string | Schema.Types.ObjectId): Promise<ObjectDocument | null> {
     return this.objectModel.findOne({id});
   }
 
