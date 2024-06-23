@@ -3,12 +3,12 @@ import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTag
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ForumService } from '../forum.service';
 import { ForumParams } from '../dto/forum-params.dto';
-import { OrderedCollectionPageDto } from 'src/common/dto/collection/ordered-collection-page.dto';
-import { ContentQueryOptionsDto } from 'src/modules/object/dto/content-query-options.dto';
-import { ObjectService } from 'src/modules/object/object.service';
 import { plainToInstance } from 'class-transformer';
-import { ObjectDto } from 'src/common/dto/object';
-import { StoredObjectResolver } from 'src/modules/object/resolver/stored-object.resolver';
+import { ObjectService } from '../../object/object.service';
+import { StoredObjectResolver } from '../../object/resolver/stored-object.resolver';
+import { ObjectDto } from '../../object/dto/object.dto';
+import { ContentQueryOptionsDto } from '../../object/dto/content-query-options.dto';
+import { OrderedCollectionPageDto } from '../../object/dto/collection/ordered-collection-page.dto';
 
 /**
  * Structure for the forum content controller response.

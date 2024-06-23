@@ -9,7 +9,7 @@ import {
 import { Expose, Transform } from 'class-transformer';
 import * as mongoose from 'mongoose';
 import sanitizeHtml from 'sanitize-html';
-import { ObjectType } from '../../../modules/object/type/object.type';
+import { ObjectType } from '../type/object.type';
 
 const { Mixed } = mongoose.Schema.Types;
 

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { ObjectDto } from '../../../common/dto/object/object.dto';
+import { ObjectDto } from '../dto/object.dto';
 import { BaseObjectSchema } from './base-object.schema';
 import { GConstructor } from '../../../common/schema/base.schema';
 import { ObjectType } from '../type/object.type';

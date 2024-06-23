@@ -6,7 +6,7 @@ import { Activity, ASObject } from '@yuforium/activity-streams';
 import { sign } from '@yuforium/http-signature';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { PersonDto } from '../../../common/dto/object/person.dto';
+import { PersonDto } from '../../object/dto/object/person.dto';
 import { UserService } from '../../user/user.service';
 import * as crypto from 'crypto';
 import { OutboxService } from '../../activity/services/outbox.service';

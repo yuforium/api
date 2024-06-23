@@ -5,7 +5,7 @@ import { plainToInstance } from 'class-transformer';
 import { generateKeyPairSync } from 'crypto';
 import { MongoServerError } from 'mongodb';
 import { Model, Schema } from 'mongoose';
-import { ActorDto } from '../../common/dto/actor/actor.dto';
+import { ActorDto } from '../object/dto/actor/actor.dto';
 import { ObjectService } from '../object/object.service';
 import { ActorDocument } from '../object/schema/actor.schema';
 import { PersonDocument } from '../object/schema/person.schema';

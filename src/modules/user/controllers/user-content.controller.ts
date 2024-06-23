@@ -23,12 +23,12 @@ import { ServiceDomain } from '../../../common/decorators/service-domain.decorat
 import { ObjectService } from '../../../modules/object/object.service';
 import { UserContentQueryOptionsDto } from '../dto/user-content-query-options.dto';
 import { UserParamsDto } from '../dto/user-params.dto';
-import { ObjectDto } from '../../../common/dto/object/object.dto';
+import { ObjectDto } from '../../object/dto/object.dto';
 import { UserService } from '../user.service';
-import { OrderedCollectionPageDto } from '../../../common/dto/collection/ordered-collection-page.dto';
+import { OrderedCollectionPageDto } from '../../object/dto/collection/ordered-collection-page.dto';
 import { Reflector } from '@nestjs/core';
-import { StoredObjectResolver } from 'src/modules/object/resolver/stored-object.resolver';
-import { ContentQueryOptionsDto } from 'src/modules/object/dto/content-query-options.dto';
+import { ContentQueryOptionsDto } from '../../object/dto/content-query-options.dto';
+import { StoredObjectResolver } from '../../object/resolver/stored-object.resolver';
 
 @UseInterceptors(
   new ClassSerializerInterceptor(new Reflector(), {

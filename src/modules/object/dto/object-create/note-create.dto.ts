@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Equals, MaxLength } from 'class-validator';
-import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
+import { ObjectCreateDto } from './object-create.dto';
 
 export class StringArray extends Array<string> {}
 

@@ -33,7 +33,7 @@ export class AuthService {
         throw new UnauthorizedException();
       }
 
-      if (await await bcrypt.compare(password, user.password)) {
+      if (await bcrypt.compare(password, user.password)) {
         this.logger.debug(`User "${username}@${serviceDomain}" password matches, validation succeeded`);
         return user;
       }

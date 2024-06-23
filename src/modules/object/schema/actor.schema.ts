@@ -1,6 +1,6 @@
 import { Schema, SchemaFactory } from '@nestjs/mongoose';
 import { GConstructor } from '../../../common/schema/base.schema';
-import { ActorDto } from '../../../common/dto/actor/actor.dto';
+import { ActorDto } from '../dto/actor/actor.dto';
 import mongoose from 'mongoose';
 import { ActorType } from '../type/actor.type';
 import { BaseObjectSchema } from './base-object.schema';

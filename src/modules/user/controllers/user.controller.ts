@@ -2,14 +2,14 @@ import { Body, Controller, Get, Header, Logger, NotFoundException, Param, Post, 
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { ObjectDocument } from 'src/modules/object/schema/object.schema';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ObjectService } from '../../object/object.service';
-import { PersonDto } from '../../../common/dto/object/person.dto';
+import { PersonDto } from '../../object/dto/object/person.dto';
 import { UserCreateDto } from '../dto/user-create.dto';
 import { UserService } from '../user.service';
 import { UserParamsDto } from '../dto/user-params.dto';
-import { ActorDto } from '../../../common/dto/actor/actor.dto';
+import { ActorDto } from '../../object/dto/actor/actor.dto';
+import { ObjectDocument } from '../../object/schema/object.schema';
 
 @ApiTags('user')
 @Controller('users')

@@ -8,7 +8,7 @@ import { Request } from 'express';
 import { UserDocument } from '../user/schemas/user.schema';
 import { plainToInstance } from 'class-transformer';
 import { PersonRecordDto } from '../object/schema/person.schema';
-import { User } from 'src/common/decorators/user.decorator';
+import { User } from '../../common/decorators/user.decorator';
 
 @ApiTags('auth')
 @Controller('auth')

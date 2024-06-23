@@ -5,9 +5,7 @@ import { parse, verify, VerifyOptions } from '@yuforium/http-signature';
 import { SyncDispatchService } from './sync-dispatch.service';
 import { InboxProcessorService } from './inbox-processor.service';
 import { ActivityPubService } from './activity-pub.service';
-import { resolveDomain } from 'src/common/decorators/service-domain.decorator';
-import { parse as parseDomain } from 'tldts';
-import { InvalidURLException, validateURL } from 'src/common/util/validate-url';
+import { InvalidURLException, validateURL } from '../../../common/util/validate-url';
 
 export interface AcceptOptions {
   requestSignature?: {

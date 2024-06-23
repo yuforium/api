@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
-import { ServiceDomain } from 'src/common/decorators/service-domain.decorator';
+import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 
 @Controller('topics')
 export class TopicController {

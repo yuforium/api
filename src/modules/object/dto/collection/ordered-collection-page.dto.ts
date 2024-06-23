@@ -1,6 +1,6 @@
-import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
 import { ActivityStreams, Link } from '@yuforium/activity-streams';
-import { ObjectDto } from '../object';
+import { ObjectDto } from '../object.dto';
 
 @ApiExtraModels(ObjectDto, Link)
 export class OrderedCollectionPageDto extends ActivityStreams.collectionPage('OrderedCollectionPage') {

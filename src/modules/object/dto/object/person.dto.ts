@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { ObjectRecord } from '../../../modules/object/schema/object.schema';
+import { ObjectRecord } from '../../schema/object.schema';
 
 export class PublicKey {
   @Expose()

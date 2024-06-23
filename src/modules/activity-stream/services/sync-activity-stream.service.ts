@@ -7,7 +7,7 @@ import { Connection, Types } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 import { AxiosResponse } from 'axios';
 import { ActivityService } from '../../activity/services/activity.service';
-import { ActivityDto } from 'src/modules/activity/dto/activity.dto';
+import { ActivityDto } from '../../activity/dto/activity.dto';
 
 interface ActivityStreamService {
   accept(activity: ActivityDto, serviceId?: string): Promise<boolean>;

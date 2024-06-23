@@ -10,8 +10,8 @@ import { JwtUser } from '../../../modules/auth/auth.service';
 import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe';
 import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
-import { ObjectCreateDto } from '../../../common/dto/object-create/object-create.dto';
-import { NoteCreateDto } from '../../../common/dto/object-create/note-create.dto';
+import { ObjectCreateDto } from '../../object/dto/object-create/object-create.dto';
+import { NoteCreateDto } from '../../object/dto/object-create/note-create.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { OutboxService } from '../../activity/services/outbox.service';
 

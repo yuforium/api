@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
-import { JwtUser } from 'src/modules/auth/auth.service';
 import { ActivityService } from './activity.service';
 import { ObjectService } from '../../object/object.service';
 import { InjectModel } from '@nestjs/mongoose';
@@ -10,8 +8,10 @@ import { ActivityRecord } from '../schema/activity.schema';
 import { instanceToPlain } from 'class-transformer';
 import { ObjectRecord } from '../../object/schema/object.schema';
 import { Activity } from '@yuforium/activity-streams';
-import { ObjectDto } from 'src/common/dto/object';
-import { ActorDto } from 'src/common/dto/actor/actor.dto';
+import { ObjectCreateDto } from '../../object/dto/object-create/object-create.dto';
+import { JwtUser } from '../../auth/auth.service';
+import { ObjectDto } from '../../object/dto/object.dto';
+import { ActorDto } from '../../object/dto/actor/actor.dto';
 
 @Injectable()
 export class OutboxService {

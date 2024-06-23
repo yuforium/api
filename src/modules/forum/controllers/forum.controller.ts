@@ -1,17 +1,15 @@
 import { Controller, Get, Param, NotFoundException, Header, Post, Body } from '@nestjs/common';
-import { ApiExtraModels, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiExtraModels, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { ObjectService } from '../../object/object.service';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ForumDto } from '../dto/forum.dto';
 import { ForumCollectionDto } from '../dto/forum-collection.dto';
 import { ForumParams } from '../dto/forum-params.dto';
-import { ForumService } from '../forum.service';
-import { ForumCreateDto } from '../../../common/dto/forum-create.dto';
+import { ForumCreateDto } from '../../object/dto/forum-create.dto';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';
-import { ActorDto } from 'src/common/dto/actor/actor.dto';
-import { ObjectType } from 'src/modules/object/type/object.type';
-import { ObjectDto } from 'src/common/dto/object';
+import { ActorDto } from '../../object/dto/actor/actor.dto';
+import { ObjectDto } from '../../object/dto/object.dto';
 
 @ApiTags('forum')
 @Controller('forums')
@@ -26,6 +24,7 @@ export class ForumController {
   public async findForums(@ServiceDomain() _domain: string) {
     const forums = await this.objectService.find({type: 'Forum', _domain});
     const collection = new ForumCollectionDto();
+
     collection.items = forums.map((item: ObjectDocument) => plainToInstance(ForumDto, item));
 
     return collection;

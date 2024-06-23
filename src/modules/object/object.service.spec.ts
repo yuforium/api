@@ -2,14 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ObjectService } from './object.service';
 import { ActivityStreams, Link } from '@yuforium/activity-streams';
 import { StoredObjectResolver } from './resolver/stored-object.resolver';
-import { ObjectDto } from '../../common/dto/object';
+import { ObjectDto } from './dto/object';
 import { ObjectType } from './type/object.type';
 import { getModelToken } from '@nestjs/mongoose';
 import { ObjectRecord } from './schema/object.schema';
 import { RelationshipRecord } from './schema/relationship.schema';
 import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
-import { ActorDto } from '../../common/dto/actor/actor.dto';
+import { ActorDto } from './dto/actor/actor.dto';
 import { ActorType } from './type/actor.type';
 
 class TestResolver extends ActivityStreams.Resolver {

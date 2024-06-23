@@ -3,8 +3,9 @@ import { Activity, ActivityStreams, IsRequired } from '@yuforium/activity-stream
 import { Expose, Transform } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 import * as mongoose from 'mongoose';
-import { NoteDto, ArticleDto } from '../../../common/dto/object';
 import { LinkDto } from '../../../modules/link/dto/link.dto';
+import { ArticleDto } from '../../object/dto/object/article.dto';
+import { NoteDto } from '../../object/dto/object/note.dto';
 
 const { Mixed } = mongoose.Schema.Types;
 

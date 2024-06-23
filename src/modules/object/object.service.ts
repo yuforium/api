@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ObjectDocument, ObjectRecord } from './schema/object.schema';
 import { Model, Types, Schema } from 'mongoose';
 import { plainToInstance } from 'class-transformer';
-import { ObjectDto } from '../../common/dto/object/object.dto';
+import { ObjectDto } from './dto/object.dto';
 import { RelationshipDocument, RelationshipRecord } from './schema/relationship.schema';
 import { ConfigService } from '@nestjs/config';
 import { Attribution, BaseObjectRecord } from './schema/base-object.schema';
@@ -13,8 +13,7 @@ import { ObjectType } from './type/object.type';
 import { ASObject, ASObjectOrLink, Link } from '@yuforium/activity-streams';
 import { StoredObjectResolver } from './resolver/stored-object.resolver';
 import { ActorDocument } from './schema/actor.schema';
-import { ActorDto } from '../../common/dto/actor/actor.dto';
-import { ObjectCreateDto } from 'src/common/dto/object-create/object-create.dto';
+import { ActorDto } from './dto/actor/actor.dto';
 
 type ResolvableFields = 'attributedTo' | 'to' | 'cc' | 'bcc' | 'audience';
 

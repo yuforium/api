@@ -3,7 +3,7 @@ import { IsLink } from '@yuforium/activity-streams';
 import { IsNotEmptyArray, IsRequired } from '@yuforium/activity-streams';
 import { Transform } from 'class-transformer';
 import { Equals, IsOptional, IsString, MaxLength } from 'class-validator';
-import { ObjectDto } from '../object/object.dto';
+import { ObjectDto } from '../object.dto';
 import sanitizeHtml from 'sanitize-html';
 
 const allowedTags = sanitizeHtml.defaults.allowedTags.concat(['strong']);

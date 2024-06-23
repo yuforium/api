@@ -1,6 +1,5 @@
 import { Expose } from 'class-transformer';
-import { ActorDto } from 'src/common/dto/actor/actor.dto';
-// import { PersonDto } from 'src/common/dto/object/person.dto';
+import { ActorDto } from '../../object/dto/actor/actor.dto';
 
 export class UserActorDto extends ActorDto {
   // @Expose()

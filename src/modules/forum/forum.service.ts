@@ -1,11 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { ForumCreateDto } from 'src/common/dto/forum-create.dto';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { ObjectService } from '../object/object.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActorDocument, ActorRecord } from '../object/schema/actor.schema';
 import { Model } from 'mongoose';
-import { ObjectDocument, ObjectRecord } from '../object/schema/object.schema';
-import { plainToInstance } from 'class-transformer';
+import { ForumCreateDto } from '../object/dto/forum-create.dto';
 
 export type ForumQueryOpts = {
   skip?: number;

@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { ActivityRecord } from 'src/modules/activity/schema/activity.schema';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { ObjectService } from '../../../modules/object/object.service';
@@ -12,8 +11,9 @@ import { resolveDomain } from '../../../common/decorators/service-domain.decorat
 import { InjectModel } from '@nestjs/mongoose';
 import { ActorDocument, ActorRecord } from '../../object/schema/actor.schema';
 import { Model } from 'mongoose';
-import { ObjectDto } from '../../../common/dto/object';
-import { RelationshipType } from 'src/modules/object/type/relationship.type';
+import { ObjectDto } from '../../object/dto/object.dto';
+import { RelationshipType } from '../../object/type/relationship.type';
+import { ActivityRecord } from '../../activity/schema/activity.schema';
 
 @Injectable()
 export class InboxProcessorService {
@@ -63,7 +63,7 @@ export class InboxProcessorService {
     return activityDto;
   }
 
-  public async follow(activityDto: ActivityDto, actor: UserActorDto): Promise<Activity | null> {
+  public async follow(activityDto: ActivityDto, _actor: UserActorDto): Promise<Activity | null> {
     this.logger.log(`follow(): ${activityDto.id}`);
 
     if (!activityDto.id) {

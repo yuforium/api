@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import { Schema, SchemaFactory } from '@nestjs/mongoose';
 import { BaseObjectSchema } from './base-object.schema';
-import { PersonDto } from '../../../common/dto/object/person.dto';
+import { PersonDto } from '../dto/object/person.dto';
 import { Exclude } from 'class-transformer';
 import { GConstructor } from '../../../common/schema/base.schema';
 
