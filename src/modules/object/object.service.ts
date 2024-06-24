@@ -6,7 +6,6 @@ import { plainToInstance } from 'class-transformer';
 import { ObjectDto } from './dto/object.dto';
 import { RelationshipDocument, RelationshipRecord } from './schema/relationship.schema';
 import { ConfigService } from '@nestjs/config';
-import { BaseObjectRecord } from './schema/base-object.schema';
 import { resolveDomain } from '../../common/decorators/service-domain.decorator';
 import { RelationshipType } from './type/relationship.type';
 import { ObjectType } from './type/object.type';
@@ -16,6 +15,7 @@ import { ActorDocument } from './schema/actor.schema';
 import { ActorDto } from './dto/actor/actor.dto';
 import { Attribution } from './type/attribution.type';
 import { BaseObjectType } from './type/base-object.type';
+import { BaseObjectDocument, BaseObjectMetadataType } from './schema/base-object.schema';
 
 type ResolvableFields = 'attributedTo' | 'to' | 'cc' | 'bcc' | 'audience';
 
@@ -140,7 +140,7 @@ export class ObjectService {
    * @param dto
    * @returns
    */
-  public async getObjectMetadata(dto: ObjectType): Promise<BaseObjectRecord> {
+  public async getBaseObjectMetadata(dto: ObjectType): Promise<BaseObjectMetadataType> {
     const url = new URL(dto.id);
     const _domain = resolveDomain(url.hostname);
     const _public = this.isPublic(dto);
@@ -155,7 +155,7 @@ export class ObjectService {
         .map(i => typeof i === 'object' ? i.id : i)
         .filter(i => i !== undefined ? true : false) as string[];
 
-      return Promise.all(ids.map(id => this.objectModel.findOne({id, _local: true})))
+      return Promise.all(ids.map(id => this.objectModel.findOne({id: {$eq: id}, _local: true})))
         .then(results => results.filter(this.isNotNull));
     }
 
@@ -184,8 +184,8 @@ export class ObjectService {
    * @param dto
    * @returns
    */
-  public async assignObjectMetadata<T extends ObjectType = ObjectType>(dto: T): Promise<T & BaseObjectRecord> {
-    const metadata: BaseObjectRecord = await this.getObjectMetadata(dto);
+  public async assignObjectMetadata<T extends ObjectType = ObjectType>(dto: T): Promise<T & BaseObjectType> {
+    const metadata = await this.getBaseObjectMetadata(dto);
     return Object.assign(dto, metadata);
   }
 
@@ -193,8 +193,8 @@ export class ObjectService {
    * Rebuild an object's metadata.  This does not save the object.
    * @param dto
    */
-  public async rebuildMetadata<T extends ObjectType = ObjectType>(dto: T): Promise<T & BaseObjectRecord> {
-    const metadata: BaseObjectRecord = await this.getObjectMetadata(dto);
+  public async rebuildMetadata<T extends ObjectType = ObjectType>(dto: T): Promise<T & BaseObjectType> {
+    const metadata = await this.getBaseObjectMetadata(dto);
     return Object.assign(dto, metadata);
   }
 
@@ -203,7 +203,7 @@ export class ObjectService {
    * @param id The object's ID
    * @returns The (repaired) object record
    */
-  public async repairMetadata(id: string): Promise<BaseObjectRecord> {
+  public async repairMetadata(id: string): Promise<BaseObjectType> {
     const obj = await this.objectModel.findOne({ id });
 
     if (!obj) {
@@ -219,9 +219,9 @@ export class ObjectService {
   /**
    * Create a new object record.
    */
-  public async create(dto: ObjectType): Promise<BaseObjectType> {
+  public async create<T extends BaseObjectType = BaseObjectType>(dto: T): Promise<BaseObjectType> {
     try {
-      const record = Object.assign({}, dto, this.getObjectMetadata(dto));
+      const record = Object.assign({}, dto, this.getBaseObjectMetadata(dto));
       const doc = await this.objectModel.create(record);
 
       return this.docToInstance(doc);

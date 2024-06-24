@@ -1,7 +1,4 @@
-import { ObjectType } from './object.type';
+import { RelationshipDto } from '../dto/object/relationship.dto';
+import { DtoType } from './dto.type';
 
-export type RelationshipType = ObjectType & {
-  subject: string;
-  object: string;
-  relationship: string;
-};
+export type RelationshipType = DtoType<RelationshipDto>;

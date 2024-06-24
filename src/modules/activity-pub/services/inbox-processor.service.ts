@@ -14,6 +14,7 @@ import { Model } from 'mongoose';
 import { ObjectDto } from '../../object/dto/object.dto';
 import { RelationshipType } from '../../object/type/relationship.type';
 import { ActivityRecord } from '../../activity/schema/activity.schema';
+import { ObjectType } from '../../object/type/object.type';
 
 @Injectable()
 export class InboxProcessorService {
@@ -52,7 +53,7 @@ export class InboxProcessorService {
     const activityDto = plainToInstance(ActivityDto, receivedActivity, { excludeExtraneousValues: true });
     const obj = plainToInstance(ObjectDto, receivedActivity.object, { excludeExtraneousValues: true });
 
-    await this.objectService.create(Object.assign({}, obj, await this.objectService.getObjectMetadata(obj)));
+    await this.objectService.create(Object.assign({}, obj, await this.objectService.getBaseObjectMetadata(obj)));
     await this.activityService.createActivity(Object.assign({}, receivedActivity, { _local: false, _public: true, _domain }));
 
     // const activityDto = plainToInstance(ActivityDto, await this.activityService.create(record), {excludeExtraneousValues: true});
@@ -105,29 +106,28 @@ export class InboxProcessorService {
 
     const _id = this.objectService.id().toString();
 
-    const relationshipDto: RelationshipType = Object.assign(
-      await this.objectService.assignObjectMetadata({
-        '@context': 'https://www.w3.org/ns/activitystreams',
-        id: `${followee.id}/relationship/${_id.toString()}`,
-        type: 'Relationship',
-        summary: 'Follows',
-        attributedTo: followee.id,
-      }),
-      {
-        relationship: 'https://yuforium.com/vocab/relationship/followerOf',
-        _relationship: 'followerOf',
-        subject: activity.actor,
-        object: activity.object as string,
-      });
+    const relationshipDto: RelationshipType = {
+      '@context': 'https://www.w3.org/ns/activitystreams',
+      id: `${followee.id}/relationship/${_id.toString()}`,
+      type: 'Relationship',
+      summary: 'Follows',
+      attributedTo: followee.id,
+      object: followee.id,
+      subject: _actor.id,
+      relationship: 'follows'
+    };
 
-    const relationship = await this.objectService.createRelationship(relationshipDto);
+    const relationship = await this.objectService.create(relationshipDto);
     this.logger.debug(`follow(): created relationship ${relationship.id}`);
+
+    const url = new URL(relationship.id);
+    const _domain = resolveDomain(url.hostname);
 
     // @todo - if auto accept, accept the follow request, accept it anyway for now
     const _acceptId = this.activityService.id().toString();
     const acceptActivityDto: ActivityRecord = {
       _id: _acceptId,
-      _domain: relationship._domain,
+      _domain: _domain,
       // _path: `${followee._path}/${followee._pathId}/activities`,
       // _pathId: _acceptId,
       _local: true,

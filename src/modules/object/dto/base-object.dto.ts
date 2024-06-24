@@ -1,15 +1,8 @@
 import { Prop } from '@nestjs/mongoose';
-import { ApiExtraModels, ApiHideProperty, ApiProperty, getSchemaPath } from '@nestjs/swagger';
-import {
-  ActivityStreams,
-  ASObjectOrLink,
-  Collection,
-  Link
-} from '@yuforium/activity-streams';
-import { Expose, Transform } from 'class-transformer';
+import { ApiExtraModels, ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { ActivityStreams, Link } from '@yuforium/activity-streams';
+import { Expose } from 'class-transformer';
 import * as mongoose from 'mongoose';
-import sanitizeHtml from 'sanitize-html';
-import { ObjectType } from '../type/object.type';
 
 const { Mixed } = mongoose.Schema.Types;
 

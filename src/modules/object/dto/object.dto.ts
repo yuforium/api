@@ -58,7 +58,7 @@ export class ObjectDto extends BaseObjectDto {
   @Transform(({value}) => {
     return sanitizeHtml(value);
   }, { toClassOnly: true })
-  public content?: string;
+  public content?: string | string[];
 
   @Prop({ type: Mixed })
   @Expose()
@@ -66,7 +66,7 @@ export class ObjectDto extends BaseObjectDto {
 
   @Prop({ type: String })
   @Expose()
-  public inReplyTo?: string;
+  public inReplyTo?: ASObjectOrLink;
 
   @Prop({ type: String })
   @Expose()
@@ -75,15 +75,15 @@ export class ObjectDto extends BaseObjectDto {
   @ApiProperty(ApiPropertyOneOfStringOrArray)
   @Prop({ type: Mixed })
   @Expose()
-  public to?: string | string[]; // note that the "to" field should always have a value, even if the spec says it's optional
+  public to?: ASObjectOrLink | ASObjectOrLink[]; // note that the "to" field should always have a value, even if the spec says it's optional
 
   @ApiProperty(ApiPropertyOneOfStringOrArray)
   @Prop({ type: Mixed })
   @Expose()
-  public cc?: string | string[];
+  public cc?: ASObjectOrLink | ASObjectOrLink[];
 
   @ApiProperty(ApiPropertyOneOfStringOrArray)
   @Prop({ type: Mixed })
   @Expose()
-  public bcc?: string | string[];
+  public bcc?: ASObjectOrLink | ASObjectOrLink[];
 }
