@@ -1,40 +1,81 @@
 import { Prop } from '@nestjs/mongoose';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { Schema, Types } from 'mongoose';
 import { BaseRecord, BaseSchema, GConstructor } from '../../../common/schema/base.schema';
 import { ASObject } from '@yuforium/activity-streams';
+import { Attribution } from '../type/attribution.type';
+import { BaseObjectType } from '../type/base-object.type';
 
-export type Destination = {
-  rel: 'inbox' | 'outbox' | 'followers' | 'following';
-  _id: Types.ObjectId;
-  description?: string;
-};
+/**
+ * Mixin type that defines common fields that are used for all stored objects.
+ */
+export type BaseObjectMetadataType = {
+  _id: string | Types.ObjectId;
+  _domain: string;
+  _local: boolean;
+  _public: boolean;
+  _deleted?: boolean;
 
-export type Origination = {
-  rel: 'self' | 'attribution';
-  _id: Types.ObjectId;
-  description?: string;
+  /**
+   * Only used for local actors, specifies the outbox from which the object originated.
+   */
+  // _attribution?: Attribution[];
 }
 
-export type Attribution = {
-  /**
-   * Type of relationship between the object and the actor.
-   */
-  rel: 'attributedTo' | 'to' | 'cc' | 'bcc' | 'audience' | 'context';
+export function baseObjectRecord<T extends GConstructor<BaseObjectType> = GConstructor<BaseObjectType>>(Base: T): T & GConstructor<BaseObjectMetadataType> {
+  class Record extends Base {
+    /**
+     * The ID of the object, override @Prop to force requirements + uniqueness.
+     */
+    @Prop({type: String, required: true, unique: true})
+    @Expose()
+    public id!: string;
 
-  /**
-   * The internal Object ID for the actor that is attributed to the object.
-   */
-  _id: Types.ObjectId;
+    /**
+     * The database ID of the object.
+     */
+    @Exclude()
+    public _id!: Types.ObjectId;
 
-  id: string;
-  description?: string;
-  primary?: boolean;
+    /**
+     * The domain of the object.  This is used for querying content.  Although
+     * there is no support for multiple domains, this is included for future support.
+     */
+    @Prop({type: String, required: true})
+    @Exclude()
+    public _domain!: string;
+
+    /**
+     * Specifies if this is a local object.
+     */
+    @Prop({type: Boolean, required: true})
+    @Exclude()
+    public _local!: boolean;
+
+    /**
+     * Specifies if this is a public object.  Used for querying content.
+     */
+    @Prop({type: Boolean, default: false})
+    @Exclude()
+    public _public!: boolean;
+
+    /**
+     * Specifies if this is a deleted object.  This is used for querying content.
+     */
+    @Prop({type: Boolean, required: false, default: false})
+    @Exclude()
+    public _deleted?: boolean;
+
+    // _attribution?: Attribution[];
+  }
+
+  return Record;
 }
 
 /**
  * Mixin type that defines common fields that are used for all stored objects.
  * @todo consider renaming this type to `BaseObjectMetadata` or `BaseObjectFields`
+ * @deprecated Use `BaseObjectMetadataType` instead.
  */
 export type BaseObjectRecord = BaseRecord & {
   /**
@@ -52,6 +93,7 @@ export type BaseObjectRecord = BaseRecord & {
  *
  * @param Base
  * @returns GConstructor<BaseObjectRecord & ObjectDto>
+ * @deprecated Use `baseObjectRecord` instead.
  */
 export function BaseObjectSchema<TBase extends GConstructor<ASObject & {id: string}>>(Base: TBase): TBase & GConstructor<BaseObjectRecord> {
   class BaseObjectSchema extends BaseSchema<TBase>(Base) {

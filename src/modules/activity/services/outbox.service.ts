@@ -10,8 +10,8 @@ import { ObjectRecord } from '../../object/schema/object.schema';
 import { Activity } from '@yuforium/activity-streams';
 import { ObjectCreateDto } from '../../object/dto/object-create/object-create.dto';
 import { JwtUser } from '../../auth/auth.service';
-import { ObjectDto } from '../../object/dto/object.dto';
-import { ActorDto } from '../../object/dto/actor/actor.dto';
+import { ObjectType } from '../../object/type/object.type';
+import { BaseObjectType } from '../../object/type/base-object.type';
 
 @Injectable()
 export class OutboxService {
@@ -54,7 +54,7 @@ export class OutboxService {
       throw new Error(`Outbox actor not found for ${outboxActorId}.`);
     }
 
-    const recordDto: ObjectRecord = await this.objectService.assignObjectMetadata({
+    const recordDto: ObjectType = await this.objectService.assignObjectMetadata({
       ...dto,
       '@context': 'https://www.w3.org/ns/activitystreams', // note that direct assignment like dto['@context'] = '...' doesn't work
       id: `${outboxActor.id}/posts/${id.toString()}`
@@ -71,7 +71,7 @@ export class OutboxService {
       object: instanceToPlain(obj),
       _domain: _domain,
       _local: true,
-      _public: recordDto._public
+      _public: true
     };
 
     const activity = await this.activityService.create(activityDto);
@@ -84,7 +84,7 @@ export class OutboxService {
    * @param id
    * @returns
    */
-  public async getLocalObject(id: string): Promise<ObjectDto | ActorDto | null> {
+  public async getLocalObject(id: string): Promise<BaseObjectType | null> {
     return this.objectService.findOne({ id, _serviceId: { $ne: null } });
   }
 }

@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ObjectService } from './object.service';
-import { ActivityStreams, Link } from '@yuforium/activity-streams';
+import { ActivityStreams } from '@yuforium/activity-streams';
 import { StoredObjectResolver } from './resolver/stored-object.resolver';
-import { ObjectDto } from './dto/object';
 import { ObjectType } from './type/object.type';
 import { getModelToken } from '@nestjs/mongoose';
 import { ObjectRecord } from './schema/object.schema';
@@ -11,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import { ActorDto } from './dto/actor/actor.dto';
 import { ActorType } from './type/actor.type';
+import { ObjectDto } from './dto/object.dto';
 
 class TestResolver extends ActivityStreams.Resolver {
   public links = {

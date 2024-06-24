@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { ObjectDto } from '../dto/object.dto';
-import { BaseObjectSchema } from './base-object.schema';
+import { baseObjectRecord } from './base-object.schema';
 import { GConstructor } from '../../../common/schema/base.schema';
 import { ObjectType } from '../type/object.type';
 import { Exclude } from 'class-transformer';
@@ -16,9 +16,7 @@ export type ObjectDocument = ObjectRecord & mongoose.Document;
  * Extends the Object DTO and adds additional database fields by extending BaseObjectSchema.
  */
 @Schema({collection: 'objects', autoIndex: true, discriminatorKey: '_baseType'})
-export class ObjectRecord extends BaseObjectSchema<GConstructor<ObjectType>>(ObjectDto) {
-  // @Prop({type: String, required: false})
-  // public preferredUsername?: string;
+export class ObjectRecord extends baseObjectRecord<GConstructor<ObjectType>>(ObjectDto) {
   /**
    * Base Type of the object.  This is used by the Object model's discriminator.
    */

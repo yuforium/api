@@ -45,7 +45,7 @@ export class ForumController {
       type: ['Service', 'Forum']
     });
 
-    return forum;
+    return forum as ActorDto;
   }
 
   @ApiOperation({operationId: 'getForum', summary: 'Get a forum'})

@@ -7,8 +7,8 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { Request } from 'express';
 import { UserDocument } from '../user/schemas/user.schema';
 import { plainToInstance } from 'class-transformer';
-import { PersonRecordDto } from '../object/schema/person.schema';
 import { User } from '../../common/decorators/user.decorator';
+import { UserActorDto } from '../user/dto/user-actor.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -28,6 +28,6 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   async profile(@User() user: JwtUser) {
-    return plainToInstance(PersonRecordDto, user.actor);
+    return plainToInstance(UserActorDto, user.actor);
   }
 }

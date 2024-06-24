@@ -1,12 +1,12 @@
 import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectDocument, ObjectRecord } from './schema/object.schema';
-import { Model, Types, Schema } from 'mongoose';
+import mongoose, { Model, Types, Schema } from 'mongoose';
 import { plainToInstance } from 'class-transformer';
 import { ObjectDto } from './dto/object.dto';
 import { RelationshipDocument, RelationshipRecord } from './schema/relationship.schema';
 import { ConfigService } from '@nestjs/config';
-import { Attribution, BaseObjectRecord } from './schema/base-object.schema';
+import { BaseObjectRecord } from './schema/base-object.schema';
 import { resolveDomain } from '../../common/decorators/service-domain.decorator';
 import { RelationshipType } from './type/relationship.type';
 import { ObjectType } from './type/object.type';
@@ -14,6 +14,8 @@ import { ASObject, ASObjectOrLink, Link } from '@yuforium/activity-streams';
 import { StoredObjectResolver } from './resolver/stored-object.resolver';
 import { ActorDocument } from './schema/actor.schema';
 import { ActorDto } from './dto/actor/actor.dto';
+import { Attribution } from './type/attribution.type';
+import { BaseObjectType } from './type/base-object.type';
 
 type ResolvableFields = 'attributedTo' | 'to' | 'cc' | 'bcc' | 'audience';
 
@@ -217,7 +219,7 @@ export class ObjectService {
   /**
    * Create a new object record.
    */
-  public async create(dto: ObjectType): Promise<ObjectDto | ActorDto> {
+  public async create(dto: ObjectType): Promise<BaseObjectType> {
     try {
       const record = Object.assign({}, dto, this.getObjectMetadata(dto));
       const doc = await this.objectModel.create(record);
@@ -293,8 +295,9 @@ export class ObjectService {
 
   /**
    * Find an object by its internal ID (MongoDB ObjectId).
+   * @todo there should be a BaseObject type that T extends
    */
-  public async findByInternalId(id: string | Schema.Types.ObjectId): Promise<ObjectDocument | null> {
+  public async findByInternalId<T extends mongoose.Document>(id: string | Schema.Types.ObjectId): Promise<T | null> {
     return this.objectModel.findById(id);
   }
 
@@ -306,7 +309,7 @@ export class ObjectService {
   /**
    * Convert a Mongoose doc to DTO instance
    */
-  public docToInstance(doc: ObjectType): ObjectDto | ActorDto {
+  public docToInstance(doc: ObjectType): BaseObjectType {
     const type = Array.isArray(doc.type) ? doc.type : [doc.type];
     const opts = {excludeExtraneousValues: true, exposeUnsetFields: false};
 
@@ -315,7 +318,7 @@ export class ObjectService {
       return i;
     }
 
-    return plainToInstance(ObjectDto, doc, opts);
+    return plainToInstance<ObjectDto, ObjectType>(ObjectDto, doc, opts);
   }
 
   /**
@@ -328,7 +331,7 @@ export class ObjectService {
     return {totalItems: result[0].metadata[0]?.total || 0, data};
   }
 
-  public async findOne(params: any): Promise<ObjectDto | ActorDto | null> {
+  public async findOne(params: any): Promise<BaseObjectType | null> {
     const obj = await this.objectModel.findOne(params);
     if (obj) {
       return this.docToInstance(obj);

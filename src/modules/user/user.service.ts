@@ -8,7 +8,6 @@ import { Model, Schema } from 'mongoose';
 import { ActorDto } from '../object/dto/actor/actor.dto';
 import { ObjectService } from '../object/object.service';
 import { ActorDocument } from '../object/schema/actor.schema';
-import { PersonDocument } from '../object/schema/person.schema';
 import { UserActorDocument, UserActorRecord } from '../object/schema/user-actor.schema';
 import { UserCreateDto } from './dto/user-create.dto';
 import { User, UserDocument } from './schemas/user.schema';
@@ -188,7 +187,7 @@ export class UserService {
       return null;
     }
 
-    const person = await this.objectService.findByInternalId(user.defaultIdentity) as PersonDocument;
+    const person = await this.objectService.findByInternalId<ActorDocument>(user.defaultIdentity);
 
     if (person) {
       person['@context'] = ['https://www.w3.org/ns/activitystreams', 'https://w3id.org/security/v1'];

@@ -10,6 +10,7 @@ import { Expose, Transform } from 'class-transformer';
 import * as mongoose from 'mongoose';
 import sanitizeHtml from 'sanitize-html';
 import { ObjectType } from '../type/object.type';
+import { BaseObjectDto } from './base-object.dto';
 
 const { Mixed } = mongoose.Schema.Types;
 
@@ -32,35 +33,13 @@ const ApiPropertyOneOfStringOrArray = {
  * do things like normalize IDs or resolve link references to objects.
  */
 @ApiExtraModels(Link)
-export class ObjectDto extends ActivityStreams.object('Object') implements ObjectType {
-  @ApiHideProperty()
-  @Prop({
-    name: '@context',
-    type: mongoose.Schema.Types.Mixed,
-    required: false
-  })
-  @Expose()
-  public '@context': string | string[] = 'https://www.w3.org/ns/activitystreams';
-
-  @ApiProperty({ required: true, type: 'string' })
-  @Prop({ type: String, required: true })
-  @Expose()
-  public id!: string;
-
-  /**
-   * @todo for validation, the first type should be a string of any supported type
-   */
-  @ApiProperty({ type: 'string', required: true })
-  @Prop({ type: Mixed, required: true })
-  @Expose()
-  public type!: string;
-
+export class ObjectDto extends BaseObjectDto {
   @ApiProperty({
     oneOf: [{ type: 'string' }, { $ref: getSchemaPath(Link) }, {$ref: getSchemaPath(ObjectDto) }]
   })
   @Prop({ type: Mixed })
   @Expose()
-  public attributedTo!: ASObjectOrLink | ASObjectOrLink[];
+  public attributedTo?: ASObjectOrLink | ASObjectOrLink[];
 
   @ApiProperty({
     type: String,
@@ -80,25 +59,6 @@ export class ObjectDto extends ActivityStreams.object('Object') implements Objec
     return sanitizeHtml(value);
   }, { toClassOnly: true })
   public content?: string;
-
-  @ApiProperty({ type: String })
-  @Prop({ type: Mixed })
-  @Expose()
-  public context?: string | string[];
-
-  @ApiProperty({
-    required: false,
-    type: 'string',
-    oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }]
-  })
-  @Prop({ type: String })
-  @Expose()
-  public name?: string;
-
-  @ApiProperty({ type: String })
-  @Prop({ type: String })
-  @Expose()
-  public published?: string;
 
   @Prop({ type: Mixed })
   @Expose()
@@ -126,45 +86,4 @@ export class ObjectDto extends ActivityStreams.object('Object') implements Objec
   @Prop({ type: Mixed })
   @Expose()
   public bcc?: string | string[];
-
-  @ApiProperty(ApiPropertyOneOfStringOrArray)
-  @Prop({ type: Mixed })
-  @Expose()
-  public audience?: string | string[];
-
-  /**
-   * @todo This belongs in a separate Actor model
-   */
-  @Prop({ type: Mixed })
-  @Expose()
-  public publicKey?: {
-    id: string;
-    owner: string;
-    publicKeyPem: string;
-  };
-
-  /**
-   * Take a single ASObjectOrLink or an array of ASObjectOrLink and return ids
-   * as an array of string values.
-   * @todo This should throw an exception if there is no id value for any item
-   * @param value
-   * @returns Normalized array of string ids
-   */
-  public static normalizeIds(
-    value: ASObjectOrLink | ASObjectOrLink[]
-  ): string[] {
-    if (Array.isArray(value)) {
-      return value
-        .filter((item: ASObjectOrLink) => {
-          return typeof item === 'string' || item.id;
-        })
-        .map((item: ASObjectOrLink) => {
-          if (typeof item === 'string') {
-            return item;
-          }
-          return item.id;
-        }) as string[];
-    }
-    return [value as string];
-  }
 }

@@ -4,6 +4,7 @@ import { ActivityStreams } from '@yuforium/activity-streams';
 import { Expose } from 'class-transformer';
 import { IsAlphanumeric, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 import { Schema } from 'mongoose';
+import { BaseObjectDto } from '../base-object.dto';
 
 /**
  * Yuforium's base Actor type diverges from its base Object type in that it
@@ -15,7 +16,7 @@ import { Schema } from 'mongoose';
  * decordated with @Prop will not be saved (note the absence of the `to`
  * field below).
  */
-export class ActorDto extends ActivityStreams.object('Actor') {
+export class ActorDto extends BaseObjectDto {
   @ApiProperty({
     oneOf: [{type: 'string'}, {type: 'array', items: {type: 'string'}}],
     description: 'The context of the actor, multiple supported'

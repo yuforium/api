@@ -6,9 +6,9 @@
   "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
   "ignorePatterns": [
     "node_modules/",
-    "dist/",
+    "dist/"
     // @todo ignore test files for now, remove later
-    "src/**/*.spec.ts"
+    // "src/**/*.spec.ts"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
