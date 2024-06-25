@@ -8,10 +8,13 @@ import { ActivityRecord } from '../schema/activity.schema';
 import { instanceToPlain } from 'class-transformer';
 import { ObjectRecord } from '../../object/schema/object.schema';
 import { Activity } from '@yuforium/activity-streams';
-import { ObjectCreateDto } from '../../object/dto/object-create/object-create.dto';
 import { JwtUser } from '../../auth/auth.service';
 import { ObjectType } from '../../object/type/object.type';
 import { BaseObjectType } from '../../object/type/base-object.type';
+
+export type OutboxObjectCreateType = Omit<ObjectType, 'id'> & {
+  published: string;
+}
 
 @Injectable()
 export class OutboxService {
@@ -29,7 +32,7 @@ export class OutboxService {
   /**
    * Create a new activity from an object specified by the client
    */
-  public async createObject<T extends ObjectCreateDto = ObjectCreateDto>(
+  public async createObject<T extends OutboxObjectCreateType = OutboxObjectCreateType>(
     _domain: string,
     _user: JwtUser,
     outboxActorId: string,
@@ -60,7 +63,13 @@ export class OutboxService {
       id: `${outboxActor.id}/posts/${id.toString()}`
     });
 
-    const obj = await this.objectService.create(recordDto);
+    const obj = Array.isArray(recordDto.type)
+      ? recordDto.type.some(type => ['Note', 'Article'].includes(type))
+        ? await this.objectService.createContent(recordDto)
+        : await this.objectService.create(recordDto)
+      : ['Note', 'Article'].includes(recordDto.type)
+        ? await this.objectService.createContent(recordDto)
+        : await this.objectService.create(recordDto);
 
     const activityId = this.activityService.id();
 

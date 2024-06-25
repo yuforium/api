@@ -15,7 +15,7 @@ import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe
 import { ObjectCreateDto } from '../../object/dto/object-create/object-create.dto';
 import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
 import { JwtUser } from '../../../modules/auth/auth.service';
-import { OutboxService } from '../../activity/services/outbox.service';
+import { OutboxObjectCreateType, OutboxService } from '../../activity/services/outbox.service';
 import { ArticleCreateDto } from '../../object/dto/object-create/article-create.dto';
 
 @Controller('users/:username/outbox')
@@ -58,13 +58,14 @@ export class UserOutboxController {
 
     this.logger.debug(`postOutbox(): ${params.username} creating a ${dto.type}`);
 
-    Object.assign(dto, {
+    const createDto = Object.assign({}, dto, {
+      '@context': 'https://www.w3.org/ns/activitystreams',
       attributedTo: (req.user as any).actor.id,
       published: (new Date()).toISOString(),
       to: Array.isArray(dto.to) ? dto.to.map(i => i.toString()) : [dto.to.toString()]
     });
 
-    const activity = this.outboxService.createObject(domain, user, userId, dto);
+    const activity = this.outboxService.createObject(domain, user, userId, createDto);
 
     return activity;
   }

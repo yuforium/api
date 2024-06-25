@@ -5,6 +5,7 @@ import { baseObjectRecord } from './base-object.schema';
 import { GConstructor } from '../../../common/schema/base.schema';
 import { ObjectType } from '../type/object.type';
 import { Exclude } from 'class-transformer';
+import { RepliesType } from '../type/replies.type';
 
 /**
  * ObjectDocument is a type that extends the ObjectRecord and adds the mongoose.Document type,
@@ -22,6 +23,12 @@ export class ObjectRecord extends baseObjectRecord<GConstructor<ObjectType>>(Obj
    */
   @Prop({type: String, required: false})
   @Exclude()
-  public _baseType?: 'actor' | 'object';
+  public _baseType?: 'actor' | 'object' | 'content';
+
+  @Prop({type: mongoose.Schema.Types.Mixed, required: false})
+  @Exclude()
+  public _replies?: {
+    default: RepliesType
+  }
 }
 export const ObjectSchema = SchemaFactory.createForClass(ObjectRecord);

@@ -15,7 +15,7 @@ import { ActorDocument } from './schema/actor.schema';
 import { ActorDto } from './dto/actor/actor.dto';
 import { Attribution } from './type/attribution.type';
 import { BaseObjectType } from './type/base-object.type';
-import { BaseObjectDocument, BaseObjectMetadataType } from './schema/base-object.schema';
+import { BaseObjectMetadataType } from './schema/base-object.schema';
 
 type ResolvableFields = 'attributedTo' | 'to' | 'cc' | 'bcc' | 'audience';
 
@@ -216,6 +216,47 @@ export class ObjectService {
     return obj;
   }
 
+  protected async getParentIds(dto: ObjectType, thread: string[]): Promise<string[]> {
+    if (dto.inReplyTo) {
+      console.log('the dto is', dto);
+      const id = typeof dto.inReplyTo === 'string' ?
+        dto.inReplyTo : dto.inReplyTo instanceof Link ? dto.inReplyTo.href : dto.inReplyTo.id;
+      console.log('the id is', id);
+      const parent = await this.findById(id as string);
+      if (parent) {
+        thread.push(parent.id.toString());
+        console.log('thread is now', thread);
+        thread = await this.getParentIds(parent, thread);
+      }
+      else {
+        // @todo do nothing for now, but it may be possible in a federated model that a parent object is not in the database.
+      }
+    }
+    return thread;
+  }
+
+  /**
+   * @todo consider moving this into a separate content service
+   */
+  public async createContent<T extends ObjectType = ObjectType>(dto: T): Promise<ObjectType> {
+    const record = Object.assign({}, dto, this.getBaseObjectMetadata(dto), {
+      _replies: {
+        default: {
+          count: 0
+        }
+      }
+    });
+
+    const parents = await this.getParentIds(dto, []);
+
+    console.log('the ids are', parents);
+
+    const doc = await this.objectModel.create(record);
+    await this.objectModel.updateMany({id: {$in: parents}}, {$inc: {'_replies.default.count': 1}, '_replies.default.last': Math.floor(new Date(doc.published as string).getTime())});
+
+    return this.docToInstance(doc);
+  }
+
   /**
    * Create a new object record.
    */
@@ -223,7 +264,6 @@ export class ObjectService {
     try {
       const record = Object.assign({}, dto, this.getBaseObjectMetadata(dto));
       const doc = await this.objectModel.create(record);
-
       return this.docToInstance(doc);
     }
     catch (err) {
@@ -289,7 +329,7 @@ export class ObjectService {
   /**
    * Find an object by its Activity Streams ID.  Note that this is different from the internal ID (MongoDB ObjectId).
    */
-  public async findById(id: string | Schema.Types.ObjectId): Promise<ObjectDocument | null> {
+  public async findById(id: string): Promise<ObjectDocument | null> {
     return this.objectModel.findOne({id});
   }
 
@@ -312,6 +352,8 @@ export class ObjectService {
   public docToInstance(doc: ObjectType): BaseObjectType {
     const type = Array.isArray(doc.type) ? doc.type : [doc.type];
     const opts = {excludeExtraneousValues: true, exposeUnsetFields: false};
+
+    console.log(doc);
 
     if (['Forum', 'Person'].some(i => type.includes(i))) {
       const i = plainToInstance<ActorDto, ObjectType>(ActorDto, doc, opts);

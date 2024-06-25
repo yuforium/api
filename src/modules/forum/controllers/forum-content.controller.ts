@@ -71,6 +71,7 @@ export class ForumContentController {
     }
 
     const queryParams = {
+      inReplyTo: null,
       $or: [
         {'_attribution.id': forum.id, '_attribution.rel': 'attributedTo', '_public': true},
         {'_attribution.id': forum.id, '_attribution.rel': 'to', '_public': true}

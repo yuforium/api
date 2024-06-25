@@ -118,6 +118,7 @@ export class UserContentController {
     }
 
     const queryParams = {
+      inReplyTo: null,
       $or: [
         {'_attribution.id': person.id, '_attribution.rel': 'attributedTo', '_public': true},
         {'_attribution.id': person.id, '_attribution.rel': 'to', '_public': true}
@@ -129,7 +130,10 @@ export class UserContentController {
 
     const {data, totalItems: total} = await this.objectService.findPageWithTotal(queryParams, contentQuery);
 
-    const items = data.map((item: any) => plainToInstance(ObjectDto, item));
+    const items = data.map((item: any) => {
+      console.log(item);
+      return plainToInstance(ObjectDto, item);
+    });
 
     collectionPage.id = `${userId}/content`;
     collectionPage.items = items;
