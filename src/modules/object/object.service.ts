@@ -227,7 +227,8 @@ export class ObjectService {
         thread = await this.getParentIds(parent, thread);
       }
       else {
-        // @todo do nothing for now, but it may be possible in a federated model that a parent object is not in the database.
+        // @todo nothing for now, but it may be possible in a federated model that a parent object is not in the database.
+        // In that case, we want to queue a job to track/hydrate the chain to the parent object.
       }
     }
     return thread;
