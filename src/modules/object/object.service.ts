@@ -16,6 +16,7 @@ import { ActorDto } from './dto/actor/actor.dto';
 import { Attribution } from './type/attribution.type';
 import { BaseObjectType } from './type/base-object.type';
 import { BaseObjectMetadataType } from './schema/base-object.schema';
+import { ActorType } from './type/actor.type';
 
 type ResolvableFields = 'attributedTo' | 'to' | 'cc' | 'bcc' | 'audience';
 
@@ -218,14 +219,11 @@ export class ObjectService {
 
   protected async getParentIds(dto: ObjectType, thread: string[]): Promise<string[]> {
     if (dto.inReplyTo) {
-      console.log('the dto is', dto);
       const id = typeof dto.inReplyTo === 'string' ?
         dto.inReplyTo : dto.inReplyTo instanceof Link ? dto.inReplyTo.href : dto.inReplyTo.id;
-      console.log('the id is', id);
       const parent = await this.findById(id as string);
       if (parent) {
         thread.push(parent.id.toString());
-        console.log('thread is now', thread);
         thread = await this.getParentIds(parent, thread);
       }
       else {
@@ -248,8 +246,6 @@ export class ObjectService {
     });
 
     const parents = await this.getParentIds(dto, []);
-
-    console.log('the ids are', parents);
 
     const doc = await this.objectModel.create(record);
     await this.objectModel.updateMany({id: {$in: parents}}, {$inc: {'_replies.default.count': 1}, '_replies.default.last': Math.floor(new Date(doc.published as string).getTime())});
@@ -353,14 +349,12 @@ export class ObjectService {
     const type = Array.isArray(doc.type) ? doc.type : [doc.type];
     const opts = {excludeExtraneousValues: true, exposeUnsetFields: false};
 
-    console.log(doc);
-
     if (['Forum', 'Person'].some(i => type.includes(i))) {
-      const i = plainToInstance<ActorDto, ObjectType>(ActorDto, doc, opts);
+      const i = plainToInstance(ActorDto, doc, opts);
       return i;
     }
 
-    return plainToInstance<ObjectDto, ObjectType>(ObjectDto, doc, opts);
+    return plainToInstance(ObjectDto, doc, opts);
   }
 
   /**
@@ -369,7 +363,13 @@ export class ObjectService {
   public async findPageWithTotal(params: any = {}, options: {skip: number, limit: number, sort?: string} = {skip: 0, limit: 10}): Promise<{totalItems: number, data: ObjectRecord[]}> {
     const facet = {$facet: {metadata: [{$count: 'total'}], data: [{ $skip: options.skip }, { $limit: options.limit }]}};
     const result = await this.objectModel.aggregate([{$match: params}, {$sort: {published: -1}}, facet], options);
-    const data = result[0].data.map((doc: any) => this.docToInstance(doc));
+    const data = result[0].data.map((doc: any) => {
+      doc.replies = {
+        type: 'Collection',
+        totalItems: doc._replies?.default?.count || 0,
+      }
+      return this.docToInstance(doc);
+    });
     return {totalItems: result[0].metadata[0]?.total || 0, data};
   }
 
