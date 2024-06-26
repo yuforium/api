@@ -16,7 +16,6 @@ import { ActorDto } from './dto/actor/actor.dto';
 import { Attribution } from './type/attribution.type';
 import { BaseObjectType } from './type/base-object.type';
 import { BaseObjectMetadataType } from './schema/base-object.schema';
-import { ActorType } from './type/actor.type';
 
 type ResolvableFields = 'attributedTo' | 'to' | 'cc' | 'bcc' | 'audience';
 
@@ -238,15 +237,15 @@ export class ObjectService {
    * @todo consider moving this into a separate content service
    */
   public async createContent<T extends ObjectType = ObjectType>(dto: T): Promise<ObjectType> {
+    const parents = await this.getParentIds(dto, []);
     const record = Object.assign({}, dto, this.getBaseObjectMetadata(dto), {
       _replies: {
         default: {
           count: 0
         }
-      }
+      },
+      _rootId: parents.length ? parents[parents.length - 1] : dto.id
     });
-
-    const parents = await this.getParentIds(dto, []);
 
     const doc = await this.objectModel.create(record);
     await this.objectModel.updateMany({id: {$in: parents}}, {$inc: {'_replies.default.count': 1}, '_replies.default.last': Math.floor(new Date(doc.published as string).getTime())});
@@ -346,7 +345,7 @@ export class ObjectService {
   /**
    * Convert a Mongoose doc to DTO instance
    */
-  public docToInstance(doc: ObjectType): BaseObjectType {
+  public docToInstance(doc: ObjectType): ActorDto | ObjectDto {
     const type = Array.isArray(doc.type) ? doc.type : [doc.type];
     const opts = {excludeExtraneousValues: true, exposeUnsetFields: false};
 
@@ -361,9 +360,42 @@ export class ObjectService {
   /**
    * Consider splitting this off into a content service or something similar.
    */
-  public async findPageWithTotal(params: any = {}, options: {skip: number, limit: number, sort?: string} = {skip: 0, limit: 10}): Promise<{totalItems: number, data: ObjectRecord[]}> {
-    const facet = {$facet: {metadata: [{$count: 'total'}], data: [{ $skip: options.skip }, { $limit: options.limit }]}};
-    const result = await this.objectModel.aggregate([{$match: params}, {$sort: {published: -1}}, facet], options);
+  public async getContentPage(
+    filter: mongoose.FilterQuery<ObjectDocument> = {},
+    queryOptions: {skip: number, limit: number, sort?: string} = {skip: 0, limit: 10},
+
+  ): Promise<{totalItems: number, data: (ObjectDto | ActorDto)[]}> {
+    this.objectModel.find(filter);
+    const facet = {
+      $facet: {
+        metadata: [
+          {
+            $count: 'total'
+          }
+        ],
+        data: [
+          {
+            $skip: queryOptions.skip
+          },
+          {
+            $limit: queryOptions.limit
+          }
+        ]
+      }
+    };
+
+    const result = await this.objectModel.aggregate([
+      {
+        $match: filter
+      },
+      {
+        $sort: {
+          published: -1
+        }
+      },
+      facet
+    ], queryOptions);
+
     const data = result[0].data.map((doc: any) => {
       doc.replies = {
         type: 'Collection',
@@ -371,6 +403,7 @@ export class ObjectService {
       }
       return this.docToInstance(doc);
     });
+
     return {totalItems: result[0].metadata[0]?.total || 0, data};
   }
 

@@ -19,7 +19,7 @@ export class UserService {
   constructor(
     protected readonly objectService: ObjectService,
     @InjectModel(User.name) protected userModel: Model<UserDocument>,
-    @InjectModel(UserActorRecord.name) protected userActorModel: Model<UserActorDocument>,
+    @InjectModel(UserActorRecord.name) protected userActorModel: Model<UserActorDocument>
   ) { }
 
   public async create(domain: string, userDto: UserCreateDto): Promise<any> {

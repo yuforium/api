@@ -30,5 +30,9 @@ export class ObjectRecord extends baseObjectRecord<GConstructor<ObjectType>>(Obj
   public _replies?: {
     default: RepliesType
   }
+
+  @Prop({type: String, required: true})
+  @Exclude()
+  public _rootId!: string;
 }
 export const ObjectSchema = SchemaFactory.createForClass(ObjectRecord);

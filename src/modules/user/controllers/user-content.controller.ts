@@ -125,15 +125,9 @@ export class UserContentController {
       ]
     };
 
-    // const scratch = await this.objectService.findById('https://localhost/forums/scratch');
-    // return scratch;
+    const {data, totalItems: total} = await this.objectService.getContentPage(queryParams, contentQuery);
 
-    const {data, totalItems: total} = await this.objectService.findPageWithTotal(queryParams, contentQuery);
-
-    const items = data.map((item: any) => {
-      console.log(item);
-      return plainToInstance(ObjectDto, item);
-    });
+    const items = data;
 
     collectionPage.id = `${userId}/content`;
     collectionPage.items = items;

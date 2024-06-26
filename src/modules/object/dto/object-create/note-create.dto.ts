@@ -5,7 +5,7 @@ import { ObjectCreateDto } from './object-create.dto';
 export class NoteCreateDto extends ObjectCreateDto {
   static type = 'Note';
 
-  @MaxLength(500) // make it compatible with Mastodon for now
+  @MaxLength(65536) // we could make this 500 to make it compatible with Mastodon, but also create a separate `TootDto` for Mastodon compatibility
   public content!: string;
 
   @Equals('Note')

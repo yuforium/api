@@ -86,15 +86,16 @@ export class ForumContentController {
 
     // const posts = await this.forumService.getContent(domain, params.forumname, opts);
 
-    const {data, totalItems} = await this.objectService.findPageWithTotal(queryParams, opts);
-    const items = data.map(item => plainToInstance(ObjectDto, item));
+    const {data, totalItems} = await this.objectService.getContentPage(queryParams, opts);
+    // const items = data.map(item => plainToInstance(ObjectDto, item, {excludeExtraneousValues: true, exposeUnsetFields: false}));
+    const items = data;
 
-    await Promise.all(items.map(item => this.objectService.resolveFields(item, 'attributedTo')));
+    await Promise.all(items.map(item => this.objectService.resolveFields(item, ['attributedTo', 'audience'])));
 
     Object.assign(collectionPage, {
       items,
       totalItems: totalItems
-    })
+    });
 
     collectionPage.id = `https://${domain}/forums/${params.forumname}/content/page/1`;
 
