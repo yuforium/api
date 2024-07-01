@@ -7,9 +7,14 @@ metadata:
   annotations:
     "helm.sh/hook": test
 spec:
+  automountServiceAccountToken: false
   containers:
     - name: wget
       image: busybox
       command: ['wget']
       args: ['{{ include "api.fullname" . }}:{{ .Values.service.port }}']
+      resources:
+        limits:
+          memory: 128Mi
+          cpu: 500m
   restartPolicy: Never
