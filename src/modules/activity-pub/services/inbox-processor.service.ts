@@ -34,11 +34,12 @@ export class InboxProcessorService {
       if (!actorRecord) {
         this.logger.debug(`create(): creating actor ${actor.id}`);
         const url = new URL(actor.id);
-        await this.actorModel.create(Object.assign({}, actor, {
+        await this.actorModel.create({
+          ...actor,
           _domain: resolveDomain(url.hostname),
           _local: false,
           _public: true
-        }));
+        });
       }
 
       const existing = await this.activityService.get(receivedActivity.id);
@@ -57,16 +58,17 @@ export class InboxProcessorService {
       const obj = plainToInstance(ObjectDto, receivedActivity.object, {excludeExtraneousValues: true});
 
       // @todo create instead of createContent - requires create to inspect the type and route to the appropriate method
-      await this.objectService.createContent(Object.assign({}, obj, await this.objectService.getBaseObjectMetadata(obj)));
-      await this.activityService.createActivity(
-        Object.assign({},
-          receivedActivity,
-          {
-            _local: false,
-            _public: true,
-            _domain,
-            _raw
-          }));
+      await this.objectService.createContent({
+        ...obj,
+        ...await this.objectService.getBaseObjectMetadata(obj)
+      });
+      await this.activityService.createActivity({
+        ...receivedActivity,
+        _local: false,
+        _public: true,
+        _domain,
+        _raw
+      });
 
       // const activityDto = plainToInstance(ActivityDto, await this.activityService.create(record), {excludeExtraneousValues: true});
       // const objectDto = plainToInstance(ObjectDto, activity.object);
