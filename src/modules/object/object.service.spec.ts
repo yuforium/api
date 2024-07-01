@@ -122,7 +122,7 @@ describe('ObjectService', () => {
     //     return new TestResolver();
     //   }
     // })
-    .compile();
+      .compile();
 
     service = module.get<ObjectService>(ObjectService);
     resolver = module.get<TestResolver>(StoredObjectResolver);

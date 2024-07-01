@@ -178,6 +178,7 @@ export class InboxService {
     // @todo - if auto accept, accept the follow request, accept it anyway for now
     const _acceptId = this.activityService.id().toString();
     const acceptActivityDto: ActivityRecord = {
+      '@context': 'https://www.w3.org/ns/activitystreams',
       _id: _acceptId,
       _domain: relationship._domain,
       _local: true,

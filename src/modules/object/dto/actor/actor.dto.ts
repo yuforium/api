@@ -1,7 +1,6 @@
 import { Prop } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { ActivityStreams } from '@yuforium/activity-streams';
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { IsAlphanumeric, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 import { Schema } from 'mongoose';
 import { BaseObjectDto } from '../base-object.dto';
@@ -61,4 +60,24 @@ export class ActorDto extends BaseObjectDto {
   @Expose()
   @Prop({type: Schema.Types.Mixed, required: false})
   public publicKey!: {id: string, owner: string, publicKeyPem: string};
+
+  @Expose({toPlainOnly: true})
+  public get inbox(): string {
+    return `${this.id}/inbox`;
+  }
+
+  @Expose({toPlainOnly: true})
+  public get outbox(): string {
+    return `${this.id}/outbox`;
+  }
+
+  @Expose({toPlainOnly: true})
+  public get followers(): string {
+    return `${this.id}/followers`;
+  }
+
+  @Expose({toPlainOnly: true})
+  public get following(): string {
+    return `${this.id}/following`;
+  }
 }

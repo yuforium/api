@@ -16,6 +16,7 @@ import { ActorDto } from './dto/actor/actor.dto';
 import { Attribution } from './type/attribution.type';
 import { BaseObjectType } from './type/base-object.type';
 import { BaseObjectMetadataType } from './schema/base-object.schema';
+import { ActorRecord } from './schema/content.schema';
 
 type ResolvableFields = 'attributedTo' | 'to' | 'cc' | 'bcc' | 'audience';
 
@@ -34,6 +35,7 @@ export class ObjectService {
 
   constructor(
     @InjectModel(ObjectRecord.name) protected objectModel: Model<ObjectDocument>,
+    @InjectModel(ActorRecord.name) protected actorModel: Model<ActorDocument>,
     @InjectModel(RelationshipRecord.name) protected relationshipModel: Model<RelationshipDocument>,
     protected configService: ConfigService,
     @Inject(forwardRef(() => StoredObjectResolver)) protected readonly resolver: StoredObjectResolver
@@ -237,6 +239,7 @@ export class ObjectService {
    * @todo consider moving this into a separate content service
    */
   public async createContent<T extends ObjectType = ObjectType>(dto: T): Promise<ObjectType> {
+    this.logger.debug(`Creating content: ${dto.id}`);
     const parents = await this.getParentIds(dto, []);
     const record = Object.assign({}, dto, this.getBaseObjectMetadata(dto), {
       _replies: {

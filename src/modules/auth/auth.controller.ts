@@ -8,7 +8,8 @@ import { Request } from 'express';
 import { UserDocument } from '../user/schemas/user.schema';
 import { plainToInstance } from 'class-transformer';
 import { User } from '../../common/decorators/user.decorator';
-import { UserActorDto } from '../user/dto/user-actor.dto';
+import { JwtUserActorDto } from '../user/dto/user-actor.dto';
+import { ActorDto } from '../object/dto/actor/actor.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -27,7 +28,7 @@ export class AuthController {
   @ApiOperation({operationId: 'profile'})
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
-  async profile(@User() user: JwtUser) {
-    return plainToInstance(UserActorDto, user.actor);
+  async profile(@User() user: JwtUser): Promise<JwtUserActorDto> {
+    return plainToInstance(ActorDto, user.actor);
   }
 }

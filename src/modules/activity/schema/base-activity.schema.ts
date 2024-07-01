@@ -6,6 +6,7 @@ import { Activity } from '@yuforium/activity-streams';
 
 type BaseActivityRecord = BaseRecord & {
   _object?: mongoose.Schema.Types.ObjectId;
+  _raw?: string;
 };
 
 /**
@@ -18,6 +19,10 @@ export function BaseActivitySchema<TBase extends GConstructor<Activity & {id: st
     @Exclude()
     @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'objects'})
     public _object?: mongoose.Schema.Types.ObjectId;
+
+    @Exclude()
+    @Prop({ type: String, required: false })
+    public _raw!: string;
   }
 
   return BaseActivitySchema;

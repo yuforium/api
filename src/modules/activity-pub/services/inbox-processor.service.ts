@@ -6,7 +6,7 @@ import { ObjectService } from '../../../modules/object/object.service';
 import { RelationshipRecord } from '../../../modules/object/schema/relationship.schema';
 import { ActivityPubService } from './activity-pub.service';
 import { Activity } from '@yuforium/activity-streams';
-import { UserActorDto } from '../../../modules/user/dto/user-actor.dto';
+import { JwtUserActorDto } from '../../../modules/user/dto/user-actor.dto';
 import { resolveDomain } from '../../../common/decorators/service-domain.decorator';
 import { InjectModel } from '@nestjs/mongoose';
 import { ActorDocument, ActorRecord } from '../../object/schema/actor.schema';
@@ -14,7 +14,6 @@ import { Model } from 'mongoose';
 import { ObjectDto } from '../../object/dto/object.dto';
 import { RelationshipType } from '../../object/type/relationship.type';
 import { ActivityRecord } from '../../activity/schema/activity.schema';
-import { ObjectType } from '../../object/type/object.type';
 
 @Injectable()
 export class InboxProcessorService {
@@ -26,45 +25,66 @@ export class InboxProcessorService {
     @InjectModel(ActorRecord.name) protected actorModel: Model<ActorDocument>,
   ) { }
 
-  public async create(receivedActivity: ActivityDto, actor: UserActorDto): Promise<Activity | null> {
-    const actorRecord = await this.actorModel.findOne({ id: actor.id });
+  public async create(receivedActivity: ActivityDto, _raw: string, actor: JwtUserActorDto): Promise<Activity | null> {
+    this.logger.debug(`create(): ${receivedActivity.id}`);
 
-    if (!actorRecord) {
-      const url = new URL(actor.id);
-      this.actorModel.create(Object.assign({}, actor, {
-        _domain: resolveDomain(url.hostname),
-        _local: false,
-        _public: true
-      }));
+    try {
+      const actorRecord = await this.actorModel.findOne({ id: actor.id });
+
+      if (!actorRecord) {
+        this.logger.debug(`create(): creating actor ${actor.id}`);
+        const url = new URL(actor.id);
+        await this.actorModel.create(Object.assign({}, actor, {
+          _domain: resolveDomain(url.hostname),
+          _local: false,
+          _public: true
+        }));
+      }
+
+      const existing = await this.activityService.get(receivedActivity.id);
+
+      if (existing) {
+        this.logger.debug('create(): activity already exists, returning null');
+        return null;
+      }
+
+      this.logger.debug(`create(): creating activity ${receivedActivity.id}`);
+
+      const url = new URL(receivedActivity.id);
+      const _domain = resolveDomain(url.hostname);
+
+      const activityDto = plainToInstance(ActivityDto, receivedActivity, {excludeExtraneousValues: true});
+      const obj = plainToInstance(ObjectDto, receivedActivity.object, {excludeExtraneousValues: true});
+
+      // @todo create instead of createContent - requires create to inspect the type and route to the appropriate method
+      await this.objectService.createContent(Object.assign({}, obj, await this.objectService.getBaseObjectMetadata(obj)));
+      await this.activityService.createActivity(
+        Object.assign({},
+          receivedActivity,
+          {
+            _local: false,
+            _public: true,
+            _domain,
+            _raw
+          }));
+
+      // const activityDto = plainToInstance(ActivityDto, await this.activityService.create(record), {excludeExtraneousValues: true});
+      // const objectDto = plainToInstance(ObjectDto, activity.object);
+
+      Object.assign(activityDto, { object: obj });
+
+      return activityDto;
     }
-
-    const existing = await this.activityService.get(receivedActivity.id);
-
-    if (existing) {
-      this.logger.debug('create(): activity already exists');
-      return null;
+    catch (e) {
+      this.logger.error('create(): handling exception');
+      if (e instanceof Error) {
+        this.logger.error(`${e.message}`)
+      }
+      throw e;
     }
-
-    this.logger.debug(`create(): creating activity ${receivedActivity.id}`);
-
-    const url = new URL(receivedActivity.id);
-    const _domain = resolveDomain(url.hostname);
-
-    const activityDto = plainToInstance(ActivityDto, receivedActivity, { excludeExtraneousValues: true });
-    const obj = plainToInstance(ObjectDto, receivedActivity.object, { excludeExtraneousValues: true });
-
-    await this.objectService.create(Object.assign({}, obj, await this.objectService.getBaseObjectMetadata(obj)));
-    await this.activityService.createActivity(Object.assign({}, receivedActivity, { _local: false, _public: true, _domain }));
-
-    // const activityDto = plainToInstance(ActivityDto, await this.activityService.create(record), {excludeExtraneousValues: true});
-    // const objectDto = plainToInstance(ObjectDto, activity.object);
-
-    Object.assign(activityDto, { object: obj });
-
-    return activityDto;
   }
 
-  public async follow(activityDto: ActivityDto, _actor: UserActorDto): Promise<Activity | null> {
+  public async follow(activityDto: ActivityDto, _raw: string, _actor: JwtUserActorDto): Promise<Activity | null> {
     this.logger.log(`follow(): ${activityDto.id}`);
 
     if (!activityDto.id) {
@@ -126,6 +146,7 @@ export class InboxProcessorService {
     // @todo - if auto accept, accept the follow request, accept it anyway for now
     const _acceptId = this.activityService.id().toString();
     const acceptActivityDto: ActivityRecord = {
+      '@context': 'https://www.w3.org/ns/activitystreams',
       _id: _acceptId,
       _domain: _domain,
       // _path: `${followee._path}/${followee._pathId}/activities`,

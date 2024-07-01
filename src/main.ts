@@ -3,18 +3,15 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { useContainer } from 'class-validator';
-import * as bodyParser from 'body-parser';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    bodyParser: false, // see below re: bodyParser
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
     logger: ['log', 'error', 'warn', 'debug', 'verbose']
   });
 
-  // nest's built-in bodyParser is only configured to parse application/json, we need to create our own
-  app.use(
-    bodyParser.json({ type: ['application/activity+json', 'application/json'] })
-  );
+  app.useBodyParser('json', {type: ['application/activity+json', 'application/json']});
 
   const options = new DocumentBuilder()
     .setTitle('Yuforium')
@@ -29,9 +26,7 @@ async function bootstrap() {
   // see https://github.com/nestjs/nest/issues/528 - enables DI in class-validator dto objects
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  const skipCors = true;
-
-  if (process.env.NODE_ENV === 'development' || skipCors) {
+  if (process.env.NODE_ENV === 'development') {
     app.enableCors({ origin: '*' });
   } else {
     app.enableCors({
@@ -44,7 +39,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({transform: false, whitelist: true}));
   app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get(Reflector), {excludeExtraneousValues: true})
+    new ClassSerializerInterceptor(app.get(Reflector), {excludeExtraneousValues: true, exposeUnsetFields: false})
   );
 
   await app.listen(parseInt(process.env.PORT || '3000', 10));

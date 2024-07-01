@@ -5,11 +5,11 @@ import * as bcrypt from 'bcryptjs';
 import { UserDocument } from '../user/schemas/user.schema';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { ObjectService } from '../object/object.service';
-import { UserActorDto } from '../user/dto/user-actor.dto';
+import { JwtUserActorDto } from '../user/dto/user-actor.dto';
 
 export interface JwtUser {
   _id: string;
-  actor: UserActorDto;
+  actor: JwtUserActorDto;
 }
 
 @Injectable()
@@ -62,12 +62,12 @@ export class AuthService {
       throw new Error('User\'s default identity not found');
     }
 
-    const actor = plainToInstance(UserActorDto, actorRecord, {excludeExtraneousValues: true});
+    const actor = plainToInstance(JwtUserActorDto, actorRecord, {excludeExtraneousValues: true});
     actor.preferredUsername = user.username;
 
     const payload: JwtUser = {
       _id: user._id.toString(),
-      actor: instanceToPlain(actor) as UserActorDto
+      actor: instanceToPlain(actor) as JwtUserActorDto
     };
 
     return {

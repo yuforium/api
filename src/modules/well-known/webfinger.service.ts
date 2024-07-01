@@ -1,11 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Get, Header, Injectable, NotFoundException } from '@nestjs/common';
 import { ObjectService } from '../object/object.service';
 import { UserService } from '../user/user.service';
 import { WebfingerDto } from './dto/webfinger.dto';
 
 @Injectable()
 export class WebfingerService {
-  constructor(protected userService: UserService, protected objectService: ObjectService) {}
+  constructor(
+    protected userService: UserService,
+    protected objectService: ObjectService
+  ) { }
 
   public async getAccount(domain: string, username: string): Promise<WebfingerDto> {
     const user = await this.userService.findOne(domain, username);
@@ -32,7 +35,7 @@ export class WebfingerService {
         {
           rel: 'http://webfinger.net/rel/profile-page',
           type: 'text/html',
-          href: person.id,
+          href: person.id
         }
       ],
     };

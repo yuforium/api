@@ -1,4 +1,4 @@
-import { Controller, Get, Logger, NotFoundException, Query } from '@nestjs/common';
+import { Controller, Get, Header, Logger, NotFoundException, Query } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ServiceDomain } from '../../common/decorators/service-domain.decorator';
 import { WebfingerDto } from './dto/webfinger.dto';
@@ -11,6 +11,7 @@ export class WebfingerController {
   constructor(protected readonly webfingerService: WebfingerService) {}
 
   @Get()
+  @Header('Content-Type', 'application/jrd+json')
   public async webfinger(@ServiceDomain() domain: string, @Query('resource') resource: string): Promise<WebfingerDto> {
     if (!resource) {
       this.logger.error('webfinger: no resource specified');

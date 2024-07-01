@@ -31,8 +31,11 @@ export class InboxService {
 
   /**
    * Accept an incoming activity.  This is the entry point for all incoming activities.
+   * @param activity Parsed and validated activity object
+   * @param raw Raw activity string, to keep the original actviity intact
+   * @param options Options for accepting the activity
    */
-  public async receive<T extends ActivityDto>(activity: T, options?: AcceptOptions) {
+  public async receive<T extends ActivityDto>(activity: T, raw: string, options?: AcceptOptions) {
     // if requestSignature is provided, verify the signature.  If we don't have a public key for the user, we can't verify the signature, and we
     // should queue processing of the activity for later.
     // const {requestSignature} = options || {};
@@ -131,7 +134,7 @@ export class InboxService {
 
     if (this.processor[type]) {
       this.logger.debug(`receive(): processing ${type} activity ${activity.id}`);
-      await this.processor[type](activity, actor);
+      await this.processor[type](activity, raw, actor);
     }
     else {
       throw new Error('This activity type is not supported');

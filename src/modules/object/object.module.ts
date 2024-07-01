@@ -21,6 +21,7 @@ import { UserActorRecord, UserActorSchema } from './schema/user-actor.schema';
         discriminators: [
           {name: ActorRecord.name, schema: ActorSchema, value: 'Actor'},
           {name: ActorRecord.name, schema: ActorSchema, value: 'Forum'},
+          {name: ActorRecord.name, schema: ActorSchema, value: 'Person'},
           {name: RelationshipRecord.name, schema: RelationshipSchema, value: 'relationship'}
         ]
       },

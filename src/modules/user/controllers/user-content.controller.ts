@@ -1,29 +1,27 @@
 import {
-  ClassSerializerInterceptor,
-  Controller,
-  Get,
-  Logger,
-  NotFoundException,
-  NotImplementedException,
-  Param,
-  Query,
-  UseInterceptors
+    ClassSerializerInterceptor,
+    Controller,
+    Get,
+    Logger,
+    NotFoundException,
+    NotImplementedException,
+    Param,
+    Query,
+    UseInterceptors
 } from '@nestjs/common';
 import {
-  ApiExtraModels,
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiTags,
-  getSchemaPath
+    ApiExtraModels,
+    ApiOkResponse,
+    ApiOperation,
+    ApiParam,
+    ApiQuery,
+    ApiTags,
+    getSchemaPath
 } from '@nestjs/swagger';
-import { plainToInstance } from 'class-transformer';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ObjectService } from '../../../modules/object/object.service';
 import { UserContentQueryOptionsDto } from '../dto/user-content-query-options.dto';
 import { UserParamsDto } from '../dto/user-params.dto';
-import { ObjectDto } from '../../object/dto/object.dto';
 import { UserService } from '../user.service';
 import { OrderedCollectionPageDto } from '../../object/dto/collection/ordered-collection-page.dto';
 import { Reflector } from '@nestjs/core';

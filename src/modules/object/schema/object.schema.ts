@@ -31,7 +31,7 @@ export class ObjectRecord extends baseObjectRecord<GConstructor<ObjectType>>(Obj
     default: RepliesType
   }
 
-  @Prop({type: String, required: true})
+  @Prop({type: String, required: false})
   @Exclude()
   public _rootId!: string;
 }

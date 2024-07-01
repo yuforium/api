@@ -1,8 +1,21 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
+type allowedUserFields = 'preferredUsername';
+
 export const User = createParamDecorator(
-  (data: string, ctx: ExecutionContext) => {
+  (data: allowedUserFields, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
-    return data ? request.user && request.user[data] : request.user;
+
+    if (!request.user) {
+      return null;
+    }
+
+    const user = request.user;
+
+    if (data) {
+      return user[data];
+    }
+
+    return user;
   }
 );

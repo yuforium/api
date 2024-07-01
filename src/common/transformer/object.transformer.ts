@@ -5,4 +5,4 @@ const ObjectTransformer = new ActivityStreams.Transformer(undefined, {convertTex
 
 ObjectTransformer.add(NoteDto);
 
-export { ObjectTransformer };
+export {ObjectTransformer};

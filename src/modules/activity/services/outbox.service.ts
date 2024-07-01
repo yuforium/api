@@ -63,29 +63,41 @@ export class OutboxService {
       id: `${outboxActor.id}/posts/${id.toString()}`
     });
 
-    const obj = Array.isArray(recordDto.type)
-      ? recordDto.type.some(type => ['Note', 'Article'].includes(type))
-        ? await this.objectService.createContent(recordDto)
-        : await this.objectService.create(recordDto)
-      : ['Note', 'Article'].includes(recordDto.type)
-        ? await this.objectService.createContent(recordDto)
-        : await this.objectService.create(recordDto);
+    const session = await this.objectModel.db.startSession();
+    session.startTransaction();
 
-    const activityId = this.activityService.id();
+    try {
+      const obj = Array.isArray(recordDto.type)
+        ? recordDto.type.some(type => ['Note', 'Article'].includes(type))
+          ? await this.objectService.createContent(recordDto)
+          : await this.objectService.create(recordDto)
+        : ['Note', 'Article'].includes(recordDto.type)
+          ? await this.objectService.createContent(recordDto)
+          : await this.objectService.create(recordDto);
 
-    const activityDto: ActivityRecord = {
-      id: `${outboxActor.id}/activities/${activityId.toString()}`,
-      type: 'Create',
-      actor: Array.isArray(dto.attributedTo) ? dto.attributedTo[0] as string : dto.attributedTo as string,
-      object: instanceToPlain(obj),
-      _domain: _domain,
-      _local: true,
-      _public: true
-    };
+      const activityId = this.activityService.id();
 
-    const activity = await this.activityService.create(activityDto);
+      const activityDto: ActivityRecord = {
+        '@context': 'https://www.w3.org/ns/activitystreams',
+        id: `${outboxActor.id}/activities/${activityId.toString()}`,
+        type: 'Create',
+        actor: Array.isArray(dto.attributedTo) ? dto.attributedTo[0] as string : dto.attributedTo as string,
+        object: instanceToPlain(obj),
+        _domain: _domain,
+        _local: true,
+        _public: true,
+        _raw: ''
+      };
 
-    return activity;
+      activityDto._raw = JSON.stringify(instanceToPlain(activityDto));
+
+      const activity = await this.activityService.create(activityDto);
+
+      return activity;
+    }
+    catch (e) {
+
+    }
   }
 
   /**

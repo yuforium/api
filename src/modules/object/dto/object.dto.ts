@@ -1,7 +1,6 @@
 import { Prop } from '@nestjs/mongoose';
-import { ApiExtraModels, ApiHideProperty, ApiProperty, getSchemaPath } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import {
-  ActivityStreams,
   ASObjectOrLink,
   Collection,
   Link
@@ -9,7 +8,6 @@ import {
 import { Expose, Transform } from 'class-transformer';
 import * as mongoose from 'mongoose';
 import sanitizeHtml from 'sanitize-html';
-import { ObjectType } from '../type/object.type';
 import { BaseObjectDto } from './base-object.dto';
 
 const { Mixed } = mongoose.Schema.Types;
