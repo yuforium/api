@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - arm-builds
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,5 +21,6 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:
+          platforms: linux/arm64/v8,linux/amd64
           push: true
           tags: yuforium/api:latest,yuforium/api:${{ github.sha }}
