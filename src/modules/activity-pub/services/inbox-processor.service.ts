@@ -101,7 +101,6 @@ export class InboxProcessorService {
       throw new Error('Activity does not have an actor');
     }
 
-    // @todo figure out a better way to deal with http ids passed in dev mode
     this.logger.debug(`follow(): finding actorId ${activityDto.object}`);
     const actorId = (activityDto.object as string).replace('http://', 'https://');
     this.logger.debug(`follow(): finding actorId ${actorId}`);
@@ -161,38 +160,13 @@ export class InboxProcessorService {
       _public: true
     };
 
-    // Object.assign(new ActivityDto(), {
-    //   _id: _acceptId,
-    //   _serviceId: relationship._hostname,
-    //   id: `${followee.id}/activity/${_acceptId}`,
-    //   type: 'Accept',
-    //   actor: followee.id,
-    //   object: followee.id
-    // });
-    // const acceptActivity = await this.activityService.createActivity(acceptActivityDto);
-
-    const acceptActivity = await this.activityService.createActivity(acceptActivityDto);
-
-    // this.activityPubSerice.dispatchToInbox(plainToInstance(ActivityDto, acceptActivity), actor.inbox);
+    await this.activityService.createActivity(acceptActivityDto);
 
     return acceptActivityDto;
   }
 
   public async undo() {
     throw new NotImplementedException();
-    // const obj = await this.getObjectFromActivity(activity);
-
-    // const activityId = typeof activity.object === 'string' ? activity.object : activity.object.id;
-
-    // if (!activityId) {
-    //   throw new Error('Activity does not have an object');
-    // }
-
-    // const obj = await this.objectService.get(activityId);
-
-    // if (activityId) {
-    //   return this.undoFollow(activityId);
-    // }
   }
 
   protected async undoFollow(object: RelationshipRecord) {

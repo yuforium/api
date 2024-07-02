@@ -10,6 +10,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ActorDocument, ActorRecord } from '../../object/schema/actor.schema';
 import { Model } from 'mongoose';
 import { RelationshipType } from '../../../modules/object/type/relationship.type';
+import { resolveDomain } from 'src/common/decorators/service-domain.decorator';
 
 @Injectable()
 export class InboxService {
@@ -27,14 +28,18 @@ export class InboxService {
   public async receive<T extends ActivityDto = ActivityDto>(activity: T, options?: AcceptOptions) {
     // if requestSignature is provided, verify the signature.  If we don't have a public key for the user, we can't verify the signature, and we
     // should queue processing of the activity for later.
-    // const {requestSignature} = options || {};
 
-    // @todo domain checking can be moved into activity dto validation
-    // const parsedUrl = new URL(activity.actor);
+    // will throw an exception if domain is invalid
+    const actorURL = new URL(activity.actor);
+    resolveDomain(actorURL.hostname);
 
-    // if (!psl.isValid(parsedUrl.hostname) && (parsedUrl.hostname.substring(parsedUrl.hostname.length -6) !== '.local')) {
-    //   throw new TypeError('Invalid URL');
-    // }
+    if (actorURL.protocol !== 'https') {
+      throw new BadRequestException('Actor URL must be HTTPS');
+    }
+
+    if (actorURL.port !== '') {
+      throw new BadRequestException('Actor URL must operate on default port');
+    }
 
     const response = await fetch(activity.actor, { headers: { 'Accept': 'application/activity+json' } });
     const actor = await response.json();
