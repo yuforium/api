@@ -141,15 +141,11 @@ export class InboxService {
     }
   }
 
-  protected async follow(activity: ActivityDto, actor: any): Promise<ActivityDto | null> {
-    activity;
-    actor;
+  protected async follow(_activity: ActivityDto, _actor: any): Promise<ActivityDto | null> {
     throw new NotImplementedException();
   }
 
-  protected async undo(activity: ActivityDto, actor: any): Promise<ActivityDto | null> {
-    activity;
-    actor;
+  protected async undo(_activity: ActivityDto, _actor: any): Promise<ActivityDto | null> {
     throw new NotImplementedException();
   }
 }

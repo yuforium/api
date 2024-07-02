@@ -95,18 +95,12 @@ export class InboxService {
     await this[type](activity, actor);
   }
 
-  public async create(activity: ActivityDto, actor: ExternalActorDto): Promise<ActivityDto | null> {
-    activity;
-    actor;
+  public async create(_activity: ActivityDto, _actor: ExternalActorDto): Promise<ActivityDto | null> {
     throw new NotImplementedException();
-    return null;
   }
 
-  public async undo(activity: ActivityDto, actor: ExternalActorDto): Promise<ActivityDto | null> {
-    activity;
-    actor;
+  public async undo(_activity: ActivityDto, _actor: ExternalActorDto): Promise<ActivityDto | null> {
     throw new NotImplementedException();
-    return null;
   }
 
   public async follow(activityDto: ActivityDto, actor: ExternalActorDto): Promise<ActivityDto | null> {
