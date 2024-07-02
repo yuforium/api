@@ -156,7 +156,7 @@ describe('ObjectService', () => {
 
     await service.resolveFields(forum, ['audience']);
 
-    forum.audience.forEach((a: any, i) => {
+    forum.audience.forEach((a: any) => {
       expect(a).toMatchObject(items[a.id]);
     });
   });

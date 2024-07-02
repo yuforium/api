@@ -40,7 +40,7 @@ export class UserInboxController {
    * Inbox POST request handler
    * @param domain Domain for which the activity was received
    * @param req Request object, used to log the IP address on receipt of an activity
-   * @param activity Activity object received in the request body.  Any (json) is permitted here, since we want to preserve the original object. @todo validate this
+   * @param dto Activity object received in the request body.  Any (json) is permitted here, since we want to preserve the original object. @todo validate this
    * @param username Username of the user to receive the activity
    * @returns Accepted status object
    */
@@ -51,7 +51,7 @@ export class UserInboxController {
   @UseGuards(AuthGuard(['jwt', 'anonymous']))
   @HttpCode(HttpStatus.ACCEPTED)
   public async postInbox(
-    @ServiceDomain() domain: string, @Req() req: RawBodyRequest<Request>, @Body() activity: ActivityDto, @Param('username') username: string
+    @ServiceDomain() domain: string, @Req() req: RawBodyRequest<Request>, @Body() dto: ActivityDto, @Param('username') username: string
   ) {
     const targetUserId = `https://${domain}/user/${username}`;
 
@@ -60,13 +60,7 @@ export class UserInboxController {
     }
 
     const raw = JSON.stringify(JSON.parse(req.rawBody.toString('utf-8')), null, 4);
-    const dto = plainToInstance(ActivityDto, activity);
-    const errs = await validate(dto);
 
-    console.log(errs);
-
-    console.log('the dto is', activity);
-    console.log(req.headers);
     // if (typeof activity.object.to === 'string' && activity.object.to !== targetUserId) {
     //   throw new BadRequestException(`The activity is not intended for the user ${targetUserId}.`);
     // }
@@ -74,21 +68,21 @@ export class UserInboxController {
     //   throw new BadRequestException(`The activity is not intended for the user ${targetUserId}.`);
     // }
 
-    this.logger.debug(`postInbox(): Received "${activity.type}" activity for ${targetUserId} from ${req.socket.remoteAddress}`);
+    this.logger.debug(`postInbox(): Received "${dto.type}" activity for ${targetUserId} from ${req.socket.remoteAddress}`);
 
     try {
-      await this.inboxService.receive<ActivityDto>(activity, raw, {requestSignature: {headers: req.headers, path: `/users/${username}/inbox`, method: 'post'}});
+      await this.inboxService.receive<ActivityDto>(dto, raw, {requestSignature: {headers: req.headers, path: `/users/${username}/inbox`, method: 'post'}});
     }
     catch (e: any) {
-      this.logger.error(`postInbox(): Activity "${activity.type}" for ${targetUserId} from ${req.socket.remoteAddress} was rejected: ${e.message}`);
+      this.logger.error(`postInbox(): Activity "${dto.type}" for ${targetUserId} from ${req.socket.remoteAddress} was rejected: ${e.message}`);
       throw e;
     }
 
-    this.logger.debug(`postInbox(): Activity "${activity.type}" for ${targetUserId} from ${req.socket.remoteAddress} was accepted`);
+    this.logger.debug(`postInbox(): Activity "${dto.type}" for ${targetUserId} from ${req.socket.remoteAddress} was accepted`);
 
     return {
       'status': 'Accepted',
-      'id': activity.id,
+      'id': dto.id,
     };
     // const receipt = await this.activityService.process(activity);
     // return {

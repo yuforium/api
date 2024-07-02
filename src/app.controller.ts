@@ -1,7 +1,6 @@
-import { Controller, Get, NotImplementedException, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ApiTags, ApiProduces } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { ServiceDomain } from './common/decorators/service-domain.decorator';
 
 @ApiProduces('application/ld+json; profile="https://www.w3.org/ns/activitystreams"', 'application/activity+json')

@@ -1,31 +1,30 @@
-// @todo switch to parse-domain package, it should be faster since it uses a trie to match the domain
-// @todo consider renaming `serviceId` to `serviceDomain`
-
-import { createParamDecorator, ExecutionContext, Logger } from '@nestjs/common';
-import { ServiceDomain as ServiceDomainType } from '../types/service-domain.type';
+// @todo add tests
+import { createParamDecorator, ExecutionContext, Injectable, Logger } from '@nestjs/common';
 import { parse } from 'tldts';
 
-const logger = new Logger('ServiceId');
+const logger = new Logger('ServiceDomainDecorator');
+
+@Injectable()
+export class ServiceDomainDecorator {
+  static resolveDomain(hostname: string) {
+    logger.debug(`Processing hostname ${hostname}`);
+    const domain = parse(hostname);
+
+    if (domain.hostname === 'localhost' && process.env.NODE_ENV === 'development') {
+      return 'localhost';
+    }
+
+    if (domain.domain === null) {
+      throw new Error('not a valid name');
+    }
+
+    logger.debug(`resolveDomain: Using domain ${domain.domain} as serviceDomain`);
+    return domain.domain;
+  }
+}
 
 export const ServiceDomain = createParamDecorator(
-  (_, ctx: ExecutionContext): ServiceDomainType => {
-    const request = ctx.switchToHttp().getRequest();
-    return resolveDomain(request.hostname);
-  }
+  (_, ctx: ExecutionContext): string => ServiceDomainDecorator.resolveDomain(ctx.switchToHttp().getRequest().hostname)
 );
 
-export function resolveDomain(hostname: string) {
-  logger.debug(`Processing hostname ${hostname}`);
-  const domain = parse(hostname);
-
-  if (domain.hostname === 'localhost' && process.env.NODE_ENV === 'development') {
-    return 'localhost';
-  }
-
-  if (domain.domain === null) {
-    throw new Error('not a valid name');
-  }
-
-  logger.debug(`resolveDomain: Using domain ${domain.domain} as serviceDomain`);
-  return domain.domain;
-}
+export const resolveDomain = ServiceDomainDecorator.resolveDomain;
