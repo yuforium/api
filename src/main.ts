@@ -42,6 +42,6 @@ async function bootstrap() {
     new ClassSerializerInterceptor(app.get(Reflector), {excludeExtraneousValues: true, exposeUnsetFields: false})
   );
 
-  await app.listen(parseInt(process.env.PORT || '3000', 10));
+  await app.listen(parseInt(process.env.PORT ?? '3000', 10));
 }
 bootstrap();

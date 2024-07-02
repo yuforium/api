@@ -241,14 +241,16 @@ export class ObjectService {
   public async createContent<T extends ObjectType = ObjectType>(dto: T): Promise<ObjectType> {
     this.logger.debug(`Creating content: ${dto.id}`);
     const parents = await this.getParentIds(dto, []);
-    const record = Object.assign({}, dto, this.getBaseObjectMetadata(dto), {
+    const record = {
+      ...dto,
+      ...await this.getBaseObjectMetadata(dto),
       _replies: {
         default: {
           count: 0
         }
       },
       _rootId: parents.length ? parents[parents.length - 1] : dto.id
-    });
+    };
 
     const doc = await this.objectModel.create(record);
     await this.objectModel.updateMany({id: {$in: parents}}, {$inc: {'_replies.default.count': 1}, '_replies.default.last': Math.floor(new Date(doc.published as string).getTime())});
@@ -261,7 +263,10 @@ export class ObjectService {
    */
   public async create<T extends BaseObjectType = BaseObjectType>(dto: T): Promise<BaseObjectType> {
     try {
-      const record = Object.assign({}, dto, this.getBaseObjectMetadata(dto));
+      const record = {
+        ...dto,
+        ...await this.getBaseObjectMetadata(dto)
+      };
       const doc = await this.objectModel.create(record);
       return this.docToInstance(doc);
     }

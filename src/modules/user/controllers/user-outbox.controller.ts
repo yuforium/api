@@ -58,12 +58,13 @@ export class UserOutboxController {
 
     this.logger.debug(`postOutbox(): ${params.username} creating a ${dto.type}`);
 
-    const createDto = Object.assign({}, dto, {
+    const createDto = {
+      ...dto,
       '@context': 'https://www.w3.org/ns/activitystreams',
       attributedTo: (req.user as any).actor.id,
       published: (new Date()).toISOString(),
       to: Array.isArray(dto.to) ? dto.to.map(i => i.toString()) : [dto.to.toString()]
-    });
+    };
 
     const activity = this.outboxService.createObject(domain, user, userId, createDto);
 

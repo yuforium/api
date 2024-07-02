@@ -1,6 +1,5 @@
 import { ApiProperty, PickType } from '@nestjs/swagger';
-import { IsLink } from '@yuforium/activity-streams';
-import { IsNotEmptyArray, IsRequired } from '@yuforium/activity-streams';
+import { IsLink, IsNotEmptyArray, IsRequired } from '@yuforium/activity-streams';
 import { Transform } from 'class-transformer';
 import { Equals, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ObjectDto } from '../object.dto';

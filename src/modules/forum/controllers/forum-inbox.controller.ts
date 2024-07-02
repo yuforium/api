@@ -28,7 +28,7 @@ export class ForumInboxController {
     @Param() params: ForumParams,
     @Body() activity: any
   ) {
-    this.logger.debug(`Received "${activity.type}" activity from ${request.connection.remoteAddress}`);
+    this.logger.debug(`Received "${activity.type}" activity from ${request.socket.remoteAddress}`);
     const receipt = await this.activityService.process(activity);
 
     return {

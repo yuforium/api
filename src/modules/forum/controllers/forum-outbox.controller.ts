@@ -67,7 +67,8 @@ export class ForumOutboxController {
 
     // @todo document how and why to/cc are set for various targets
     // see also https://github.com/mastodon/mastodon/issues/8067 and https://github.com/mastodon/mastodon/pull/3844#issuecomment-314897285
-    const createDto = Object.assign({}, dto, {
+    const createDto = {
+      ...dto,
       '@context': 'https://www.w3.org/ns/activitystreams',
       attributedTo: [forumId, user.actor.id], // @todo document that attributedTo is an array with the first element being the outbox, last being the actual person
       published: new Date().toISOString(),
@@ -75,7 +76,7 @@ export class ForumOutboxController {
       to: ['https://www.w3.org/ns/activitystreams#Public'],
       cc: [`${forumId}/followers`], // cc: is most appropriate for federation
       audience: forumId // represents the primary audience for the post.  In Yuforium, this is the forum, and not the context which would be considered as a wider scope than the audience
-    });
+    };
 
     const activity = await this.outboxService.createObject(domain, user, forumId, createDto);
 

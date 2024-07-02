@@ -64,7 +64,7 @@ export class UserService {
         inbox: `${id}/inbox`,
         following: `${id}/following`,
         followers: `${id}/followers`,
-        name: userDto.name || user.username,
+        name: userDto.name ?? user.username,
         preferredUsername: user.username,
         // summary: userDto.summary,
         _domain: domain,

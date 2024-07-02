@@ -8,6 +8,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import { AxiosResponse } from 'axios';
 import { ActivityService } from '../../activity/services/activity.service';
 import { ActivityDto } from '../../activity/dto/activity.dto';
+import { lastValueFrom, map } from 'rxjs';
 
 interface ActivityStreamService {
   accept(activity: ActivityDto, serviceId?: string): Promise<boolean>;
@@ -78,51 +79,30 @@ export class SyncActivityStreamService implements StreamProcessor, ActivityStrea
     this.logger.debug(`Consuming ${activity.type} activity with id ${activity.id}`);
   }
 
-  protected send(url: string, activity: any): Promise<any> {
-    // hacky dev stuff
-    url = url
-      .replace('https://yuforia.com', 'http://dev.yuforia.com:3000')
-      .replace('https://yuforium.com', 'http://dev.yuforium.com:3000');
-
-    return this.httpService.post<string>(url, instanceToPlain(activity))
-      .toPromise()
-      .then((response: AxiosResponse | undefined) => {
-        if (response !== undefined) {
-          return response.data;
-        }
-      })
-      .catch(error => {
-        this.logger.error(`send(): "${error.message}" while sending ${activity.type} activity with id ${activity.id} to ${url}`);
-        throw error;
-      });
+  protected async send(url: string, activity: any): Promise<string> {
+    return lastValueFrom(this.httpService.post<string>(url, instanceToPlain(activity))
+      .pipe(
+        map(response => response.data)
+      )
+    );
   }
 
-  protected getInboxUrl(address: string): Promise<string> {
-    // hacky dev stuff
-    address = address
-      .replace('https://yuforia.com', 'http://dev.yuforia.com:3000')
-      .replace('https://yuforium.com', 'http://dev.yuforium.com:3000');
-
+  protected async getInboxUrl(address: string): Promise<string> {
     this.logger.debug(`Getting inbox url for ${address}`);
-    return this.httpService.get(address)
-      .toPromise()
-      .then((response: AxiosResponse | undefined) => {
-        if (response === undefined) {
-          throw new Error('No response');
-        }
-
-        this.logger.debug('Found inbox url: ' + response.data.inbox);
-        return response.data.inbox;
-      })
-      .catch(error => {
-        this.logger.error(`getInboxUrl(): Received error "${error.message}" while getting inbox url for ${address}`);
-        throw error;
-      });
+    return lastValueFrom(this.httpService.get(address)
+      .pipe(
+        map(response => {
+          if (response === undefined) {
+            throw new Error('no response');
+          }
+          return response.data.inbox;
+        })
+      )
+    );
   }
 
   public async getAddressees(activity: ASActivity) {
     const obj = activity.object as ASObject;
-
     return Array.isArray(obj.to) ? obj.to : [obj.to];
   }
 
