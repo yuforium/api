@@ -33,7 +33,7 @@ export class WebfingerService {
           href: person.id,
         },
         {
-          rel: 'http://webfinger.net/rel/profile-page',
+          rel: 'https://webfinger.net/rel/profile-page',
           type: 'text/html',
           href: person.id
         }

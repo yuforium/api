@@ -29,11 +29,11 @@ export class AppService {
     return resolveDomain(hostname);
   }
 
-  /**
-   * Send a follow request to another domain
-   * @param domain Domain to follow
-   */
-  public async follow() {
-
+  public async getHealthCheck() {
+    return {
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: Date.now()
+    };
   }
 }

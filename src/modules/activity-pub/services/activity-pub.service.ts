@@ -104,11 +104,6 @@ export class ActivityPubService {
   }
 
   protected async send(url: string, activity: any): Promise<any> {
-    // hacky dev stuff
-    url = url
-      .replace('https://yuforia.com', 'http://dev.yuforia.com:3000')
-      .replace('https://yuforium.com', 'http://dev.yuforium.com:3000');
-
     return firstValueFrom(this.httpService.post<string>(url, instanceToPlain(activity)))
       .then((response: AxiosResponse | undefined) => {
         if (response !== undefined) {
@@ -131,29 +126,10 @@ export class ActivityPubService {
   }
 
   protected async getInboxUrl(address: string): Promise<string> {
-    // hacky dev stuff
-    address = address
-      .replace('https://yuforia.com', 'http://dev.yuforia.com:3000')
-      .replace('https://yuforium.com', 'http://dev.yuforium.com:3000');
-
     this.logger.debug(`getInboxUrl(): Getting inbox url for ${address}`);
 
     const actor = await fetch(address, {headers: {'Accept': 'application/activity+json'}}).then(res => res.json);
 
     return (actor as any).inbox;
-
-    // return firstValueFrom(this.httpService.get(address))
-    //   .then((response: AxiosResponse | undefined) => {
-    //     if (response === undefined) {
-    //       throw new Error('No response');
-    //     }
-    //     console.log(response.data);
-    //     this.logger.debug('Found inbox url: ' + response.data.inbox);
-    //     return response.data.inbox;
-    //   })
-    //   .catch(error => {
-    //     this.logger.error(`getInboxUrl(): Received error "${error.message}" while getting inbox url for ${address}`);
-    //     throw error;
-    //   });
   }
 }

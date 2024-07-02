@@ -18,22 +18,11 @@ export class AppController {
   }
 
   @Get('healthz')
-  public async getHealthCheck() {
+  public async getHealthCheck(): Promise<{status: string, uptime: number, timestamp: number}> {
     return {
-      status: 'ok'
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: Date.now()
     };
-  }
-
-  /**
-   * 
-   * @param req
-   * @param serviceId 
-   * @param forumDto 
-   */
-  @UseGuards(AuthGuard('jwt'))
-  @Post('outbox')
-  public async postOutbox() {
-    // @todo - determine if resource creation should be handled by the app outbox, user outbox, or individual resources (e.g. POST /forums)
-    throw new NotImplementedException();
   }
 }

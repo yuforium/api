@@ -15,8 +15,10 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      // expect(appController.getHello()).toBe('Hello World!');
+    it('should return "ok" status in healthcheck', async () => {
+      const result = await appController.getHealthCheck();
+      expect(result).toHaveProperty('status', 'ok');
+      expect(typeof result).toBe('object');
     });
   });
 });
