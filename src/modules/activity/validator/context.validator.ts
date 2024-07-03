@@ -15,7 +15,7 @@ export class ContextValidator implements ValidatorConstraintInterface {
     }
 
     return Object.entries(atContext).every(([key, val]) => {
-      typeof val === 'string' && typeof key === 'string';
+      return typeof val === 'string' && typeof key === 'string';
     });
   }
 
