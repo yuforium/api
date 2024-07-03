@@ -44,7 +44,7 @@ export class InboxService {
     const actorURL = new URL(activity.actor);
     resolveDomain(actorURL.hostname);
 
-    if (actorURL.protocol !== 'https') {
+    if (actorURL.protocol !== 'https:') {
       throw new BadRequestException('Actor URL must be HTTPS');
     }
 
@@ -56,7 +56,7 @@ export class InboxService {
 
     try {
       if (typeof activity.actor === 'string') {
-        validateURL(activity.actor);
+        actorId = validateURL(activity.actor);
       }
       else {
         throw new BadRequestException('Actor URL is required and must be a string');
