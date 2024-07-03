@@ -30,8 +30,8 @@ export class SyncDispatchService {
   /**
    * Extract dispatch targets from an activity.  These targets still need to be resolved (i.e. if the target is a collection like a followers collection).
    * @todo handle cc/bcc fields as well
-   * @param activity 
-   * @returns 
+   * @param activity
+   * @returns
    */
   protected async getDispatchTargets(activity: Activity): Promise<string[]> {
     let to = [];
@@ -41,7 +41,7 @@ export class SyncDispatchService {
     }
 
     const obj = activity.object as ASObject;
-    
+
     if (Array.isArray(obj.to)) {
       to.push(...obj.to);
     }
@@ -53,7 +53,7 @@ export class SyncDispatchService {
       if (id === 'https://www.w3.org/ns/activitystreams#Public') {
         return false;
       }
-      
+
       // don't bother with local users
       if (await this.processor.getLocalObject(id.toString())) {
         return false;
@@ -72,11 +72,11 @@ export class SyncDispatchService {
 
   /**
    * Dispatch an activity to its targets.
-   * @param activity 
+   * @param activity
    */
   protected async dispatch(activity: Activity) {
     const dispatchTo = await this.getDispatchTargets(activity);
-    
+
     dispatchTo.forEach(async to => {
       const response = await this.send(to, activity);
       return response;
@@ -84,16 +84,15 @@ export class SyncDispatchService {
   }
 
   protected async getInboxUrl(address: string): Promise<string> {
-    const actor = (await fetch(address, {headers: {'Accept': 'application/activity+json'}}).then(res => res.json()));
-
-    return (actor as any).inbox;
+    const actor = await fetch(address, {headers: {'Accept': 'application/activity+json'}}).then(res => res.json());
+    return actor.inbox;
   }
 
   /**
    * @todo for a production system, this would need to resolve targets (i.e. if the target was a followers collection).  this would/should be done with queueing.
-   * @param url 
-   * @param activity 
-   * @returns 
+   * @param url
+   * @param activity
+   * @returns
    */
   protected async send(url: string, activity: Activity): Promise<any> {
     const parsedUrl = new URL(url);
@@ -109,7 +108,7 @@ export class SyncDispatchService {
     signer.update(body);
     // const digest = signer.sign(privateKey, 'hex');
     const digest = 'SHA-256=' + crypto.createHash('sha256').update(body).digest('base64');
-  
+
     const opts = sign({
       requestPath: parsedUrl.pathname,
       method: 'post',

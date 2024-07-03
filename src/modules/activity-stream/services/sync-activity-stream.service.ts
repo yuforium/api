@@ -13,8 +13,6 @@ interface ActivityStreamService {
   accept(activity: ActivityDto, serviceId?: string): Promise<boolean>;
 }
 
-// type allowed = 'create' | 'update' | 'delete';
-
 /**
  * Synchronous activity stream service
  */
@@ -63,11 +61,11 @@ export class SyncActivityStreamService implements StreamProcessor, ActivityStrea
   }
 
   public async update() {
-
+    throw new NotImplementedException();
   }
 
   public async delete() {
-
+    throw new NotImplementedException();
   }
 
   /**

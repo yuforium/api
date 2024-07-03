@@ -70,9 +70,6 @@ export class InboxProcessorService {
         _raw
       });
 
-      // const activityDto = plainToInstance(ActivityDto, await this.activityService.create(record), {excludeExtraneousValues: true});
-      // const objectDto = plainToInstance(ObjectDto, activity.object);
-
       Object.assign(activityDto, { object: obj });
 
       return activityDto;

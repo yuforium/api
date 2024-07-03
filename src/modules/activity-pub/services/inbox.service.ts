@@ -6,6 +6,7 @@ import { SyncDispatchService } from './sync-dispatch.service';
 import { InboxProcessorService } from './inbox-processor.service';
 import { ActivityPubService } from './activity-pub.service';
 import { InvalidURLException, validateURL } from '../../../common/util/validate-url';
+import { resolveDomain } from '../../../common/decorators/service-domain.decorator';
 
 export interface AcceptOptions {
   requestSignature?: {
@@ -38,39 +39,26 @@ export class InboxService {
   public async receive<T extends ActivityDto>(activity: T, raw: string, options?: AcceptOptions) {
     // if requestSignature is provided, verify the signature.  If we don't have a public key for the user, we can't verify the signature, and we
     // should queue processing of the activity for later.
-    // const {requestSignature} = options || {};
 
-    // @todo domain checking can be moved into activity dto validation
-    // const parsedUrl = new URL(activity.actor);
+    // will throw an exception if domain is invalid
+    const actorURL = new URL(activity.actor);
+    resolveDomain(actorURL.hostname);
 
-    // if (!psl.isValid(parsedUrl.hostname) && (parsedUrl.hostname.substring(parsedUrl.hostname.length -6) !== '.local')) {
-    //   throw new TypeError('Invalid URL');
-    // }
+    if (actorURL.protocol !== 'https') {
+      throw new BadRequestException('Actor URL must be HTTPS');
+    }
 
-    // const actorURL = new URL(activity.actor);
+    if (actorURL.port !== '') {
+      throw new BadRequestException('Actor URL must operate on default port');
+    }
 
-    // if (actorURL.protocol !== 'https:') {
-    //   throw new BadRequestException('Actor URL must be avaiable via https protocol');
-    // }
-
-    // if (actorURL.port !== '') {
-    //   throw new BadRequestException('Actor URL must operate on default port');
-    // }
-
-    // const domain = parseDomain(actorURL.hostname);
-
-    // if (!domain.domain || !domain.isIcann || domain.isPrivate) {
-    //   throw new BadRequestException('Invalid domain');
-    // }
-
-    let actorURL: string;
+    let actorId!: string;
 
     try {
       if (typeof activity.actor === 'string') {
-        actorURL = validateURL(activity.actor);
+        validateURL(activity.actor);
       }
       else {
-        // @todo this should be handled by the activity dto validation, and we should be able to accept an object with an id property
         throw new BadRequestException('Actor URL is required and must be a string');
       }
     }
@@ -81,7 +69,7 @@ export class InboxService {
       throw e;
     }
 
-    const response = await fetch(actorURL, { headers: { 'Accept': 'application/activity+json' } });
+    const response = await fetch(actorId, { headers: { 'Accept': 'application/activity+json' } });
     const actor = await response.json();
 
     if (options?.requestSignature) {
