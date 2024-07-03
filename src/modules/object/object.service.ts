@@ -174,7 +174,7 @@ export class ObjectService {
             return (i as ASObject).id;
           }
         })
-        .filter(i => i !== undefined ? true : false) as string[];
+        .filter(i => i !== undefined) as string[];
 
       return Promise.all(ids.map(id => this.objectModel.findOne({id: {$eq: id}, _local: true})))
         .then(results => results.filter(this.isNotNull));
@@ -293,42 +293,6 @@ export class ObjectService {
       this.logger.error(`create(): ${(err as Error).message}`);
       throw err;
     }
-    // return await this.createObject(dto, options);
-
-    // return {
-    //   record,
-    //   object: record.toObject(),
-    // }
-
-    // const _objectId = new Types.ObjectId();
-
-    // // fill in any default fields required here
-    // const recordDto: ObjectRecordDto = Object.assign(new recordClass(), {
-    //   ...dto,
-    //   _id: _objectId.toString(),
-    //   id: `${actorId}/${dto.type && typeof dto.type === 'string' ? dto.type.toLowerCase() : 'object'}/${_objectId.toString()}`,
-    //   _serviceId: dto.serviceId,
-    //   attributedTo: actorId,
-    //   _public: Array.isArray(dto.to)? dto.to.includes('https://www.w3.org/ns/activitystreams#Public') : dto.to === 'https://www.w3.org/ns/activitystreams#Public',
-    //   published: new Date().toISOString()
-    // });
-
-    // this.logger.debug(`Creating Object with id ${recordDto.id}`);
-
-    // // model = this[`${model}Model`] as (Model<ObjectDocument | RelationshipDocument>);
-
-    // // const object = await this.objectModel.create(recordDto);
-    // // const object = await this.relationshipModel.create(recordDto);
-    // const object = await create(recordDto);
-
-    // return {
-    //   object: plainToInstance(ObjectRecordDto, object, {excludeExtraneousValues: true, exposeUnsetFields: false}),
-    //   record: object
-    // }
-
-  }
-
-  protected applyDefaultParams() {
   }
 
   public async createRelationship(dto: RelationshipType): Promise<RelationshipDocument> {

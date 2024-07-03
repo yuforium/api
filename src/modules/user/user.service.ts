@@ -30,14 +30,6 @@ export class UserService {
       throw new Error('Password is required');
     }
 
-    // @todo - consider if we should require an actual domain record to exist
-    // to allow for the creation of a user
-    // const domain = await this.objectService.find({id: `https://${serviceId}`});
-
-    // if (!domain || domain.type === 'Tombstone') {
-    //   throw new BadRequestException('The serviceId provided is not valid.');
-    // }
-
     try {
       const {publicKey, privateKey} = await this.generateUserKeyPair();
 
@@ -120,14 +112,6 @@ export class UserService {
     });
 
     return plainToInstance(ActorDto, person);
-
-    // const user = await this.findOne(serviceId, username);
-
-    // if (user) {
-    //   return this.objectService.findOne({_id: user.defaultIdentity});
-    // }
-
-    // return undefined;
   }
 
   public async find(): Promise<any[]> {

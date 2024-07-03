@@ -1,4 +1,4 @@
-import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Req, Controller, Get, NotImplementedException, Param, Post, UnauthorizedException, UseGuards, Logger } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { OrderedCollection } from '@yuforium/activity-streams';
@@ -15,7 +15,7 @@ import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe
 import { ObjectCreateDto } from '../../object/dto/object-create/object-create.dto';
 import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
 import { JwtUser } from '../../../modules/auth/auth.service';
-import { OutboxObjectCreateType, OutboxService } from '../../activity/services/outbox.service';
+import { OutboxService } from '../../activity/services/outbox.service';
 import { ArticleCreateDto } from '../../object/dto/object-create/article-create.dto';
 
 @Controller('users/:username/outbox')
@@ -93,26 +93,4 @@ export class UserOutboxController {
 
     return collection;
   }
-
-  /**
-   * User outbox page scoped to public activities
-   * @param serviceId
-   * @param username
-   * @param page
-   * @param req
-   * @returns
-   */
-  // @ApiOperation({operationId: 'getUserOutboxPage'})
-  // @ApiParam({name: 'username', type: 'string'})
-  // @ApiParam({name: 'page'})
-  // @UseGuards(AuthGuard(['anonymous', 'jwt']))
-  // @Get('page/:page')
-  // public async getOutboxPage(
-  //   @ServiceDomain() serviceId: string,
-  //   @Param() params: UserParamsDto):
-  // Promise<OrderedCollectionPage> {
-  //   const collectionPage = new OrderedCollectionPage();
-  //   const actor = `https://${serviceId}/user/${params.username}`;
-  //   return collectionPage;
-  // }
 }

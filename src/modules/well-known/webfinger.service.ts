@@ -1,4 +1,4 @@
-import { Get, Header, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ObjectService } from '../object/object.service';
 import { UserService } from '../user/user.service';
 import { WebfingerDto } from './dto/webfinger.dto';

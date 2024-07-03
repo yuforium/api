@@ -90,7 +90,7 @@ export class UserContentController {
     @ServiceDomain() domain: string,
     @Param() params: UserParamsDto,
     @Query('contentQuery') contentQuery: ContentQueryOptionsDto
-  ): Promise<OrderedCollectionPageDto | any> {
+  ): Promise<OrderedCollectionPageDto> {
     const collectionPage = new OrderedCollectionPageDto();
     const userId = `https://${domain}/users/${params.username}`;
 
@@ -130,7 +130,7 @@ export class UserContentController {
 
     collectionPage.id = `${userId}/content`;
     collectionPage.items = items;
-    collectionPage.totalItems = total; //collectionPage.items.length;
+    collectionPage.totalItems = total;
 
     await Promise.all(items.map(item => this.objectService.resolveFields(item, ['attributedTo', 'audience'])));
 

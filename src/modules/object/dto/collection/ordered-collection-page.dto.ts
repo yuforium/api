@@ -4,7 +4,7 @@ import { ObjectDto } from '../object.dto';
 
 @ApiExtraModels(ObjectDto, Link)
 export class OrderedCollectionPageDto extends ActivityStreams.collectionPage('OrderedCollectionPage') {
-  static type = 'OrderedCollectionPage';
+  static readonly type = 'OrderedCollectionPage';
 
   @ApiProperty({type: 'integer'})
   public totalItems!: number;

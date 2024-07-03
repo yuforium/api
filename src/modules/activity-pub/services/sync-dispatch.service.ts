@@ -106,7 +106,6 @@ export class SyncDispatchService {
     const body = JSON.stringify(activity);
     const signer = crypto.createSign('RSA-SHA256');
     signer.update(body);
-    // const digest = signer.sign(privateKey, 'hex');
     const digest = 'SHA-256=' + crypto.createHash('sha256').update(body).digest('base64');
 
     const opts = sign({

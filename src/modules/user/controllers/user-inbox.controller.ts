@@ -83,12 +83,5 @@ export class UserInboxController {
       'status': 'Accepted',
       'id': dto.id,
     };
-    // const receipt = await this.activityService.process(activity);
-    // return {
-    //   status: 'accepted',
-    //   message: 'The activity was queued for processing.',
-    //   receipt
-    // }
-
   }
 }

@@ -78,7 +78,7 @@ class TestResolver extends ActivityStreams.Resolver {
     const acc: {[k: string]: ObjectDto | ActorDto} = {};
 
     return Object.entries(this.items).reduce((acc, [name, type]) => {
-      const obj: ActorDto | ObjectDto = (this[type as 'forum' | 'person'])(name);
+      const obj: ActorDto | ObjectDto = this[type](name);
       acc[obj.id] = obj;
       return acc;
     }, acc);

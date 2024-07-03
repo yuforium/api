@@ -19,7 +19,7 @@ export class WebfingerController {
     }
 
     this.logger.debug(`webfinger: ${resource}`);
-    const [, username, parsedServiceId] = /^acct:([A-Za-z0-9_]*)@(.*)$/i.exec(resource) || [];
+    const [, username, parsedServiceId] = /^acct:([\w_]*)@(.*)$/i.exec(resource) || [];
 
     if (!username || !parsedServiceId) {
       this.logger.error(`webfinger: invalid resource specified: ${resource}`);

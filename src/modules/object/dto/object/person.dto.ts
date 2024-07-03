@@ -15,7 +15,7 @@ export class PublicKey {
 
 @Exclude()
 export class PersonDto extends ObjectRecord {
-  static type = 'Person' as const;
+  static readonly type = 'Person';
 
   @Expose()
   public '@context': string | string[] = 'https://www.w3.org/ns/activitystreams';

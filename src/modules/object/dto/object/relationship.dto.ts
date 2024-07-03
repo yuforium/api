@@ -5,7 +5,7 @@ import { ObjectDto } from '../object.dto';
 
 @Exclude()
 export class RelationshipDto extends ObjectDto {
-  static type = 'Relationship';
+  static readonly type = 'Relationship';
 
   @Prop({type: String, required: true})
   @IsString()
