@@ -1,22 +1,22 @@
 import {
-    ClassSerializerInterceptor,
-    Controller,
-    Get,
-    Logger,
-    NotFoundException,
-    NotImplementedException,
-    Param,
-    Query,
-    UseInterceptors
+  ClassSerializerInterceptor,
+  Controller,
+  Get,
+  Logger,
+  NotFoundException,
+  NotImplementedException,
+  Param,
+  Query,
+  UseInterceptors
 } from '@nestjs/common';
 import {
-    ApiExtraModels,
-    ApiOkResponse,
-    ApiOperation,
-    ApiParam,
-    ApiQuery,
-    ApiTags,
-    getSchemaPath
+  ApiExtraModels,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+  getSchemaPath
 } from '@nestjs/swagger';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ObjectService } from '../../../modules/object/object.service';
@@ -119,7 +119,8 @@ export class UserContentController {
       inReplyTo: null,
       $or: [
         {'_attribution.id': person.id, '_attribution.rel': 'attributedTo', '_public': true},
-        {'_attribution.id': person.id, '_attribution.rel': 'to', '_public': true}
+        {'_attribution.id': person.id, '_attribution.rel': 'to', '_public': true},
+        { '_attribution.id': person.id, '_attribution.rel': 'cc', '_public': true }
       ]
     };
 

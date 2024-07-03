@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Logge
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Note } from '@yuforium/activity-streams';
-import { instanceToPlain, plainToClass, plainToInstance } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ObjectService } from '../../../modules/object/object.service';
 import { ActivityService } from '../../activity/services/activity.service';
@@ -10,7 +10,6 @@ import { Request } from 'express';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';
 import { InboxService } from '../../../modules/activity-pub/services/inbox.service';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
-import { validate } from 'class-validator';
 
 @ApiTags('user')
 @Controller('users/:username/inbox')

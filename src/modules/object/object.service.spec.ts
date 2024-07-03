@@ -11,6 +11,7 @@ import { plainToInstance } from 'class-transformer';
 import { ActorDto } from './dto/actor/actor.dto';
 import { ActorType } from './type/actor.type';
 import { ObjectDto } from './dto/object.dto';
+import { ActorRecord } from './schema/actor.schema';
 
 class TestResolver extends ActivityStreams.Resolver {
   public links = {
@@ -84,16 +85,31 @@ class TestResolver extends ActivityStreams.Resolver {
   }
 }
 
+class TestObjectService extends ObjectService {
+  public testIsPublic(obj: ObjectType) {
+    return this.isPublic(obj);
+  }
+}
+
 describe('ObjectService', () => {
-  let service: ObjectService;
+  let service: TestObjectService;
   let resolver: TestResolver;
+
+  const pub = 'https://www.w3.org/ns/activitystreams#Public';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ObjectService,
+        {
+          provide: ObjectService,
+          useClass: TestObjectService
+        },
         {
           provide: getModelToken(ObjectRecord.name),
+          useValue: {}
+        },
+        {
+          provide: getModelToken(ActorRecord.name),
           useValue: {}
         },
         {
@@ -124,7 +140,7 @@ describe('ObjectService', () => {
     // })
       .compile();
 
-    service = module.get<ObjectService>(ObjectService);
+    service = module.get<TestObjectService>(ObjectService);
     resolver = module.get<TestResolver>(StoredObjectResolver);
   });
 
@@ -159,5 +175,21 @@ describe('ObjectService', () => {
     forum.audience.forEach((a: any) => {
       expect(a).toMatchObject(items[a.id]);
     });
+  });
+
+  const baseObj: ObjectType = {
+    id: 'https://localhost/objects/note',
+    '@context': 'https://www.w3.org/ns/activitystreams',
+    type: 'Note'
+  }
+
+  it('isPublic() should resolve the public id in "to" as true', async () => {
+    expect(service.testIsPublic({ ...baseObj, to: pub })).toBe(true);
+  });
+  it('isPublic() should resolve the public id in "cc" as true', async () => {
+    expect(service.testIsPublic({ ...baseObj, cc: pub })).toBe(true);
+  });
+  it('isPublic() should resolve the public id in "bcc" as true', async () => {
+    expect(service.testIsPublic({ ...baseObj, bcc: pub })).toBe(true);
   });
 });

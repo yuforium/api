@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { resolveDomain } from '../../common/decorators/service-domain.decorator';
 import { RelationshipType } from './type/relationship.type';
 import { ObjectType } from './type/object.type';
-import { ASObject, ASObjectOrLink, Link } from '@yuforium/activity-streams';
+import { ASLink, ASObject, ASObjectOrLink, Link } from '@yuforium/activity-streams';
 import { StoredObjectResolver } from './resolver/stored-object.resolver';
 import { ActorDocument } from './schema/actor.schema';
 import { ActorDto } from './dto/actor/actor.dto';
@@ -109,14 +109,23 @@ export class ObjectService {
   protected isPublic(obj: ObjectType): boolean {
     const pub = 'https://www.w3.org/ns/activitystreams#Public';
 
-    if (!obj.to) {
-      return false;
-    }
+    const checkFieldIsPublic = (field: 'to' | 'cc' | 'bcc') => {
+      const f = obj[field];
 
-    const isPublic =
-      obj.to === pub || (Array.isArray(obj.to) && obj.to.includes(pub)) ||
-      obj.cc === pub || (Array.isArray(obj.cc) && obj.cc.includes(pub)) ||
-      obj.bcc === pub || (Array.isArray(obj.bcc) && obj.bcc.includes(pub));
+      if (!f) {
+        return false;
+      }
+
+      return (Array.isArray(f) ? f : [f]).some(v => {
+        if (typeof v === 'string') {
+          return v === pub;
+        }
+
+        return v.id === pub || (v as ASLink).href === pub;
+      });
+    };
+
+    const isPublic = ['to', 'cc', 'bcc'].some(v => checkFieldIsPublic(v as 'to' | 'cc' | 'bcc'));
 
     return isPublic;
   }
@@ -154,7 +163,17 @@ export class ObjectService {
       }
 
       const ids = (Array.isArray(fields) ? fields : (fields ? [fields] : []))
-        .map(i => typeof i === 'object' ? i.id : i)
+        .map(i => {
+          if (typeof i === 'string') {
+            return i;
+          }
+          if (typeof i === 'object') {
+            if (i.type === 'Link') {
+              return (i as ASLink).href;
+            }
+            return (i as ASObject).id;
+          }
+        })
         .filter(i => i !== undefined ? true : false) as string[];
 
       return Promise.all(ids.map(id => this.objectModel.findOne({id: {$eq: id}, _local: true})))
