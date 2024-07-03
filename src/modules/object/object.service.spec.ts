@@ -182,14 +182,29 @@ describe('ObjectService', () => {
     '@context': 'https://www.w3.org/ns/activitystreams',
     type: 'Note'
   }
+  const multiAddr = ['https://localhost/users/chris', pub];
+  const singleAddrObj = {
+    id: pub,
+    '@context': 'https://www.w3.org/ns/activitystreams',
+    type: 'Person'
+  };
+  const singleAddrLink = {
+    type: 'Link',
+    href: pub
+  };
 
-  it('isPublic() should resolve the public id in "to" as true', async () => {
-    expect(service.testIsPublic({ ...baseObj, to: pub })).toBe(true);
-  });
-  it('isPublic() should resolve the public id in "cc" as true', async () => {
-    expect(service.testIsPublic({ ...baseObj, cc: pub })).toBe(true);
-  });
-  it('isPublic() should resolve the public id in "bcc" as true', async () => {
-    expect(service.testIsPublic({ ...baseObj, bcc: pub })).toBe(true);
+  ['to', 'cc', 'bcc'].forEach(field => {
+    it(`isPublic() should resolve the public id in "${field}" as true`, async () => {
+      expect(service.testIsPublic({ ...baseObj, [field]: pub })).toBe(true);
+    });
+    it(`isPublic() should resolve the public id in "${field}" as true with multiple values`, async () => {
+      expect(service.testIsPublic({ ...baseObj, [field]: multiAddr })).toBe(true);
+    });
+    it(`isPublic() should resolve the public id in "${field}" as true with an object`, async () => {
+      expect(service.testIsPublic({ ...baseObj, [field]: singleAddrObj })).toBe(true);
+    });
+    it(`isPublic() should resolve the public id in "${field}" as true with a link`, async () => {
+      expect(service.testIsPublic({ ...baseObj, [field]: singleAddrLink })).toBe(true);
+    });
   });
 });
