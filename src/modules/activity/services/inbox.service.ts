@@ -188,16 +188,6 @@ export class InboxService {
       _public: true
     };
 
-    // Object.assign(new ActivityDto(), {
-    //   _id: _acceptId,
-    //   _serviceId: relationship._hostname,
-    //   id: `${followee.id}/activity/${_acceptId}`,
-    //   type: 'Accept',
-    //   actor: followee.id,
-    //   object: followee.id
-    // });
-    // const acceptActivity = await this.activityService.createActivity(acceptActivityDto);
-
     await this.activityService.createActivity(acceptActivityDto);
 
     // this.activityPubSerice.dispatchToInbox(plainToInstance(ActivityDto, acceptActivity), actor.inbox);
