@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger, NotImplementedException, Scope } from '@nestjs/common';
-import { ActivityService } from '../../activity/services/activity.service';
+import { ActivityService } from '../../activity/service/activity.service';
 import { ObjectService } from '../../object/object.service';
 import { ActivityPubService } from './activity-pub.service';
 import { Activity, ASObject } from '@yuforium/activity-streams';
@@ -9,7 +9,7 @@ import { Request } from 'express';
 import { PersonDto } from '../../object/dto/object/person.dto';
 import { UserService } from '../../user/user.service';
 import * as crypto from 'crypto';
-import { OutboxService } from '../../activity/services/outbox.service';
+import { OutboxService } from '../../activity/service/outbox.service';
 
 /**
  * A synchronous dispatch service with no queueing.  This is used for testing and development purposes only.

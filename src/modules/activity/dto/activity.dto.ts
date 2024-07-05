@@ -3,11 +3,12 @@ import { Activity, ActivityStreams, ASContext, IsRequired } from '@yuforium/acti
 import { Expose, Transform, Type } from 'class-transformer';
 import { Validate, ValidateNested } from 'class-validator';
 import * as mongoose from 'mongoose';
-import { LinkDto } from '../../../modules/link/dto/link.dto';
 import { ArticleDto } from '../../object/dto/object/article.dto';
 import { NoteDto } from '../../object/dto/object/note.dto';
 import { ContextValidator } from '../validator/context.validator';
 import { HttpSignatureDto } from './http-signature.dto';
+import { LinkDto } from '../../../modules/object/dto/link.dto';
+import { ActorDto } from 'src/modules/object/dto/actor/actor.dto';
 
 const { Mixed } = mongoose.Schema.Types;
 
@@ -39,7 +40,7 @@ export class ActivityDto extends Activity {
   @Prop({type: String, required: true})
   @IsRequired()
   @Expose()
-  public actor!: string;
+  public actor!: string | ActorDto;
 
   @Prop({type: Mixed, required: true})
   @IsRequired()

@@ -5,11 +5,11 @@ import { Note } from '@yuforium/activity-streams';
 import { plainToClass } from 'class-transformer';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { ObjectService } from '../../../modules/object/object.service';
-import { ActivityService } from '../../activity/services/activity.service';
+import { ActivityService } from '../../activity/service/activity.service';
 import { Request } from 'express';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
-import { InboxService } from '../../../modules/activity/services/inbox.service';
+import { InboxService } from '../../../modules/activity/service/inbox.service';
 
 @ApiTags('user')
 @Controller('users/:username/inbox')

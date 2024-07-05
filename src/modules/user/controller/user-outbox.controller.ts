@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs
 import { OrderedCollection } from '@yuforium/activity-streams';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
 import { NoteCreateDto } from '../../object/dto/object-create/note-create.dto';
-import { ActivityService } from '../../activity/services/activity.service';
+import { ActivityService } from '../../activity/service/activity.service';
 import { ObjectService } from '../../object/object.service';
 import { UserParamsDto } from '../dto/user-params.dto';
 import { Request } from 'express';
@@ -14,7 +14,7 @@ import { ActivityStreamsPipe } from '../../../common/pipes/activity-streams.pipe
 import { ObjectCreateDto } from '../../object/dto/object-create/object-create.dto';
 import { ObjectCreateTransformer } from '../../../common/transformer/object-create.transformer';
 import { JwtUser } from '../../../modules/auth/auth.service';
-import { OutboxService } from '../../activity/services/outbox.service';
+import { OutboxService } from '../../activity/service/outbox.service';
 import { ArticleCreateDto } from '../../object/dto/object-create/article-create.dto';
 
 @Controller('users/:username/outbox')

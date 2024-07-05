@@ -11,7 +11,6 @@ import { UserModule } from './modules/user/user.module';
 import { WellKnownModule } from './modules/well-known/well-known.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { ForumModule } from './modules/forum/forum.module';
-import { TopicModule } from './modules/topic/topic.module';
 
 @Module({
   imports: [
@@ -25,8 +24,7 @@ import { TopicModule } from './modules/topic/topic.module';
     UserModule,
     WellKnownModule,
     ActivityModule,
-    ForumModule,
-    TopicModule
+    ForumModule
   ],
   controllers: [AppController],
   providers: [AppService, ConfigService],

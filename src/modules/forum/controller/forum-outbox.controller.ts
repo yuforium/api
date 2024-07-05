@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Logger, NotFoundException, NotImplementedException, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
-import { ActivityService } from '../../../modules/activity/services/activity.service';
+import { ActivityService } from '../../../modules/activity/service/activity.service';
 import { ObjectService } from '../../../modules/object/object.service';
 import { ForumParams } from '../dto/forum-params.dto';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
@@ -12,7 +12,7 @@ import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ObjectCreateDto } from '../../object/dto/object-create/object-create.dto';
 import { NoteCreateDto } from '../../object/dto/object-create/note-create.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { OutboxService } from '../../activity/services/outbox.service';
+import { OutboxService } from '../../activity/service/outbox.service';
 
 /**
  * Forum Outbox Controller

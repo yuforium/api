@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
-import { ActivityService } from '../../../modules/activity/services/activity.service';
+import { ActivityService } from '../../../modules/activity/service/activity.service';
 import { ObjectService } from '../../../modules/object/object.service';
 import { RelationshipRecord } from '../../../modules/object/schema/relationship.schema';
 import { Activity } from '@yuforium/activity-streams';

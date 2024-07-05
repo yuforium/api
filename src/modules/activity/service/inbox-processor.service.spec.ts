@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InboxProcessorService } from './inbox-processor.service';
-import { ActivityService } from '../../../modules/activity/services/activity.service';
+import { ActivityService } from '../../../modules/activity/service/activity.service';
 import { ObjectService } from '../../../modules/object/object.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { ActorRecord } from '../../../modules/object/schema/content.schema';

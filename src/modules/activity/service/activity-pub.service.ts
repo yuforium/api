@@ -4,7 +4,7 @@ import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { AxiosResponse } from 'axios';
 import { firstValueFrom } from 'rxjs';
 import { instanceToPlain } from 'class-transformer';
-import { LinkDto } from '../../../modules/link/dto/link.dto';
+import { LinkDto } from '../../../modules/object/dto/link.dto';
 
 export interface DispatchOptions {
   requestSignature?: object
