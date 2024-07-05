@@ -9,7 +9,6 @@ import { MongooseModule, MongooseModuleFactoryOptions } from '@nestjs/mongoose';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { WellKnownModule } from './modules/well-known/well-known.module';
-import { ActivityPubModule } from './modules/activity-pub/activity-pub.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { ForumModule } from './modules/forum/forum.module';
 import { TopicModule } from './modules/topic/topic.module';
@@ -25,7 +24,6 @@ import { TopicModule } from './modules/topic/topic.module';
     AuthModule,
     UserModule,
     WellKnownModule,
-    ActivityPubModule,
     ActivityModule,
     ForumModule,
     TopicModule
@@ -34,9 +32,4 @@ import { TopicModule } from './modules/topic/topic.module';
   providers: [AppService, ConfigService],
   exports: [ConfigService]
 })
-export class AppModule {
-  constructor() { }
-
-  async onApplicationBootstrap() {
-  }
-}
+export class AppModule { }

@@ -4,7 +4,6 @@ import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { ObjectService } from '../../../modules/object/object.service';
 import { RelationshipRecord } from '../../../modules/object/schema/relationship.schema';
-import { ActivityPubService } from './activity-pub.service';
 import { Activity } from '@yuforium/activity-streams';
 import { JwtUserActorDto } from '../../../modules/user/dto/user-actor.dto';
 import { resolveDomain } from '../../../common/decorators/service-domain.decorator';
@@ -21,7 +20,6 @@ export class InboxProcessorService {
   constructor(
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService,
-    protected readonly activityPubSerice: ActivityPubService,
     @InjectModel(ActorRecord.name) protected actorModel: Model<ActorDocument>,
   ) { }
 

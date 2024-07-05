@@ -8,8 +8,8 @@ import { ObjectService } from '../../../modules/object/object.service';
 import { ActivityService } from '../../activity/services/activity.service';
 import { Request } from 'express';
 import { ObjectDocument } from '../../../modules/object/schema/object.schema';
-import { InboxService } from '../../../modules/activity-pub/services/inbox.service';
 import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
+import { InboxService } from '../../../modules/activity/services/inbox.service';
 
 @ApiTags('user')
 @Controller('users/:username/inbox')

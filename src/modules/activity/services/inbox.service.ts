@@ -1,16 +1,28 @@
 import { BadRequestException, Injectable, Logger, NotImplementedException } from '@nestjs/common';
-import { ActivityDto } from '../dto/activity.dto';
-import { AcceptOptions } from '../interface/accept-options.interface';
-import { VerifyOptions, parse, verify } from '@yuforium/http-signature';
+import { ActivityDto } from '../../../modules/activity/dto/activity.dto';
+import { ActivityService } from '../../../modules/activity/services/activity.service';
+import { parse, verify, VerifyOptions } from '@yuforium/http-signature';
+import { InvalidURLException, validateURL } from '../../../common/util/validate-url';
+import { resolveDomain } from '../../../common/decorators/service-domain.decorator';
+import { InboxProcessorService } from './inbox-processor.service';
+import { ObjectService } from 'src/modules/object/object.service';
 import { ExternalActorDto } from '../dto/external-actor.dto';
-import { ObjectService } from '../../object/object.service';
-import { ActivityService } from './activity.service';
-import { ActivityRecord } from '../schema/activity.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { ActorDocument, ActorRecord } from '../../object/schema/actor.schema';
+import { ActorDocument, ActorRecord } from '../../../modules/object/schema/actor.schema';
 import { Model } from 'mongoose';
 import { RelationshipType } from '../../../modules/object/type/relationship.type';
-import { resolveDomain } from 'src/common/decorators/service-domain.decorator';
+import { ActivityRecord } from '../schema/activity.schema';
+
+export interface AcceptOptions {
+  requestSignature?: {
+    headers: {
+      [key: string]: string | string[] | undefined;
+    };
+    publicKey?: string;
+    method: string;
+    path: string;
+  }
+}
 
 @Injectable()
 export class InboxService {
@@ -18,14 +30,18 @@ export class InboxService {
 
   constructor(
     protected readonly activityService: ActivityService,
+    protected readonly processor: InboxProcessorService,
     protected readonly objectService: ObjectService,
     @InjectModel(ActorRecord.name) protected actorModel: Model<ActorDocument>,
   ) { }
 
   /**
-   * Receive an activity
+   * Accept an incoming activity.  This is the entry point for all incoming activities.
+   * @param activity Parsed and validated activity object
+   * @param raw Raw activity string, to keep the original actviity intact
+   * @param options Options for accepting the activity
    */
-  public async receive<T extends ActivityDto = ActivityDto>(activity: T, options?: AcceptOptions) {
+  public async receive<T extends ActivityDto>(activity: T, raw: string, options?: AcceptOptions) {
     // if requestSignature is provided, verify the signature.  If we don't have a public key for the user, we can't verify the signature, and we
     // should queue processing of the activity for later.
 
@@ -33,7 +49,7 @@ export class InboxService {
     const actorURL = new URL(activity.actor);
     resolveDomain(actorURL.hostname);
 
-    if (actorURL.protocol !== 'https') {
+    if (actorURL.protocol !== 'https:') {
       throw new BadRequestException('Actor URL must be HTTPS');
     }
 
@@ -41,7 +57,24 @@ export class InboxService {
       throw new BadRequestException('Actor URL must operate on default port');
     }
 
-    const response = await fetch(activity.actor, { headers: { 'Accept': 'application/activity+json' } });
+    let actorId!: string;
+
+    try {
+      if (typeof activity.actor === 'string') {
+        actorId = validateURL(activity.actor);
+      }
+      else {
+        throw new BadRequestException('Actor URL is required and must be a string');
+      }
+    }
+    catch (e) {
+      if (e instanceof InvalidURLException) {
+        throw new BadRequestException(`Invalid actor URL "${activity.actor}": ${e.message}`);
+      }
+      throw e;
+    }
+
+    const response = await fetch(actorId, { headers: { 'Accept': 'application/activity+json' } });
     const actor = await response.json();
 
     if (options?.requestSignature) {
@@ -72,40 +105,33 @@ export class InboxService {
       const verified = verify(verifyOptions);
 
       if (!verified) {
-        this.logger.error(`accept(): signature verification failed for ${activity.actor}`);
+        this.logger.error(`receive(): signature verification failed for ${activity.actor}`);
         throw new BadRequestException('Signature verification failed');
       }
     }
 
-    this.logger.debug(`accept(): signature verified for ${activity.id}`);
+    this.logger.debug(`receive(): signature verified for ${activity.id}`);
 
     if (Array.isArray(activity.type)) {
-      throw new Error('Activity type must be a string, multiple values for type are not allowed at this time');
+      throw new BadRequestException('Activity type must be a string, multiple values for type are not allowed at this time');
     }
 
     const type = activity.type.toLowerCase() as 'create' | 'follow' | 'undo';
 
     if (!type || typeof type !== 'string') {
-      throw new Error('Activity type is required');
+      throw new BadRequestException('Activity type is required');
     }
     else if (!['create', 'follow', 'undo'].includes(type)) {
-      throw new NotImplementedException(`The activity type ${type} is not supported`);
+      throw new BadRequestException(`The activity type ${type} is not supported`);
     }
 
-    /**
-     * @todo for now, we will process activities synchronously in this class, in the future we should break this
-     * functionality out into separate classes that can be injected in the constructor (e.g. an async stream processor for
-     * production level loads or sync processor for dev work)
-     */
-    await this[type](activity, actor);
-  }
-
-  public async create(_activity: ActivityDto, _actor: ExternalActorDto): Promise<ActivityDto | null> {
-    throw new NotImplementedException();
-  }
-
-  public async undo(_activity: ActivityDto, _actor: ExternalActorDto): Promise<ActivityDto | null> {
-    throw new NotImplementedException();
+    if (this.processor[type]) {
+      this.logger.debug(`receive(): processing ${type} activity ${activity.id}`);
+      await this.processor[type](activity, raw, actor);
+    }
+    else {
+      throw new Error('This activity type is not supported');
+    }
   }
 
   public async follow(activityDto: ActivityDto, actor: ExternalActorDto): Promise<ActivityDto | null> {
@@ -193,5 +219,9 @@ export class InboxService {
     // this.activityPubSerice.dispatchToInbox(plainToInstance(ActivityDto, acceptActivity), actor.inbox);
 
     return acceptActivityDto;
+  }
+
+  protected async undo(_activity: ActivityDto, _actor: any): Promise<ActivityDto | null> {
+    throw new NotImplementedException();
   }
 }

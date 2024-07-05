@@ -5,8 +5,6 @@ import { ActivityModule } from '../activity/activity.module';
 import { ForumService } from './forum.service';
 import { ForumInboxController } from './controllers/forum-inbox.controller';
 import { ForumOutboxController } from './controllers/forum-outbox.controller';
-import { ActivityPubModule } from '../activity-pub/activity-pub.module';
-import { ActivityStreamModule } from '../activity-stream/activity-stream.module';
 import { ForumContentController } from './controllers/forum-content.controller';
 
 @Module({
@@ -19,9 +17,7 @@ import { ForumContentController } from './controllers/forum-content.controller';
 
   imports: [
     ObjectModule,
-    ActivityModule,
-    ActivityPubModule,
-    ActivityStreamModule
+    ActivityModule
   ],
 
   providers: [ForumService]

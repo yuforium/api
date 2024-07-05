@@ -20,5 +20,11 @@ describe('AppController', () => {
       expect(result).toHaveProperty('status', 'ok');
       expect(typeof result).toBe('object');
     });
+
+    it('should return a valid response for root application', async () => {
+      const result = await appController.getService('localhost');
+      expect(result).toHaveProperty('id', 'https://localhost');
+      expect(result).toHaveProperty('type', 'Application');
+    });
   });
 });

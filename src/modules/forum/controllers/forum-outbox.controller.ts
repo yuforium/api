@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Logger, NotFoundException, NotImplementedException, Param, Post, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
-import { SyncActivityStreamService } from '../../../modules/activity-stream/services/sync-activity-stream.service';
 import { ActivityService } from '../../../modules/activity/services/activity.service';
 import { ObjectService } from '../../../modules/object/object.service';
 import { ForumParams } from '../dto/forum-params.dto';
@@ -28,7 +27,6 @@ export class ForumOutboxController {
   constructor(
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService,
-    protected readonly activityStreamService: SyncActivityStreamService,
     protected readonly outboxService: OutboxService
   ) { }
 

@@ -3,7 +3,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { OrderedCollection } from '@yuforium/activity-streams';
 import { ServiceDomain } from '../../../common/decorators/service-domain.decorator';
-import { SyncActivityStreamService } from '../../../modules/activity-stream/services/sync-activity-stream.service';
 import { NoteCreateDto } from '../../object/dto/object-create/note-create.dto';
 import { ActivityService } from '../../activity/services/activity.service';
 import { ObjectService } from '../../object/object.service';
@@ -26,7 +25,6 @@ export class UserOutboxController {
   constructor(
     protected readonly activityService: ActivityService,
     protected readonly objectService: ObjectService,
-    protected readonly activityStreamService: SyncActivityStreamService,
     protected readonly outboxService: OutboxService
   ) { }
 

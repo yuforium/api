@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { UserService } from './user.service';
@@ -8,8 +8,6 @@ import { UserOutboxController } from './controllers/user-outbox.controller';
 import { ActivityModule } from '../activity/activity.module';
 import { ObjectModule } from '../object/object.module';
 import { UserContentController } from './controllers/user-content.controller';
-import { ActivityStreamModule } from '../activity-stream/activity-stream.module';
-import { ActivityPubModule } from '../activity-pub/activity-pub.module';
 
 @Module({
   providers: [UserService],
@@ -18,9 +16,7 @@ import { ActivityPubModule } from '../activity-pub/activity-pub.module';
     MongooseModule.forFeature([{name: User.name, schema: UserSchema}]),
     ObjectModule,
     ActivityModule,
-    ActivityStreamModule,
-    ActivityPubModule,
-    forwardRef(() => ActivityPubModule)
+    ActivityModule
   ],
   controllers: [
     UserOutboxController,
